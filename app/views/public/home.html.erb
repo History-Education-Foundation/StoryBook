@@ -8,6 +8,7 @@
     <div class="mb-3">
       <a href="<%= new_journal_entry_path %>" class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700">New Entry</a>
       <a href="<%= journal_entries_path %>" class="ml-2 text-indigo-700 underline">View All</a>
+      <a href="<%= goals_path %>" class="ml-2 text-indigo-700 underline">Goals</a>
     </div>
     <% journal_entries = current_user.journal_entries.order(created_at: :desc).limit(5) %>
     <% if journal_entries.any? %>
@@ -26,6 +27,24 @@
       <p class="text-gray-600">No entries found. Create your first entry!</p>
     <% end %>
   </div>
+
+  <%# Show up to 3 oldest active goals for this user %>
+  <% goals = current_user.goals.where(status: 'active').order(:created_at).limit(3) %>
+  <div class="max-w-2xl mx-auto mt-10">
+    <h2 class="text-xl font-bold mb-3">Your Active Goals</h2>
+    <% if goals.any? %>
+      <ul class="space-y-3">
+      <% goals.each do |goal| %>
+        <li>
+          <%= link_to goal.title, goal_path(goal), class: 'text-indigo-700 hover:underline' %>
+        </li>
+      <% end %>
+      </ul>
+    <% else %>
+      <p class="text-gray-600">No active goals found.</p>
+    <% end %>
+  </div>
+
 <% else %>
   <div class="max-w-xl mx-auto mt-16 text-center p-8 bg-white bg-opacity-70 rounded shadow">
     <h2 class="text-3xl font-bold text-indigo-700 mb-4">Welcome to Your AI Journal</h2>

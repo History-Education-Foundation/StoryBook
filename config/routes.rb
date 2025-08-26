@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   resources :journal_entries, only: [:index, :show, :new, :create, :edit, :update]
+  resources :goals
   devise_for :users, controllers: { registrations: 'users/registrations' }
   resources :users
   mount LlamaBotRails::Engine => "/llama_bot"

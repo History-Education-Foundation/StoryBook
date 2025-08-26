@@ -19,3 +19,22 @@
     <%= link_to "Back to Goals", goals_path, class: "inline-block rounded bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200" %>
   </div>
 </div>
+
+<div class="max-w-xl mx-auto mt-10">
+  <h3 class="text-xl font-semibold mb-4">Associated Journal Entries</h3>
+  <% if @goal.journal_entries.any? %>
+    <ul class="divide-y divide-gray-200">
+      <% @goal.journal_entries.order(created_at: :desc).each do |entry| %>
+        <li class="py-3">
+          <a href="<%= journal_entry_path(entry) %>" class="text-blue-600 font-medium hover:underline">
+            <%= entry.title %>
+          </a>
+          <div class="text-gray-500 text-sm">Created at: <%= entry.created_at.strftime('%Y-%m-%d') %></div>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <div class="text-gray-500">No journal entries are associated with this goal yet.</div>
+  <% end %>
+</div>
+

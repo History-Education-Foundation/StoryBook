@@ -12,6 +12,11 @@
       <%= form.text_area :body, rows: 8, class: "w-full border rounded px-3 py-2" %>
     </div>
 
+    <div class="mb-4">
+      <%= form.label :goal_id, "Related Goal (optional)", class: "block font-medium mb-1" %>
+      <%= form.collection_select :goal_id, current_user.goals, :id, :title, { include_blank: true }, { class: "w-full border rounded px-3 py-2" } %>
+    </div>
+
     <div class="flex items-center space-x-2">
       <%= form.submit "Update Entry", class: "bg-indigo-600 text-white font-semibold px-4 py-2 rounded hover:bg-indigo-700" %>
       <%= link_to "Cancel", journal_entry_path(@journal_entry), class: "text-gray-700 underline ml-2" %>

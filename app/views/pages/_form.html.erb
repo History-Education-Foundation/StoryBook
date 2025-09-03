@@ -1,0 +1,12 @@
+<%= form_with model: [@book, @chapter, page], local: true do |f| %>
+  <div class="mb-4">
+    <%= f.label :content, class: "block font-bold mb-1" %>
+    <%= f.text_field :content, class: "w-full border rounded px-3 py-2" %>
+  </div>
+  <div class="flex gap-4 items-center">
+    <%= f.submit "Save", class: "bg-purple-600 text-white font-bold px-4 py-2 rounded hover:bg-purple-700" %>
+    <% if page.persisted? %>
+      <%= link_to "Cancel", book_chapter_pages_path(@book, @chapter), class: "bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold px-4 py-2 rounded" %>
+    <% end %>
+  </div>
+<% end %>

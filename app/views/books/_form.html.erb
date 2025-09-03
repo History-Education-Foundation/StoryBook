@@ -1,0 +1,24 @@
+<%= form_with model: book, local: true do |f| %>
+  <div class="mb-4">
+    <%= f.label :title, class: "block font-bold mb-1" %>
+    <%= f.text_field :title, class: "w-full border rounded px-3 py-2" %>
+  </div>
+  <div class="mb-4">
+    <%= f.label :learning_outcome, class: "block font-bold mb-1" %>
+    <%= f.text_area :learning_outcome, rows: 3, class: "w-full border rounded px-3 py-2" %>
+  </div>
+  <div class="mb-4">
+    <%= f.label :reading_level, class: "block font-bold mb-1" %>
+    <%= f.select :reading_level, ["Beginner", "Intermediate", "Advanced"], { prompt: "Select reading level" }, class: "w-full border rounded px-3 py-2" %>
+  </div>
+  <div class="mb-4">
+    <%= f.label :status, class: "block font-bold mb-1" %>
+    <%= f.select :status, Book::STATUSES, {}, class: "w-full border rounded px-3 py-2" %>
+  </div>
+  <div class="flex gap-4 items-center">
+    <%= f.submit "Save", class: "bg-green-600 text-white font-bold px-4 py-2 rounded hover:bg-green-700" %>
+    <% if book.persisted? %>
+      <%= link_to "Cancel", books_path, class: "bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold px-4 py-2 rounded" %>
+    <% end %>
+  </div>
+<% end %>

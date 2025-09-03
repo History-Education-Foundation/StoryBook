@@ -1,0 +1,7 @@
+<% content_for :header, "Edit Page in Chapter: #{@chapter.title}" %>
+<div class="mb-4">
+  <%= link_to "← Back to Pages", book_chapter_pages_path(@book, @chapter), class: "rounded px-4 py-2 bg-gray-200 text-gray-800 hover:bg-gray-300 font-semibold" %>
+</div>
+<div class="max-w-xl mx-auto">
+  <%= render "form", page: @page %>
+</div>

@@ -47,11 +47,10 @@ class BooksController < ApplicationController
 
   def library
     if current_user.student?
-      @books = current_user.saved_books_library
+      @books = current_user.saved_books_library.where(status: 'Published')
     elsif current_user.staff?
-      # Union of books they've created and books they've saved (removable)
-      created_books = current_user.books
-      saved_books = current_user.saved_books_library
+      created_books = current_user.books.where(status: 'Published')
+      saved_books = current_user.saved_books_library.where(status: 'Published')
       @books = (created_books + saved_books).uniq
     else
       redirect_to books_path, alert: 'My Library is only for students or staff.' and return
@@ -60,7 +59,10 @@ class BooksController < ApplicationController
 
   def reader
     @book = Book.find(params[:id])
-    if !(current_user.student? && current_user.saved_books_library.exists?(id: @book.id))
+    allowed =
+      (current_user.student? && current_user.saved_books_library.exists?(id: @book.id)) ||
+      (current_user.staff? && current_user.books.exists?(id: @book.id))
+    unless allowed
       redirect_to books_path, alert: 'You must save this book to your library before reading.' and return
     end
     @chapters = @book.chapters.includes(:pages).order(:id)

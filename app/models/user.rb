@@ -3,4 +3,26 @@ class User < ApplicationRecord
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
+
+  has_many :books, dependent: :destroy
+  has_many :saved_books, dependent: :destroy
+  has_many :saved_books_library, through: :saved_books, source: :book
+
+  ROLES = ["admin", "staff", "student"].freeze
+
+  after_initialize do
+    self.role ||= "student"
+  end
+
+  def admin?
+    role == "admin"
+  end
+
+  def staff?
+    role == "staff"
+  end
+
+  def student?
+    role == "student"
+  end
 end

@@ -1,0 +1,7 @@
+<% content_for :title, "Public Book: #{@book.title}" %>
+<div class="max-w-xl mx-auto mt-12 bg-white shadow rounded p-6">
+  <h1 class="text-2xl font-bold mb-2"><%= @book.title %></h1>
+  <div class="mb-2 text-sm text-gray-600">Reading Level: <%= @book.reading_level %></div>
+  <div class="mb-4 text-gray-800">Learning Outcome: <%= simple_format(@book.learning_outcome) %></div>
+  <div class="text-xs italic text-gray-500">Shared by a user - Book ID <%= @book.id %></div>
+</div>

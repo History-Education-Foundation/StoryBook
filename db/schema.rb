@@ -10,9 +10,29 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_08_26_165633) do
+ActiveRecord::Schema[7.2].define(version: 2025_08_29_092723) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "books", force: :cascade do |t|
+    t.string "title"
+    t.text "learning_outcome"
+    t.string "reading_level"
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "status"
+    t.index ["user_id"], name: "index_books_on_user_id"
+  end
+
+  create_table "chapters", force: :cascade do |t|
+    t.string "title"
+    t.text "description"
+    t.bigint "book_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["book_id"], name: "index_chapters_on_book_id"
+  end
 
   create_table "checkpoint_blobs", primary_key: ["thread_id", "checkpoint_ns", "channel", "version"], force: :cascade do |t|
     t.text "thread_id", null: false
@@ -51,6 +71,14 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_26_165633) do
     t.index ["thread_id"], name: "checkpoints_thread_id_idx"
   end
 
+  create_table "pages", force: :cascade do |t|
+    t.string "content"
+    t.bigint "chapter_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chapter_id"], name: "index_pages_on_chapter_id"
+  end
+
   create_table "posts", force: :cascade do |t|
     t.string "title"
     t.text "body"
@@ -58,6 +86,15 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_26_165633) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_posts_on_user_id"
+  end
+
+  create_table "saved_books", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "book_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["book_id"], name: "index_saved_books_on_book_id"
+    t.index ["user_id"], name: "index_saved_books_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -69,9 +106,15 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_26_165633) do
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
+    t.string "role"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "books", "users"
+  add_foreign_key "chapters", "books"
+  add_foreign_key "pages", "chapters"
   add_foreign_key "posts", "users"
+  add_foreign_key "saved_books", "books"
+  add_foreign_key "saved_books", "users"
 end

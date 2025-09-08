@@ -8,6 +8,12 @@
   <ul class="mt-6 grid gap-4">
     <% @pages.each do |page| %>
       <li class="bg-white rounded shadow p-4">
+        <% if page.image.attached? %>
+          <div class="mb-2">
+            <%= image_tag url_for(page.image), class: "rounded border h-24 w-24 object-cover" %>
+            <span class="text-xs text-gray-500 ml-2">Image attached</span>
+          </div>
+        <% end %>
         <div class="mb-1 text-sm">Content: <%= page.content.presence || 'n/a' %></div>
         <div class="mt-2 flex gap-2">
           <%= link_to 'Edit', edit_book_chapter_page_path(@book, @chapter, page), class: 'px-3 py-1 rounded bg-yellow-500 text-white hover:bg-yellow-600 text-sm' %>

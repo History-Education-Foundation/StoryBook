@@ -1,12 +1,8 @@
 <% content_for :header, @book.title %>
 <style>
-  .highlight-read {
-    background: #fef08a;
-    transition: background 0.25s;
-  }
+  .highlight-read { background: #fef08a; transition: background 0.25s; }
 </style>
 
-<!-- ✅ Fixed Back Button at top-left -->
 <div class="fixed top-6 left-6 z-50">
   <%= link_to "← My Library", library_books_path, class: "rounded px-3 py-1 bg-gray-100 font-semibold hover:bg-gray-200 text-gray-900 shadow" %>
 </div>
@@ -16,25 +12,38 @@
     <div>
       <% ix = 1 %>
       <h1 class="text-3xl font-bold mb-2" data-read-ix="0"><%= @book.title %></h1>
+
       <% @chapters.each do |chapter| %>
         <div class="mt-10 chapter-read-block">
           <h2 class="text-2xl font-semibold mb-2 border-b pb-1" data-read-ix="<%= ix %>"><%= chapter.title %></h2>
           <% ix += 1 %>
+
           <div class="mb-2 text-gray-600"><%= simple_format(chapter.description) %></div>
+
           <% chapter.pages.order(:id).each do |page| %>
             <div class="my-6 p-6 bg-gray-50 rounded shadow-sm">
-              <div class="text-base text-gray-800 whitespace-pre-line" data-read-ix="<%= ix %>"><%= page.content %></div>
+              <% if page.image.attached? %>
+                <div class="flex justify-center mb-4">
+                  <%= image_tag url_for(page.image),
+                        class: "rounded shadow max-h-80 object-contain",
+                        loading: "lazy",
+                        alt: "" %>
+                </div>
+              <% end %>
+
+              <div class="text-base text-gray-800 whitespace-pre-line" data-read-ix="<%= ix %>">
+                <%= page.content %>
+              </div>
             </div>
             <% ix += 1 %>
           <% end %>
         </div>
       <% end %>
 
-      <!-- Floating audio controls at bottom-right -->
       <div class="fixed bottom-6 right-6 z-50 bg-white shadow-xl rounded-lg p-3 flex gap-2 border border-gray-200">
         <button id="play-audio" class="px-4 py-1 rounded bg-indigo-600 text-white font-semibold hover:bg-indigo-700">Listen</button>
-        <button id="pause-audio" class="px-4 py-1 rounded bg-gray-400 text-white font-semibold hover:bg-gray-500">Pause</button>
-        <button id="stop-audio" class="px-4 py-1 rounded bg-red-500 text-white font-semibold hover:bg-red-700">Stop</button>
+        <div id="audio-loading" class="hidden ml-2 flex items-center gap-1 text-indigo-600 text-sm"><span class="loader inline-block"></span> Generating audio...</div>
+        <audio id="audio-player" class="hidden mt-3" controls style="width:200px"></audio>
       </div>
 
       <div class="text-xs text-gray-500 mb-1">
@@ -50,87 +59,52 @@
   </div>
 </div>
 
-<!-- ✅ Single script block -->
 <script>
-var utterances = [];
-var currentUtteranceIndex = 0;
-var isPaused = false;
+document.addEventListener('DOMContentLoaded', function() {
+  const playButton = document.getElementById('play-audio');
+  const loading = document.getElementById('audio-loading');
+  const audioPlayer = document.getElementById('audio-player');
 
-function collectBookText() {
-  const blocks = [];
-  if (document.querySelector('h1')) {
-    blocks.push(document.querySelector('h1').innerText);
-  }
-  document.querySelectorAll('.chapter-read-block').forEach(chapterBlock => {
-    if (chapterBlock.querySelector('h2')) {
-      blocks.push(chapterBlock.querySelector('h2').innerText);
+  if (!playButton) return;
+
+  playButton.onclick = async function() {
+    loading.classList.remove('hidden');
+    audioPlayer.classList.add('hidden');
+    audioPlayer.src = '';
+
+    try {
+      const resp = await fetch(window.location.pathname.replace(/\/read$/, "/generate_audio"), {
+        method: 'POST',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        }
+      });
+      if (!resp.ok) throw new Error('Failed to generate audio');
+      const blob = await resp.blob();
+      audioPlayer.src = URL.createObjectURL(blob);
+      audioPlayer.classList.remove('hidden');
+      audioPlayer.play();
+    } catch (err) {
+      alert('Audio generation failed: ' + err.message);
+    } finally {
+      loading.classList.add('hidden');
     }
-    chapterBlock.querySelectorAll('.whitespace-pre-line').forEach(page => 
-      blocks.push(page.innerText)
-    );
-  });
-  return blocks;
-}
-
-function initSpeechSynthesis() {
-  const textBlocks = collectBookText();
-  utterances = textBlocks.map(text => new window.SpeechSynthesisUtterance(text));
-  currentUtteranceIndex = 0;
-}
-
-function playBook() {
-  if (speechSynthesis.speaking && isPaused) {
-    speechSynthesis.resume();
-    isPaused = false;
-    return;
   }
-  if (!speechSynthesis.speaking) {
-    initSpeechSynthesis();
-    speakBlock(0);
-  }
-}
-
-function highlightReadingBlock(index) {
-  document.querySelectorAll('[data-read-ix]').forEach(el => 
-    el.classList.remove('highlight-read')
-  );
-  var el = document.querySelector('[data-read-ix="' + index + '"]');
-  if (el) {
-    el.classList.add('highlight-read');
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-}
-
-function speakBlock(index) {
-  if (index >= utterances.length) return;
-  currentUtteranceIndex = index;
-  highlightReadingBlock(index);
-  let u = utterances[index];
-  u.onend = function() { speakBlock(index + 1); };
-  speechSynthesis.speak(u);
-}
-
-function pauseBook() {
-  if (speechSynthesis.speaking) {
-    speechSynthesis.pause();
-    isPaused = true;
-  }
-}
-
-function stopBook() {
-  speechSynthesis.cancel();
-  isPaused = false;
-}
-
-function attachAudioEvents() {
-  document.getElementById('play-audio').onclick = playBook;
-  document.getElementById('pause-audio').onclick = pauseBook;
-  document.getElementById('stop-audio').onclick = stopBook;
-}
-
-if (window.Turbo) {
-  document.addEventListener('turbo:load', attachAudioEvents);
-} else {
-  document.addEventListener('DOMContentLoaded', attachAudioEvents);
-}
+});
 </script>
+<style>
+.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #6366f1;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>

@@ -2,21 +2,27 @@ Rails.application.routes.draw do
   resources :posts
   devise_for :users, controllers: { registrations: 'users/registrations' }
   resources :users
+
 resources :books do
   resources :chapters do
-    resources :pages
+    resources :pages do
+      member do
+        post :generate_image
+      end
+    end
   end
-
   member do
     get :public, to: 'books#public_show'
     post :save,   to: 'saved_books#create'
     delete :unsave, to: 'saved_books#destroy'
+    post :generate_audio, to: 'books#generate_audio'
   end
   collection do
     get :library, to: 'books#library'
     get ':id/read', to: 'books#reader', as: :read
   end
 end
+
   mount LlamaBotRails::Engine => "/llama_bot"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

@@ -66,9 +66,38 @@ class BooksController < ApplicationController
       redirect_to books_path, alert: 'You must save this book to your library before reading.' and return
     end
     @chapters = @book.chapters.includes(:pages).order(:id)
+    @chapters.each { |chapter| chapter.pages.with_attached_image.load }
   end
 
-  private
+  def generate_audio
+  @book = Book.find(params[:id])
+  allowed = (current_user.student? && current_user.saved_books_library.exists?(id: @book.id)) ||
+    (current_user.staff? && current_user.books.exists?(id: @book.id))
+  unless allowed
+    render json: { error: 'Not authorized' }, status: :unauthorized and return
+  end
+
+  # Gather text: book title, chapters, descriptions, and page content
+  text_blocks = []
+  text_blocks << @book.title
+  @book.chapters.order(:id).includes(:pages).each do |chapter|
+    text_blocks << chapter.title
+    text_blocks << chapter.description.to_s if chapter.description.present?
+    chapter.pages.order(:id).each do |page|
+      text_blocks << page.content.to_s if page.content.present?
+    end
+  end
+  full_text = text_blocks.join("\n\n")
+
+  begin
+    audio_file = OpenAi.new.generate_audio(full_text)
+    send_data audio_file.read, type: 'audio/mpeg', disposition: 'inline', filename: "book-#{@book.id}.mp3"
+  rescue => e
+    render json: { error: "Audio generation failed: #{e.message}" }, status: :internal_server_error
+  end
+end
+
+private
 
   def book_params
     params.require(:book).permit(:title, :learning_outcome, :reading_level, :status)

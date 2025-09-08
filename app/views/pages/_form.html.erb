@@ -1,8 +1,39 @@
-<%= form_with model: [@book, @chapter, page], local: true do |f| %>
+<%# == Page Edit / New == %>
+<%= form_with model: [@book, @chapter, page], html: { multipart: true } do |f| %>
   <div class="mb-4">
     <%= f.label :content, class: "block font-bold mb-1" %>
     <%= f.text_field :content, class: "w-full border rounded px-3 py-2" %>
   </div>
+
+  <div class="mb-4">
+    <%= f.label :image, "Image", class: "block font-bold mb-1" %>
+    <%= f.file_field :image, direct_upload: true, class: "w-full border rounded px-3 py-2" %>
+    <% if page.image.attached? %>
+      <div class="mt-2">
+        <%# Only variant if variable? %>
+        <% if page.image.variable? %>
+          <%= image_tag page.image.variant(resize_to_limit: [300, 300]) %>
+        <% else %>
+          <%= image_tag page.image %>
+        <% end %>
+        <span class="text-sm text-gray-600 ml-2">Current image is attached.</span>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="mb-4">
+    <%= f.label :audio_file, "Audio File", class: "block font-bold mb-1" %>
+    <%= f.file_field :audio_file, direct_upload: true, class: "w-full border rounded px-3 py-2" %>
+    <% if page.audio_file.attached? %>
+      <div class="mt-2">
+        <audio controls>
+          <source src="<%= url_for(page.audio_file) %>">
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+    <% end %>
+  </div>
+
   <div class="flex gap-4 items-center">
     <%= f.submit "Save", class: "bg-purple-600 text-white font-bold px-4 py-2 rounded hover:bg-purple-700" %>
     <% if page.persisted? %>
@@ -10,3 +41,65 @@
     <% end %>
   </div>
 <% end %>
+
+<%# == AI Image Generation (separate form; NOT nested) == %>
+<div class="mb-8 mt-10">
+  <div class="relative flex flex-col items-center">
+    <div class="text-center mb-2 text-gray-700 font-semibold">OR generate an image with AI</div>
+    <div class="max-w-md w-full">
+      <%= form_with url: generate_image_book_chapter_page_path(@book, @chapter, page),
+                    method: :post,
+                    id: "ai-image-form" do |g| %>
+        <div class="mb-2">
+          <%= g.label :image_description, "Describe the image you want" %>
+          <%= g.text_field :image_description, class: "block shadow-sm rounded-md border px-3 py-2 mt-2 w-full" %>
+        </div>
+        <div>
+          <%= g.submit "Generate Image",
+                class: "w-full rounded bg-indigo-600 py-2 px-4 text-white font-semibold hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75" %>
+        </div>
+      <% end %>
+
+      <div id="loading-indicator" class="hidden text-center mt-4">
+        <span class="loader inline-block align-middle"></span>
+        <span class="ml-2 align-middle">Generating image, please wait...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function wireAiFormSpinner() {
+    const form = document.getElementById("ai-image-form");
+    const loading = document.getElementById("loading-indicator");
+    if (!form || !loading) return;
+
+    // Turbo events (Rails 7)
+    form.addEventListener("turbo:submit-start", function () {
+      loading.classList.remove("hidden");
+    });
+    form.addEventListener("turbo:submit-end", function () {
+      loading.classList.add("hidden");
+    });
+
+    // Fallback if Turbo not present
+    form.addEventListener("submit", function () {
+      loading.classList.remove("hidden");
+    });
+  }
+
+  document.addEventListener("turbo:load", wireAiFormSpinner);
+  document.addEventListener("DOMContentLoaded", wireAiFormSpinner);
+</script>
+
+<style>
+  .loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #6366f1;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>

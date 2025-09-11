@@ -18,6 +18,7 @@ resources :books do
     post :generate_audio, to: 'books#generate_audio'
     patch :publish, to: 'books#publish'
     patch :archive, to: 'books#archive'
+    patch :unarchive, to: 'books#unarchive'
   end
   collection do
     get :library, to: 'books#library'

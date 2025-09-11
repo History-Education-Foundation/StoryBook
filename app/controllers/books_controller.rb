@@ -21,7 +21,8 @@ class BooksController < ApplicationController
 
   def edit
     @book = current_user.books.find(params[:id])
-    if @book.status == "Published"
+    # Only published books are locked
+    if @book.status == "Published" && params[:from_publish].blank?
       redirect_to books_path, alert: "You cannot edit published books."
     end
   end
@@ -100,7 +101,7 @@ class BooksController < ApplicationController
 
 def publish
   @book = current_user.books.find(params[:id])
-  if @book.status == "Draft"
+  if @book.status == "Draft" || @book.status == "Archived"
     # Generate audio and save path before publishing
     audio_path = nil
     begin
@@ -127,9 +128,9 @@ def publish
       audio_path = nil # No audio saved if failed
     end
     @book.update(status: "Published", audio: audio_path)
-    redirect_to edit_book_path(@book), notice: "Book published successfully."
+    redirect_to books_path, notice: "Book published successfully."
   else
-    redirect_to edit_book_path(@book), alert: "Only drafts can be published."
+    redirect_to edit_book_path(@book), alert: "Only draft or archived books can be published."
   end
 end
 
@@ -142,6 +143,17 @@ def archive
     redirect_to books_path, alert: "Only published books can be archived."
   end
 end
+
+def unarchive
+  @book = current_user.books.find(params[:id])
+  if @book.status == "Archived"
+    @book.update(status: "Draft")
+    redirect_to books_path, notice: "Book was restored to draft."
+  else
+    redirect_to books_path, alert: "Only archived books can be unarchived."
+  end
+end
+
 
 private
 

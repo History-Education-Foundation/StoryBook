@@ -11,6 +11,7 @@ class BooksController < ApplicationController
 
   def create
     @book = current_user.books.new(book_params)
+    @book.status = "Draft" # Always start as draft, ignore param
     if @book.save
       redirect_to books_path, notice: 'Book was successfully created.'
     else
@@ -20,6 +21,9 @@ class BooksController < ApplicationController
 
   def edit
     @book = current_user.books.find(params[:id])
+    if @book.status == "Published"
+      redirect_to books_path, alert: "You cannot edit published books."
+    end
   end
 
   def update
@@ -70,30 +74,79 @@ class BooksController < ApplicationController
   end
 
   def generate_audio
-  @book = Book.find(params[:id])
-  allowed = (current_user.student? && current_user.saved_books_library.exists?(id: @book.id)) ||
-    (current_user.staff? && current_user.books.exists?(id: @book.id))
-  unless allowed
-    render json: { error: 'Not authorized' }, status: :unauthorized and return
-  end
+    @book = Book.find(params[:id])
+    allowed = (current_user.student? && current_user.saved_books_library.exists?(id: @book.id)) ||
+      (current_user.staff? && current_user.books.exists?(id: @book.id))
+    unless allowed
+      render json: { error: 'Not authorized' }, status: :unauthorized and return
+    end
+    unless @book.status == 'Published'
+      render json: { error: 'Audio generation is only available for published books.' }, status: :forbidden and return
+    end
 
-  # Gather text: book title, chapters, descriptions, and page content
-  text_blocks = []
-  text_blocks << @book.title
-  @book.chapters.order(:id).includes(:pages).each do |chapter|
-    text_blocks << chapter.title
-    text_blocks << chapter.description.to_s if chapter.description.present?
-    chapter.pages.order(:id).each do |page|
-      text_blocks << page.content.to_s if page.content.present?
+    # Gather text: book title, chapters, descriptions, and page content
+    text_blocks = []
+    text_blocks << @book.title
+    @book.chapters.order(:id).includes(:pages).each do |chapter|
+      text_blocks << chapter.title
+      text_blocks << chapter.description.to_s if chapter.description.present?
+      chapter.pages.order(:id).each do |page|
+        text_blocks << page.content.to_s if page.content.present?
+      end
+    end
+    full_text = text_blocks.join("\n\n")
+
+    begin
+      audio_file = OpenAi.new.generate_audio(full_text)
+      send_data audio_file.read, type: 'audio/mpeg', disposition: 'inline', filename: "book-#{@book.id}.mp3"
+    rescue => e
+      render json: { error: "Audio generation failed: #{e.message}" }, status: :internal_server_error
     end
   end
-  full_text = text_blocks.join("\n\n")
 
-  begin
-    audio_file = OpenAi.new.generate_audio(full_text)
-    send_data audio_file.read, type: 'audio/mpeg', disposition: 'inline', filename: "book-#{@book.id}.mp3"
-  rescue => e
-    render json: { error: "Audio generation failed: #{e.message}" }, status: :internal_server_error
+
+def publish
+  @book = current_user.books.find(params[:id])
+  if @book.status == "Draft"
+    # Generate audio and save path before publishing
+    audio_path = nil
+    begin
+      text_blocks = []
+      text_blocks << @book.title
+      @book.chapters.order(:id).includes(:pages).each do |chapter|
+        text_blocks << chapter.title
+        text_blocks << chapter.description.to_s if chapter.description.present?
+        chapter.pages.order(:id).each do |page|
+          text_blocks << page.content.to_s if page.content.present?
+        end
+      end
+      full_text = text_blocks.join("\n\n")
+      audio_file = OpenAi.new.generate_audio(full_text)
+      # Directory where audio files are stored
+      audio_dir = Rails.root.join("public", "book_audio")
+      FileUtils.mkdir_p(audio_dir)
+      filename = "book-#{@book.id}.mp3"
+      full_audio_path = audio_dir.join(filename)
+      File.binwrite(full_audio_path, audio_file.read)
+      audio_path = "/book_audio/#{filename}"
+    rescue => e
+      Rails.logger.error("Audio generation failed at publish: #{e.message}")
+      audio_path = nil # No audio saved if failed
+    end
+    @book.update(status: "Published", audio: audio_path)
+    redirect_to edit_book_path(@book), notice: "Book published successfully."
+  else
+    redirect_to edit_book_path(@book), alert: "Only drafts can be published."
+  end
+end
+
+def archive
+  @book = current_user.books.find(params[:id])
+  if @book.status == "Published"
+    @book.update(status: "Archived")
+    redirect_to books_path, notice: "Book archived successfully."
+  else
+    redirect_to books_path, alert: "Only published books can be archived."
   end
 end
 

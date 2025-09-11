@@ -40,11 +40,15 @@
         </div>
       <% end %>
 
+      <% if @book.status == "Published" %>
       <div class="fixed bottom-6 right-6 z-50 bg-white shadow-xl rounded-lg p-3 flex gap-2 border border-gray-200">
         <button id="play-audio" class="px-4 py-1 rounded bg-indigo-600 text-white font-semibold hover:bg-indigo-700">Listen</button>
+        <button id="pause-audio" class="px-4 py-1 rounded bg-gray-200 text-indigo-700 font-semibold hover:bg-gray-300">Pause</button>
+        <button id="stop-audio" class="px-4 py-1 rounded bg-gray-200 text-indigo-700 font-semibold hover:bg-gray-300">Stop</button>
         <div id="audio-loading" class="hidden ml-2 flex items-center gap-1 text-indigo-600 text-sm"><span class="loader inline-block"></span> Generating audio...</div>
         <audio id="audio-player" class="hidden mt-3" controls style="width:200px"></audio>
       </div>
+      <% end %>
 
       <div class="text-xs text-gray-500 mb-1">
         Reading Level: <%= @book.reading_level.presence || 'n/a' %>
@@ -60,28 +64,46 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('turbo:load', function() {
   const playButton = document.getElementById('play-audio');
+  const pauseButton = document.getElementById('pause-audio');
+  const stopButton = document.getElementById('stop-audio');
   const loading = document.getElementById('audio-loading');
   const audioPlayer = document.getElementById('audio-player');
 
   if (!playButton) return;
 
+  let audioSrcUrl = null;
+
   playButton.onclick = async function() {
     loading.classList.remove('hidden');
     audioPlayer.classList.add('hidden');
+    // If already loaded, just play
+    if (audioSrcUrl) {
+      audioPlayer.classList.remove('hidden');
+      audioPlayer.play();
+      loading.classList.add('hidden');
+      return;
+    }
     audioPlayer.src = '';
-
     try {
+      console.log('Fetching audio...');
       const resp = await fetch(window.location.pathname.replace(/\/read$/, "/generate_audio"), {
         method: 'POST',
         headers: {
           'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
         }
       });
-      if (!resp.ok) throw new Error('Failed to generate audio');
+      console.log('Audio response', resp);
+      if (!resp.ok) {
+        const text = await resp.text();
+        console.error('Audio API error:', text);
+        throw new Error('Failed to generate audio: ' + text);
+      }
       const blob = await resp.blob();
-      audioPlayer.src = URL.createObjectURL(blob);
+      console.log('Audio blob', blob);
+      audioSrcUrl = URL.createObjectURL(blob);
+      audioPlayer.src = audioSrcUrl;
       audioPlayer.classList.remove('hidden');
       audioPlayer.play();
     } catch (err) {
@@ -90,8 +112,18 @@ document.addEventListener('DOMContentLoaded', function() {
       loading.classList.add('hidden');
     }
   }
+
+  pauseButton.onclick = function() {
+    if (!audioPlayer.paused) audioPlayer.pause();
+  }
+
+  stopButton.onclick = function() {
+    audioPlayer.pause();
+    audioPlayer.currentTime = 0;
+  }
 });
 </script>
+
 <style>
 .loader {
   border: 4px solid #f3f3f3;

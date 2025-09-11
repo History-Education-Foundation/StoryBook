@@ -1,4 +1,9 @@
 <% content_for :header, "Edit Book: #{@book.title}" %>
 <div class="max-w-xl mx-auto">
   <%= render "form", book: @book %>
+  <% if @book.status == "Published" %>
+    <div class="mt-4">
+      <%= button_to "Archive", archive_book_path(@book), method: :patch, data: { confirm: "Are you sure? This will move the book to archive." }, class: "bg-gray-700 text-white font-bold px-4 py-2 rounded hover:bg-gray-800" %>
+    </div>
+  <% end %>
 </div>

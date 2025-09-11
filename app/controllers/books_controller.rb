@@ -84,24 +84,17 @@ class BooksController < ApplicationController
       render json: { error: 'Audio generation is only available for published books.' }, status: :forbidden and return
     end
 
-    # Gather text: book title, chapters, descriptions, and page content
-    text_blocks = []
-    text_blocks << @book.title
-    @book.chapters.order(:id).includes(:pages).each do |chapter|
-      text_blocks << chapter.title
-      text_blocks << chapter.description.to_s if chapter.description.present?
-      chapter.pages.order(:id).each do |page|
-        text_blocks << page.content.to_s if page.content.present?
+    # Serve audio file if it exists
+    if @book.audio.present?
+      full_audio_path = Rails.root.join('public', @book.audio.sub(%r{^/}, ''))
+      if File.exist?(full_audio_path)
+        send_file full_audio_path, type: 'audio/mpeg', disposition: 'inline', filename: File.basename(full_audio_path)
+        return
       end
     end
-    full_text = text_blocks.join("\n\n")
 
-    begin
-      audio_file = OpenAi.new.generate_audio(full_text)
-      send_data audio_file.read, type: 'audio/mpeg', disposition: 'inline', filename: "book-#{@book.id}.mp3"
-    rescue => e
-      render json: { error: "Audio generation failed: #{e.message}" }, status: :internal_server_error
-    end
+    # No audio present, return error (audio generation now only on publish)
+    render json: { error: 'Audio file not found for this published book.' }, status: :not_found
   end
 
 

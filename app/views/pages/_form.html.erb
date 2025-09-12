@@ -43,6 +43,7 @@
 <% end %>
 
 <%# == AI Image Generation (separate form; NOT nested) == %>
+<% if page.persisted? %>
 <div class="mb-8 mt-10">
   <div class="relative flex flex-col items-center">
     <div class="text-center mb-2 text-gray-700 font-semibold">OR generate an image with AI</div>
@@ -67,6 +68,7 @@
     </div>
   </div>
 </div>
+<% end %>
 
 <script>
   function wireAiFormSpinner() {

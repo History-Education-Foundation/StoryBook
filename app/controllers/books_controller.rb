@@ -155,6 +155,20 @@ def unarchive
 end
 
 
+def generate_all_pictures
+  @book = current_user.books.find(params[:id])
+  result = @book.generate_all_pictures
+  flash[:notice] = "Batch image generation complete: #{result[:generated]} images generated, #{result[:failed]} failed, #{result[:skipped]} skipped, out of #{result[:total]} pages. See logs for details."
+  redirect_to book_chapters_path(@book)
+end
+
+def retry_failed_pictures
+  @book = current_user.books.find(params[:id])
+  result = @book.retry_failed_pictures
+  flash[:notice] = "Retry complete: #{result[:generated]} images generated, #{result[:failed]} still failed, out of #{result[:total]} retried pages."
+  redirect_to book_chapters_path(@book)
+end
+
 private
 
   def book_params

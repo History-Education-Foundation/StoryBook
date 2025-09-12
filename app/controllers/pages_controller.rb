@@ -14,6 +14,15 @@ class PagesController < ApplicationController
   def create
     @page = @chapter.pages.new(page_params)
     if @page.save
+      # Automatically generate AI image using content, if image was not uploaded
+      unless @page.image.attached?
+        prompt = "This is the page content from a picture book, please generate an appropriate image that matches the content on the page. Here is the page content: <PAGE> #{@page.content} </PAGE>"
+        begin
+          OpenAi.new.generate_image(prompt, attach_to: @page, attachment_name: :image)
+        rescue => e
+          Rails.logger.error("Automatic AI image generation failed: ", e)
+        end
+      end
       redirect_to book_chapter_pages_path(@book, @chapter), notice: 'Page was successfully created.'
     else
       render :new, status: :unprocessable_entity

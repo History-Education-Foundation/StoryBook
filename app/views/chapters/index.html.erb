@@ -2,6 +2,10 @@
 <div class="flex gap-4">
   <%= link_to "← Back to Books", books_path, class: "rounded px-4 py-2 bg-gray-200 text-gray-800 hover:bg-gray-300 font-semibold" %>
   <%= link_to "Add Chapter", new_book_chapter_path(@book), class: "rounded px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 font-semibold" %>
+  <% if ["Draft", "Archived"].include?(@book.status) %>
+    <%= button_to "Generate All Pictures", generate_all_pictures_book_path(@book), method: :post, class: "rounded px-4 py-2 bg-green-600 text-white font-semibold hover:bg-green-700", data: { turbo_confirm: "This will generate or replace all images for every page in this book. Continue?" } %>
+    <%= button_to "Retry Failed Images", retry_failed_pictures_book_path(@book), method: :post, class: "rounded px-4 py-2 bg-orange-500 text-white font-semibold hover:bg-orange-600", data: { turbo_confirm: "This will retry image generation only for pages missing images. Continue?" } %>
+  <% end %>
 </div>
 
 <% if @chapters.any? %>

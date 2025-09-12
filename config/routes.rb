@@ -16,6 +16,8 @@ resources :books do
     post :save,   to: 'saved_books#create'
     delete :unsave, to: 'saved_books#destroy'
     post :generate_audio, to: 'books#generate_audio'
+    post :generate_all_pictures, to: 'books#generate_all_pictures'
+    post :retry_failed_pictures, to: 'books#retry_failed_pictures'
     patch :publish, to: 'books#publish'
     patch :archive, to: 'books#archive'
     patch :unarchive, to: 'books#unarchive'

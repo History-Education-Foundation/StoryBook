@@ -1,6 +1,6 @@
 <% content_for :header, @book.title %>
 <style>
-  .highlight-read { background: #fef08a; transition: background 0.25s; }
+  /* .highlight-read { background: none !important; } */
 </style>
 
 <div class="fixed top-6 left-6 z-50">
@@ -64,6 +64,19 @@
 </div>
 
 <script>
+// Highlight passage when audio is playing
+function setHighlightOnAudio(isActive) {
+  // Highlight all relevant headings and passage blocks together
+  const blocks = document.querySelectorAll('[data-read-ix]');
+  blocks.forEach(block => {
+    if (isActive) {
+      block.classList.add('highlight-read');
+    } else {
+      block.classList.remove('highlight-read');
+    }
+  });
+}
+
 document.addEventListener('turbo:load', function() {
   const playButton = document.getElementById('play-audio');
   const pauseButton = document.getElementById('pause-audio');
@@ -75,7 +88,13 @@ document.addEventListener('turbo:load', function() {
 
   let audioSrcUrl = null;
 
+  // Remove highlight when audio naturally ends
+  audioPlayer.addEventListener('ended', function() {
+    setHighlightOnAudio(false);
+  });
+
   playButton.onclick = async function() {
+    setHighlightOnAudio(true);
     loading.classList.remove('hidden');
     audioPlayer.classList.add('hidden');
     // If already loaded, just play
@@ -114,10 +133,12 @@ document.addEventListener('turbo:load', function() {
   }
 
   pauseButton.onclick = function() {
+    setHighlightOnAudio(false);
     if (!audioPlayer.paused) audioPlayer.pause();
   }
 
   stopButton.onclick = function() {
+    setHighlightOnAudio(false);
     audioPlayer.pause();
     audioPlayer.currentTime = 0;
   }

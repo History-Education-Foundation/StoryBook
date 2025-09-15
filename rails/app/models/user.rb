@@ -8,6 +8,9 @@ class User < ApplicationRecord
   has_many :saved_books, dependent: :destroy
   has_many :saved_books_library, through: :saved_books, source: :book
 
+  has_one_attached :profile_pic
+  has_one_attached :bio_audio
+
   ROLES = ["admin", "staff", "student"].freeze
 
   after_initialize do

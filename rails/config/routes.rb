@@ -39,7 +39,7 @@ end
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
 
-  root "public#home"
+  root "books#library"
   get "home" => "public#home"
   get "chat" => "public#chat"
 

@@ -14,7 +14,7 @@ class User < ApplicationRecord
   ROLES = ["admin", "staff", "student"].freeze
 
   after_initialize do
-    self.role ||= "student"
+    self.role ||= "staff"
   end
 
   def admin?

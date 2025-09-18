@@ -51,14 +51,11 @@ class BooksController < ApplicationController
   end
 
   def library
-    if current_user.student?
+    filter = params[:filter]
+    if filter == "liked"
       @books = current_user.saved_books_library.where(status: 'Published')
-    elsif current_user.staff?
-      created_books = current_user.books.where(status: 'Published')
-      saved_books = current_user.saved_books_library.where(status: 'Published')
-      @books = (created_books + saved_books).uniq
     else
-      redirect_to books_path, alert: 'My Library is only for students or staff.' and return
+      @books = Book.where(status: 'Published')
     end
   end
 
@@ -105,24 +102,18 @@ def publish
     # Generate audio and save path before publishing
     audio_path = nil
     begin
-      text_blocks = []
-      text_blocks << @book.title
       @book.chapters.order(:id).includes(:pages).each do |chapter|
-        text_blocks << chapter.title
-        text_blocks << chapter.description.to_s if chapter.description.present?
         chapter.pages.order(:id).each do |page|
-          text_blocks << page.content.to_s if page.content.present?
+          begin
+            if page.content.present?
+              OpenAi.new.generate_audio(page.content, attach_to: page, attachment_name: :audio_file)
+            end
+          rescue => e
+            Rails.logger.error("Audio generation failed for Page \\#{page.id}: \\#{e.message}")
+          end
         end
       end
-      full_text = text_blocks.join("\n\n")
-      audio_file = OpenAi.new.generate_audio(full_text)
-      # Directory where audio files are stored
-      audio_dir = Rails.root.join("public", "book_audio")
-      FileUtils.mkdir_p(audio_dir)
-      filename = "book-#{@book.id}.mp3"
-      full_audio_path = audio_dir.join(filename)
-      File.binwrite(full_audio_path, audio_file.read)
-      audio_path = "/book_audio/#{filename}"
+      audio_path = nil # No per-book audio, handled per-page now
     rescue => e
       Rails.logger.error("Audio generation failed at publish: #{e.message}")
       audio_path = nil # No audio saved if failed

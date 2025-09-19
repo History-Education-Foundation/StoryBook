@@ -3,11 +3,35 @@ class Book < ApplicationRecord
   has_many :chapters, dependent: :destroy
   has_many :saved_books, dependent: :destroy
   has_many :saved_by_users, through: :saved_books, source: :user
+  has_many :pages, through: :chapters
+  has_one_attached :audio_file
 
   STATUSES = ["Draft", "Published", "Archived"].freeze
 
   after_initialize do
     self.status ||= "Draft"
+  end
+
+  def generate_full_audio(voice: "alloy", format: "mp3")
+    # Gather entire book, in reading order: Page Title > Chapter Title > Page Content
+    lines = []
+    chapters.order(:id).each do |chapter|
+      chapter.pages.order(:id).each do |page|
+        lines << "Page Title: #{page.title.to_s.strip}"
+        lines << "Chapter Title: #{chapter.title.to_s.strip}"
+        lines << page.content.to_s.strip
+      end
+    end
+    text = lines.join(".\n")
+    return if text.blank?
+
+    ai = OpenAi.new
+    ai.generate_audio(text, voice: voice, format: format, attach_to: self, attachment_name: :audio_file)
+    self.save!
+    self.audio_file
+  rescue => e
+    Rails.logger.error("Book audio generation failed: #{e.message}")
+    nil
   end
 
   def generate_all_pictures(replace_existing: false)

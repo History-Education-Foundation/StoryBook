@@ -22,7 +22,7 @@
     </span>
     <% if book.status == 'Published' %>
       <%= link_to "Share", public_book_path(book), target: "_blank", rel: "noopener", class: "ml-2 underline text-blue-600 text-xs" %>
-      <% if book.audio.present? %>
+      <% if book.pages.any? && book.pages.all? { |page| page.audio_file.attached? } %>
         <span class="ml-2 text-green-700 text-sm font-semibold" title="Audio available">🔊 Audio</span>
       <% end %>
     <% end %>

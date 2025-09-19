@@ -3,30 +3,31 @@ Rails.application.routes.draw do
   devise_for :users, controllers: { registrations: 'users/registrations' }
   resources :users
 
-resources :books do
-  resources :chapters do
-    resources :pages do
-      member do
-        post :generate_image
+  resources :books do
+    resources :chapters do
+      resources :pages do
+        member do
+          post :generate_image
+        end
       end
     end
+    member do
+      get :public, to: 'books#public_show'
+      post :save,   to: 'saved_books#create'
+      delete :unsave, to: 'saved_books#destroy'
+      post :generate_audio, to: 'books#generate_audio'
+      post :generate_all_pictures, to: 'books#generate_all_pictures'
+      post :retry_failed_pictures, to: 'books#retry_failed_pictures'
+      patch :publish, to: 'books#publish'
+      patch :archive, to: 'books#archive'
+      patch :unarchive, to: 'books#unarchive'
+      get :audio_playlist, to: 'books#audio_playlist'
+    end
+    collection do
+      get :library, to: 'books#library'
+      get ':id/read', to: 'books#reader', as: :read
+    end
   end
-  member do
-    get :public, to: 'books#public_show'
-    post :save,   to: 'saved_books#create'
-    delete :unsave, to: 'saved_books#destroy'
-    post :generate_audio, to: 'books#generate_audio'
-    post :generate_all_pictures, to: 'books#generate_all_pictures'
-    post :retry_failed_pictures, to: 'books#retry_failed_pictures'
-    patch :publish, to: 'books#publish'
-    patch :archive, to: 'books#archive'
-    patch :unarchive, to: 'books#unarchive'
-  end
-  collection do
-    get :library, to: 'books#library'
-    get ':id/read', to: 'books#reader', as: :read
-  end
-end
 
   mount LlamaBotRails::Engine => "/llama_bot"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

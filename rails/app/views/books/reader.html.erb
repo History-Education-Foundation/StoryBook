@@ -12,6 +12,15 @@
     <div>
       <% ix = 1 %>
       <h1 class="text-3xl font-bold mb-2" data-read-ix="0"><%= @book.title %></h1>
+      <div class="text-xs text-gray-500 mb-1 mt-2">
+        Reading Level: <%= @book.reading_level.presence || 'n/a' %>
+      </div>
+      <div class="text-xs text-gray-500 mb-3">
+        Status: <%= @book.status %>
+      </div>
+      <div class="text-gray-700 text-sm mb-4">
+        <%= simple_format(@book.learning_outcome) %>
+      </div>
 
       <% @chapters.each do |chapter| %>
         <div class="mt-10 chapter-read-block">
@@ -34,6 +43,15 @@
               <div class="text-base text-gray-800 whitespace-pre-line" data-read-ix="<%= ix %>">
                 <%= page.content %>
               </div>
+
+              <% if page.audio_file.attached? %>
+                <audio controls class="mt-2">
+                  <source src="<%= url_for(page.audio_file) %>" type="audio/mpeg">
+                  Your browser does not support the audio element.
+                </audio>
+              <% else %>
+                <div class="mt-2 text-sm text-gray-400">No audio available for this page.</div>
+              <% end %>
             </div>
             <% ix += 1 %>
           <% end %>
@@ -45,20 +63,10 @@
         <button id="play-audio" class="px-4 py-1 rounded bg-indigo-600 text-white font-semibold hover:bg-indigo-700">Listen</button>
         <button id="pause-audio" class="px-4 py-1 rounded bg-gray-200 text-indigo-700 font-semibold hover:bg-gray-300">Pause</button>
         <button id="stop-audio" class="px-4 py-1 rounded bg-gray-200 text-indigo-700 font-semibold hover:bg-gray-300">Stop</button>
-        <div id="audio-loading" class="hidden ml-2 flex items-center gap-1 text-indigo-600 text-sm"><span class="loader inline-block"></span> Generating audio...</div>
+        <div id="audio-loading" class="hidden ml-2 flex items-center gap-1 text-indigo-600 text-sm"><span class="loader inline-block"></span> Loading audio playlist...</div>
         <audio id="audio-player" class="hidden mt-3" controls style="width:200px"></audio>
       </div>
       <% end %>
-
-      <div class="text-xs text-gray-500 mb-1">
-        Reading Level: <%= @book.reading_level.presence || 'n/a' %>
-      </div>
-      <div class="text-xs text-gray-500 mb-3">
-        Status: <%= @book.status %>
-      </div>
-      <div class="text-gray-700 text-sm mb-4">
-        <%= simple_format(@book.learning_outcome) %>
-      </div>
     </div>
   </div>
 </div>
@@ -66,7 +74,6 @@
 <script>
 // Highlight passage when audio is playing
 function setHighlightOnAudio(isActive) {
-  // Highlight all relevant headings and passage blocks together
   const blocks = document.querySelectorAll('[data-read-ix]');
   blocks.forEach(block => {
     if (isActive) {
@@ -86,61 +93,85 @@ document.addEventListener('turbo:load', function() {
 
   if (!playButton) return;
 
-  let audioSrcUrl = null;
+  let audioPlaylist = [];
+  let currentTrackIdx = 0;
+  let paused = false;
+  let finished = false;
 
-  // Remove highlight when audio naturally ends
-  audioPlayer.addEventListener('ended', function() {
-    setHighlightOnAudio(false);
-  });
+  async function fetchAudioPlaylist() {
+    const matches = window.location.pathname.match(/books\/(\d+)\/read/);
+    const bookId = matches ? matches[1] : null;
+    if (!bookId) return [];
+    const resp = await fetch(`/books/${bookId}/audio_playlist`);
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    return (data.audios || []).map(entry => entry.url);
+  }
 
-  playButton.onclick = async function() {
+  async function playPlaylist(startAt = 0) {
     setHighlightOnAudio(true);
     loading.classList.remove('hidden');
     audioPlayer.classList.add('hidden');
-    // If already loaded, just play
-    if (audioSrcUrl) {
-      audioPlayer.classList.remove('hidden');
-      audioPlayer.play();
+    if (!audioPlaylist.length) {
+      audioPlaylist = await fetchAudioPlaylist();
+    }
+    if (!audioPlaylist.length) {
+      alert('No audio files found for this book.');
       loading.classList.add('hidden');
+      setHighlightOnAudio(false);
+      finished = false;
       return;
     }
-    audioPlayer.src = '';
-    try {
-      console.log('Fetching audio...');
-      const resp = await fetch(window.location.pathname.replace(/\/read$/, "/generate_audio"), {
-        method: 'POST',
-        headers: {
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
-        }
-      });
-      console.log('Audio response', resp);
-      if (!resp.ok) {
-        const text = await resp.text();
-        console.error('Audio API error:', text);
-        throw new Error('Failed to generate audio: ' + text);
-      }
-      const blob = await resp.blob();
-      console.log('Audio blob', blob);
-      audioSrcUrl = URL.createObjectURL(blob);
-      audioPlayer.src = audioSrcUrl;
-      audioPlayer.classList.remove('hidden');
-      audioPlayer.play();
-    } catch (err) {
-      alert('Audio generation failed: ' + err.message);
-    } finally {
-      loading.classList.add('hidden');
-    }
+    finished = false;
+    paused = false;
+    playTrack(startAt);
   }
 
+  function playTrack(idx) {
+    if (idx >= audioPlaylist.length) {
+      loading.classList.add('hidden');
+      setHighlightOnAudio(false);
+      finished = true;
+      return;
+    }
+    currentTrackIdx = idx;
+    audioPlayer.src = audioPlaylist[idx];
+    audioPlayer.classList.remove('hidden');
+    audioPlayer.play().then(() => {});
+  }
+
+  audioPlayer.onended = function() {
+    if (paused || finished) return;
+    setTimeout(() => playTrack(currentTrackIdx + 1), 800);
+  };
+
+  playButton.onclick = () => {
+    // Resume if paused and not finished
+    if (paused && audioPlaylist.length && !finished) {
+      paused = false;
+      setHighlightOnAudio(true);
+      audioPlayer.play();
+      return;
+    }
+    // Restart from beginning if finished or never started
+    playPlaylist(0);
+  };
+
   pauseButton.onclick = function() {
+    paused = true;
     setHighlightOnAudio(false);
     if (!audioPlayer.paused) audioPlayer.pause();
   }
 
   stopButton.onclick = function() {
+    paused = true;
+    finished = true;
     setHighlightOnAudio(false);
     audioPlayer.pause();
     audioPlayer.currentTime = 0;
+    currentTrackIdx = 0;
+    audioPlaylist = [];
+    loading.classList.add('hidden');
   }
 });
 </script>

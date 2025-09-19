@@ -11,7 +11,7 @@ class BooksController < ApplicationController
 
   def create
     @book = current_user.books.new(book_params)
-    @book.status = "Draft" # Always start as draft, ignore param
+    @book.status = "Draft"
     if @book.save
       redirect_to books_path, notice: 'Book was successfully created.'
     else
@@ -21,7 +21,6 @@ class BooksController < ApplicationController
 
   def edit
     @book = current_user.books.find(params[:id])
-    # Only published books are locked
     if @book.status == "Published" && params[:from_publish].blank?
       redirect_to books_path, alert: "You cannot edit published books."
     end
@@ -71,6 +70,33 @@ class BooksController < ApplicationController
     @chapters.each { |chapter| chapter.pages.with_attached_image.load }
   end
 
+  def audio_playlist
+    @book = Book.find(params[:id])
+    allowed =
+      (current_user.student? && current_user.saved_books_library.exists?(id: @book.id)) ||
+      (current_user.staff? && current_user.books.exists?(id: @book.id))
+    unless allowed
+      render json: { error: 'Not authorized' }, status: :unauthorized and return
+    end
+    unless @book.status == 'Published'
+      render json: { error: 'Audio playlist is only available for published books.' }, status: :forbidden and return
+    end
+    playlist = []
+    @book.chapters.order(:id).each do |chapter|
+      chapter.pages.order(:id).each do |page|
+        if page.audio_file.attached?
+          playlist << {
+            page_id: page.id,
+            url: helpers.url_for(page.audio_file)
+          }
+        end
+      end
+    end
+    render json: { audios: playlist }
+  end
+
+  # ... rest of controller unchanged ...
+
   def generate_audio
     @book = Book.find(params[:id])
     allowed = (current_user.student? && current_user.saved_books_library.exists?(id: @book.id)) ||
@@ -81,86 +107,77 @@ class BooksController < ApplicationController
     unless @book.status == 'Published'
       render json: { error: 'Audio generation is only available for published books.' }, status: :forbidden and return
     end
-
-    # Serve audio file if it exists
-    if @book.audio.present?
-      full_audio_path = Rails.root.join('public', @book.audio.sub(%r{^/}, ''))
-      if File.exist?(full_audio_path)
-        send_file full_audio_path, type: 'audio/mpeg', disposition: 'inline', filename: File.basename(full_audio_path)
-        return
-      end
+    if @book.audio_file.attached?
+      send_data @book.audio_file.download, type: @book.audio_file.content_type, disposition: 'inline', filename: @book.audio_file.filename.to_s
+      return
     end
-
-    # No audio present, return error (audio generation now only on publish)
-    render json: { error: 'Audio file not found for this published book.' }, status: :not_found
+    render json: { error: 'Full book audio not available yet for this book.' }, status: :not_found
   end
 
-
-def publish
-  @book = current_user.books.find(params[:id])
-  if @book.status == "Draft" || @book.status == "Archived"
-    # Generate audio and save path before publishing
-    audio_path = nil
-    begin
-      @book.chapters.order(:id).includes(:pages).each do |chapter|
-        chapter.pages.order(:id).each do |page|
-          begin
-            if page.content.present?
-              OpenAi.new.generate_audio(page.content, attach_to: page, attachment_name: :audio_file)
+  def publish
+    @book = current_user.books.find(params[:id])
+    if @book.status == "Draft" || @book.status == "Archived"
+      audio_path = nil
+      begin
+        @book.chapters.order(:id).includes(:pages).each do |chapter|
+          chapter.pages.order(:id).each do |page|
+            begin
+              if page.content.present?
+                OpenAi.new.generate_audio(page.content, attach_to: page, attachment_name: :audio_file)
+              end
+            rescue => e
+              Rails.logger.error("Audio generation failed for Page \\#{page.id}: \\#{e.message}")
             end
-          rescue => e
-            Rails.logger.error("Audio generation failed for Page \\#{page.id}: \\#{e.message}")
           end
         end
+        audio_path = nil
+        @book.generate_full_audio
+      rescue => e
+        Rails.logger.error("Audio generation failed at publish: #{e.message}")
+        audio_path = nil
       end
-      audio_path = nil # No per-book audio, handled per-page now
-    rescue => e
-      Rails.logger.error("Audio generation failed at publish: #{e.message}")
-      audio_path = nil # No audio saved if failed
+      @book.update(status: "Published", audio: audio_path)
+      redirect_to books_path, notice: "Book published successfully."
+    else
+      redirect_to edit_book_path(@book), alert: "Only draft or archived books can be published."
     end
-    @book.update(status: "Published", audio: audio_path)
-    redirect_to books_path, notice: "Book published successfully."
-  else
-    redirect_to edit_book_path(@book), alert: "Only draft or archived books can be published."
   end
-end
 
-def archive
-  @book = current_user.books.find(params[:id])
-  if @book.status == "Published"
-    @book.update(status: "Archived")
-    redirect_to books_path, notice: "Book archived successfully."
-  else
-    redirect_to books_path, alert: "Only published books can be archived."
+  def archive
+    @book = current_user.books.find(params[:id])
+    if @book.status == "Published"
+      @book.update(status: "Archived")
+      redirect_to books_path, notice: "Book archived successfully."
+    else
+      redirect_to books_path, alert: "Only published books can be archived."
+    end
   end
-end
 
-def unarchive
-  @book = current_user.books.find(params[:id])
-  if @book.status == "Archived"
-    @book.update(status: "Draft")
-    redirect_to books_path, notice: "Book was restored to draft."
-  else
-    redirect_to books_path, alert: "Only archived books can be unarchived."
+  def unarchive
+    @book = current_user.books.find(params[:id])
+    if @book.status == "Archived"
+      @book.update(status: "Draft")
+      redirect_to books_path, notice: "Book was restored to draft."
+    else
+      redirect_to books_path, alert: "Only archived books can be unarchived."
+    end
   end
-end
 
+  def generate_all_pictures
+    @book = current_user.books.find(params[:id])
+    result = @book.generate_all_pictures
+    flash[:notice] = "Batch image generation complete: #{result[:generated]} images generated, #{result[:failed]} failed, #{result[:skipped]} skipped, out of #{result[:total]} pages. See logs for details."
+    redirect_to book_chapters_path(@book)
+  end
 
-def generate_all_pictures
-  @book = current_user.books.find(params[:id])
-  result = @book.generate_all_pictures
-  flash[:notice] = "Batch image generation complete: #{result[:generated]} images generated, #{result[:failed]} failed, #{result[:skipped]} skipped, out of #{result[:total]} pages. See logs for details."
-  redirect_to book_chapters_path(@book)
-end
+  def retry_failed_pictures
+    @book = current_user.books.find(params[:id])
+    result = @book.retry_failed_pictures
+    flash[:notice] = "Retry complete: #{result[:generated]} images generated, #{result[:failed]} still failed, out of #{result[:total]} retried pages."
+    redirect_to book_chapters_path(@book)
+  end
 
-def retry_failed_pictures
-  @book = current_user.books.find(params[:id])
-  result = @book.retry_failed_pictures
-  flash[:notice] = "Retry complete: #{result[:generated]} images generated, #{result[:failed]} still failed, out of #{result[:total]} retried pages."
-  redirect_to book_chapters_path(@book)
-end
-
-private
+  private
 
   def book_params
     params.require(:book).permit(:title, :learning_outcome, :reading_level, :status)

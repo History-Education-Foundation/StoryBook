@@ -1,12 +1,6 @@
-// Configure your import map in config/importmap.rb. Read more: https://github.com/rails/importmap-rails
-import "@hotwired/turbo-rails"
-import "controllers"
-import * as ActionCable from "@rails/actioncable"
-window.ActionCable = ActionCable
-
-console.log("application.js loaded!!");
-
 window.addEventListener("message", (event) => {
+    if (event.data.source !== 'leonardo') { return; } // don't process messages from leonardo (prevents infinite loop)
+    
     console.log("here is the message", event);
     
     // Ensure we have the most up-to-date HTML content
@@ -44,3 +38,16 @@ window.addEventListener("message", (event) => {
         page_loaded_at: window.page_loaded_at
     }, event.origin);
 });
+
+// Configure your import map in config/importmap.rb. Read more: https://github.com/rails/importmap-rails
+import "@hotwired/turbo-rails"
+import "controllers"
+
+// import "trix"
+// import "@rails/actiontext"
+
+import * as ActionCable from "@rails/actioncable"
+window.ActionCable = ActionCable
+
+console.log("application.js loaded!!");
+

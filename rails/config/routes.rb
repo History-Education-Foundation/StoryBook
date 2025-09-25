@@ -3,6 +3,15 @@ Rails.application.routes.draw do
   resources :goals
   devise_for :users, controllers: { registrations: 'users/registrations' }
   resources :users
+  devise_for :users, controllers: { registrations: 'users/registrations' }
+  resources :users do
+    member do
+      get :generate_profile_pic, action: :generate_profile_pic_form
+      post :generate_profile_pic
+      get :generate_bio_audio, action: :generate_bio_audio_form
+      post :generate_bio_audio
+    end
+  end
   mount LlamaBotRails::Engine => "/llama_bot"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -16,7 +25,12 @@ Rails.application.routes.draw do
 
   root "public#home"
   get "home" => "public#home"
+  # root "public#home"
+  # root "prototypes#show", page: "home"
+  get "home" => "public#home"
+  get "chat" => "public#chat"
 
+  get "/prototypes/*page", to: "prototypes#show"
   # Defines the root path route ("/")
   # root "posts#index"
 end

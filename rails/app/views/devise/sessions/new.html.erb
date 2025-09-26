@@ -3,6 +3,11 @@
 <% end %>
 
 <div class="max-w-md mx-auto mt-8 bg-white rounded-lg shadow-md p-8">
+  <% if flash[:alert] %>
+    <div class="mb-4 p-3 rounded bg-red-100 text-red-800 border border-red-300">
+      <%= flash[:alert] %>
+    </div>
+  <% end %>
   <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
     <div class="mb-4">
       <%= f.label :email, class: "block text-sm font-medium text-gray-700" %>

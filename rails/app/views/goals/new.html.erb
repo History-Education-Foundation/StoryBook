@@ -1,0 +1,31 @@
+<% content_for :header do %>
+  New Goal
+<% end %>
+
+<div class="max-w-xl mx-auto bg-white p-6 rounded shadow">
+  <%= form_with(model: @goal, local: true) do |form| %>
+    <div class="mb-4">
+      <%= form.label :title, class: "block text-gray-700" %>
+      <%= form.text_field :title, class: "mt-1 block w-full rounded border-gray-300" %>
+    </div>
+    <div class="mb-4">
+      <%= form.label :description, class: "block text-gray-700" %>
+      <%= form.text_area :description, rows: 3, class: "mt-1 block w-full rounded border-gray-300" %>
+    </div>
+    <div class="mb-4">
+      <%= form.label :status, class: "block text-gray-700" %>
+      <%= form.select :status, options_for_select([["active", "active"],["completed", "completed"],["abandoned", "abandoned"]], @goal.status), include_blank: true, class: "mt-1 block w-full rounded border-gray-300" %>
+    </div>
+    <div class="mb-4">
+      <%= form.label :target_date, class: "block text-gray-700" %>
+      <%= form.date_field :target_date, class: "mt-1 block w-full rounded border-gray-300" %>
+    </div>
+    <div class="text-right">
+      <%= form.submit "Create Goal", class: "inline-block rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700" %>
+    </div>
+  <% end %>
+
+  <div class="mt-6">
+    <%= link_to "Back to Goals", goals_path, class: "text-indigo-600 hover:underline" %>
+  </div>
+</div>

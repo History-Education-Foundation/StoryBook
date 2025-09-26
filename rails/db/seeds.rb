@@ -68,3 +68,72 @@ if staff_user
   )
   legacy.pages.create!(content: "After a life filled with passion and suffering, Van Gogh died in 1890. Today, he is recognized as a pioneer of modern art, with works celebrated worldwide for their color, movement, and emotion.")
 end
+
+# Seed: Early England Colonies, 1700-1776
+existing_title = 'Early England Colonies: Foundations of American Government'
+if staff_user.books.find_by(title: existing_title)
+  staff_user.books.where(title: existing_title).destroy_all
+end
+book = staff_user.books.create!(
+  title: existing_title,
+  learning_outcome: 'Explain how self-government developed in the English colonies before the American Revolution.',
+  reading_level: '8th Grade',
+  status: 'Draft'
+)
+
+chapters = [
+  {
+    title: 'Life in the Early Colonies',
+    description: 'Everyday experience in the colonies during the 1700s.',
+    pages: [
+      { content: 'Starting in the 1600s, English people sailed across the Atlantic to build new communities. By the early 1700s, thirteen main colonies lined the east coast of North America.' },
+      { content: 'Daily life in the colonies was hard. Most people were farmers, growing their own food and making what they needed.' },
+      { content: 'Colonies were separated into three regions: New England, Middle, and Southern Colonies. Each region developed different economies and lifestyles.' }
+    ]
+  },
+  {
+    title: 'The Rise of Colonial Assemblies',
+    description: 'How colonists began voting and governing themselves.',
+    pages: [
+      { content: 'At first, English governors and company leaders made most decisions in the colonies.' },
+      { content: 'Soon, colonists wanted more of a say in their laws. Town meetings and assemblies began to form.' },
+      { content: 'By the mid-1700s, most colonies had some form of representative assembly that created local laws and taxes.' },
+      { content: 'These groups often met in churches or meeting halls and debated issues facing the community.' }
+    ]
+  },
+  {
+    title: 'The House of Burgesses and Virginia’s Legacy',
+    description: 'The first elected assembly in America and its model for others.',
+    pages: [
+      { content: 'The Virginia House of Burgesses was established in 1619. It was the first elected lawmaking body in the colonies.' },
+      { content: 'Members were elected by free, landowning men. They made laws and decisions about local life.' },
+      { content: 'The House of Burgesses showed other colonies that people could govern themselves instead of relying on a king.' }
+    ]
+  },
+  {
+    title: 'Local Government and Town Meetings',
+    description: 'How small communities practiced democracy.',
+    pages: [
+      { content: 'In New England colonies, people gathered in town meetings to discuss issues and make rules.' },
+      { content: 'Everyone could speak, but only certain men could vote.' },
+      { content: 'Town meetings taught colonists how to debate and compromise—skills important for democracy.' }
+    ]
+  },
+  {
+    title: 'Seeds of Independence',
+    description: 'How colonial government led to revolution.',
+    pages: [
+      { content: 'By the 1700s, colonists had lots of practice running their own governments.' },
+      { content: 'British laws and taxes started to anger colonists, who were used to making their own decisions.' },
+      { content: 'Representative assemblies and town meetings helped unite people against British rule.' },
+      { content: 'By 1776, the colonies were ready to declare independence and form a new nation.' }
+    ]
+  }
+]
+chapters.each do |ch|
+  chapter = book.chapters.create!(title: ch[:title], description: ch[:description])
+  ch[:pages].each do |page_attrs|
+    chapter.pages.create!(content: page_attrs[:content])
+  end
+end
+puts "Early England Colonies book seeded."

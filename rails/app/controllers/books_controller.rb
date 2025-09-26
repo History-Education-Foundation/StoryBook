@@ -123,7 +123,13 @@ class BooksController < ApplicationController
           chapter.pages.order(:id).each do |page|
             begin
               if page.content.present?
-                OpenAi.new.generate_audio(page.content, attach_to: page, attachment_name: :audio_file)
+                content_for_audio = page.content
+                if page.this_is_first_page_and_first_chapter?
+                  content_for_audio = "#{@book.title.strip}. #{chapter.title.strip}. #{page.content.strip}"
+                elsif page.this_is_first_page_in_chapter?
+                  content_for_audio = "#{chapter.title.strip}. #{page.content.strip}"
+                end
+                OpenAi.new.generate_audio(content_for_audio, attach_to: page, attachment_name: :audio_file)
               end
             rescue => e
               Rails.logger.error("Audio generation failed for Page \\#{page.id}: \\#{e.message}")

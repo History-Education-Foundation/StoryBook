@@ -2,7 +2,7 @@
 <%= form_with model: [@book, @chapter, page], html: { multipart: true } do |f| %>
   <div class="mb-4">
     <%= f.label :content, class: "block font-bold mb-1" %>
-    <%= f.text_field :content, class: "w-full border rounded px-3 py-2" %>
+    <%= f.text_area :content, class: "w-full border rounded px-3 py-2 resize-y", rows: 4 %>
   </div>
 
   <div class="mb-4">
@@ -53,7 +53,7 @@
                     id: "ai-image-form" do |g| %>
         <div class="mb-2">
           <%= g.label :image_description, "Describe the image you want" %>
-          <%= g.text_field :image_description, class: "block shadow-sm rounded-md border px-3 py-2 mt-2 w-full" %>
+          <textarea class="block shadow-sm rounded-md border px-3 py-2 mt-2 w-full resize-y" rows="3" name="image_description" id="image_description"><%= page.content.presence || '' %></textarea>
         </div>
         <div>
           <%= g.submit "Generate Image",
@@ -105,3 +105,78 @@
   }
   @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
+<script>
+(function() {
+  // Debounced sync from content to AI textarea UNTIL user manually edits the AI textarea
+  var contentId = 'page_content';
+  var aiId = 'image_description';
+  var debounceDelay = 700;
+  var aiEdited = false;
+  var debounceTimer = null;
+
+  function syncAI() {
+    if (!aiEdited) {
+      var content = document.getElementById(contentId);
+      var aiDesc = document.getElementById(aiId);
+      if (content && aiDesc) {
+        aiDesc.value = content.value;
+      }
+    }
+  }
+
+  function setupSync() {
+    var content = document.getElementById(contentId);
+    var aiDesc = document.getElementById(aiId);
+    if (!(content && aiDesc)) return;
+    aiEdited = false;
+    aiDesc.addEventListener('input', function() {
+      aiEdited = true;
+    });
+    content.addEventListener('input', function() {
+      if (aiEdited) return;
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(syncAI, debounceDelay);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', setupSync);
+  document.addEventListener('turbo:load', setupSync);
+})();
+</script>
+
+<script>
+(function() {
+  // IDs of the content and AI desc textareas
+  var contentId = 'page_content';
+  var aiId = 'image_description';
+  var debounceDelay = 700;
+  var aiEdited = false;
+  var debounceTimer = null;
+
+  function syncAI() {
+    if (!aiEdited) {
+      var content = document.getElementById(contentId);
+      var aiDesc = document.getElementById(aiId);
+      if (content && aiDesc) {
+        aiDesc.value = content.value;
+      }
+    }
+  }
+
+  function setupSync() {
+    var content = document.getElementById(contentId);
+    var aiDesc = document.getElementById(aiId);
+    if (!(content && aiDesc)) return;
+
+    aiDesc.addEventListener('input', function() {
+      aiEdited = true;
+    });
+    content.addEventListener('input', function() {
+      if (aiEdited) return;
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(syncAI, debounceDelay);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', setupSync);
+  document.addEventListener('turbo:load', setupSync);
+})();
+</script>

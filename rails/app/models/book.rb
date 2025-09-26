@@ -44,7 +44,18 @@ class Book < ApplicationRecord
         # Defensive safeguard - only attempt if image missing or we are forcing replacement
         next if page.image.attached? && !replace_existing
         total += 1
-        result = page.generate_picture(replace_existing: replace_existing)
+        # Gather context for prompt
+title = self.title.to_s.strip
+level = self.reading_level.to_s.strip
+objective = self.learning_outcome.to_s.strip
+all_prev_content = ''
+pages_in_order = chapters.order(:id).map { |c| c.pages.order(:id).to_a }.flatten
+pages_in_order.each do |p|
+  break if p.id == page.id
+  all_prev_content << (p.content.to_s + '\n')
+end
+result = page.generate_picture(replace_existing: replace_existing, book_title: title, book_level: level, learning_objective: objective, previous_pages: all_prev_content.strip)
+
         case result
         when :generated
           generated += 1

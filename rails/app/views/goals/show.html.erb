@@ -1,0 +1,40 @@
+<% content_for :header do %>
+  Goal: <%= @goal.title %>
+<% end %>
+
+<div class="max-w-xl mx-auto bg-white p-6 rounded shadow">
+  <h2 class="text-2xl font-semibold mb-2"><%= @goal.title %></h2>
+  <div class="mb-2 text-gray-700">
+    <span class="font-medium">Status:</span> <%= @goal.status.presence || "active" %>
+  </div>
+  <div class="mb-2 text-gray-700">
+    <span class="font-medium">Target Date:</span> <%= @goal.target_date&.strftime("%Y-%m-%d") || "—" %>
+  </div>
+  <div class="mb-4 text-gray-700">
+    <span class="font-medium">Description:</span>
+    <div class="whitespace-pre-line"><%= @goal.description %></div>
+  </div>
+  <div class="flex gap-2">
+    <%= link_to "Edit", edit_goal_path(@goal), class: "inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700" %>
+    <%= link_to "Back to Goals", goals_path, class: "inline-block rounded bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200" %>
+  </div>
+</div>
+
+<div class="max-w-xl mx-auto mt-10">
+  <h3 class="text-xl font-semibold mb-4">Associated Journal Entries</h3>
+  <% if @goal.journal_entries.any? %>
+    <ul class="divide-y divide-gray-200">
+      <% @goal.journal_entries.order(created_at: :desc).each do |entry| %>
+        <li class="py-3">
+          <a href="<%= journal_entry_path(entry) %>" class="text-blue-600 font-medium hover:underline">
+            <%= entry.title %>
+          </a>
+          <div class="text-gray-500 text-sm">Created at: <%= entry.created_at.strftime('%Y-%m-%d') %></div>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <div class="text-gray-500">No journal entries are associated with this goal yet.</div>
+  <% end %>
+</div>
+

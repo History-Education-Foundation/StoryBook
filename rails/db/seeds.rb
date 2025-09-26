@@ -4,8 +4,8 @@
 #
 
 User.find_or_create_by!(email: 'kody@llamapress.ai') do |user|
-  user.password = '123456'
-  user.password_confirmation = '123456'
+  user.password = 'kody123'
+  user.password_confirmation = 'kody123'
 end
 
 # Example:

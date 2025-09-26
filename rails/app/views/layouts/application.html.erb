@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="h-full bg-gray-50">
+<html class="h-full bg-white">
   <head>
     <title><%= content_for(:title) || "Rails Basic" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -79,6 +79,7 @@
                     <%= link_to "Sign In", new_user_session_path, class: "inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700" %>
                   <% end %>
                 </div>
+
             </div>
             <div class="hidden sm:ml-6 sm:flex sm:items-center">
               <% if user_signed_in? %>

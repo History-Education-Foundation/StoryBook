@@ -42,8 +42,12 @@ Rails.application.routes.draw do
 
   root "books#library"
   get "home" => "public#home"
+  # root "public#home"
+  # root "prototypes#show", page: "home"
+  get "home" => "public#home"
   get "chat" => "public#chat"
 
+  get "/prototypes/*page", to: "prototypes#show"
   # Defines the root path route ("/")
   # root "posts#index"
 end

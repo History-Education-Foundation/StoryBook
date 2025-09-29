@@ -1,7 +1,192 @@
-<% content_for :title, "Public Book: #{@book.title}" %>
-<div class="max-w-xl mx-auto mt-12 bg-white shadow rounded p-6">
-  <h1 class="text-2xl font-bold mb-2"><%= @book.title %></h1>
-  <div class="mb-2 text-sm text-gray-600">Reading Level: <%= @book.reading_level %></div>
-  <div class="mb-4 text-gray-800">Learning Outcome: <%= simple_format(@book.learning_outcome) %></div>
-  <div class="text-xs italic text-gray-500">Shared by a user - Book ID <%= @book.id %></div>
+<% content_for :header, @book.title %>
+<style>
+  /* .highlight-read { background: none !important; } */
+</style>
+
+<!-- My Library button intentionally omitted for public page -->
+
+<div class="max-w-2xl mx-auto mt-10 bg-white p-8 rounded shadow">
+  <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <% ix = 1 %>
+      <h1 class="text-3xl font-bold mb-2" data-read-ix="0"><%= @book.title %></h1>
+      <div class="text-xs text-gray-500 mb-1 mt-2">
+        Reading Level: <%= @book.reading_level.presence || 'n/a' %>
+      </div>
+      <div class="text-xs text-gray-500 mb-3">
+        Status: <%= @book.status %>
+      </div>
+      <div class="text-gray-700 text-sm mb-4">
+        <%= simple_format(@book.learning_outcome) %>
+      </div>
+
+      <% @chapters.each do |chapter| %>
+        <div class="mt-10 chapter-read-block">
+          <h2 class="text-2xl font-semibold mb-2 border-b pb-1" data-read-ix="<%= ix %>"><%= chapter.title %></h2>
+          <% ix += 1 %>
+
+          <div class="mb-2 text-gray-600"><%= simple_format(chapter.description) %></div>
+
+          <% chapter.pages.order(:id).each do |page| %>
+            <div class="my-6 p-6 bg-gray-50 rounded shadow-sm">
+              <% if page.image.attached? %>
+                <div class="flex justify-center mb-4">
+                  <%= image_tag url_for(page.image),
+                        class: "rounded shadow max-h-80 object-contain",
+                        loading: "lazy",
+                        alt: "" %>
+                </div>
+              <% end %>
+
+              <div class="text-base text-gray-800 whitespace-pre-line" data-read-ix="<%= ix %>">
+                <%= page.content %>
+              </div>
+
+              <% if page.audio_file.attached? %>
+                <audio controls class="mt-2">
+                  <source src="<%= url_for(page.audio_file) %>" type="audio/mpeg">
+                  Your browser does not support the audio element.
+                </audio>
+              <% else %>
+                <div class="mt-2 text-sm text-gray-400">No audio available for this page.</div>
+              <% end %>
+            </div>
+            <% ix += 1 %>
+          <% end %>
+        </div>
+      <% end %>
+
+      <% if @book.status == "Published" %>
+      <div class="fixed bottom-6 right-6 z-50 bg-white shadow-xl rounded-lg p-3 flex gap-2 border border-gray-200">
+        <button id="play-audio" class="px-4 py-1 rounded bg-indigo-600 text-white font-semibold hover:bg-indigo-700">Listen</button>
+        <button id="pause-audio" class="px-4 py-1 rounded bg-gray-200 text-indigo-700 font-semibold hover:bg-gray-300">Pause</button>
+        <button id="stop-audio" class="px-4 py-1 rounded bg-gray-200 text-indigo-700 font-semibold hover:bg-gray-300">Stop</button>
+        <div id="audio-loading" class="hidden ml-2 flex items-center gap-1 text-indigo-600 text-sm"><span class="loader inline-block"></span> Loading audio playlist...</div>
+        <audio id="audio-player" class="hidden mt-3" controls style="width:200px"></audio>
+      </div>
+      <% end %>
+    </div>
+  </div>
 </div>
+
+<script>
+// Highlight passage when audio is playing
+function setHighlightOnAudio(isActive) {
+  const blocks = document.querySelectorAll('[data-read-ix]');
+  blocks.forEach(block => {
+    if (isActive) {
+      block.classList.add('highlight-read');
+    } else {
+      block.classList.remove('highlight-read');
+    }
+  });
+}
+
+document.addEventListener('turbo:load', function() {
+  const playButton = document.getElementById('play-audio');
+  const pauseButton = document.getElementById('pause-audio');
+  const stopButton = document.getElementById('stop-audio');
+  const loading = document.getElementById('audio-loading');
+  const audioPlayer = document.getElementById('audio-player');
+
+  if (!playButton) return;
+
+  let audioPlaylist = [];
+  let currentTrackIdx = 0;
+  let paused = false;
+  let finished = false;
+
+  async function fetchAudioPlaylist() {
+    const matches = window.location.pathname.match(/books\/(\d+)\/public/);
+    const bookId = matches ? matches[1] : null;
+    if (!bookId) return [];
+    const resp = await fetch(`/books/${bookId}/audio_playlist`);
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    return (data.audios || []).map(entry => entry.url);
+  }
+
+  async function playPlaylist(startAt = 0) {
+    setHighlightOnAudio(true);
+    loading.classList.remove('hidden');
+    audioPlayer.classList.add('hidden');
+    if (!audioPlaylist.length) {
+      audioPlaylist = await fetchAudioPlaylist();
+    }
+    if (!audioPlaylist.length) {
+      alert('No audio files found for this book.');
+      loading.classList.add('hidden');
+      setHighlightOnAudio(false);
+      finished = false;
+      return;
+    }
+    finished = false;
+    paused = false;
+    playTrack(startAt);
+  }
+
+  function playTrack(idx) {
+    if (idx >= audioPlaylist.length) {
+      loading.classList.add('hidden');
+      setHighlightOnAudio(false);
+      finished = true;
+      return;
+    }
+    currentTrackIdx = idx;
+    audioPlayer.src = audioPlaylist[idx];
+    audioPlayer.classList.remove('hidden');
+    audioPlayer.play().then(() => {});
+  }
+
+  audioPlayer.onended = function() {
+    if (paused || finished) return;
+    setTimeout(() => playTrack(currentTrackIdx + 1), 800);
+  };
+
+  playButton.onclick = () => {
+    // Resume if paused and not finished
+    if (paused && audioPlaylist.length && !finished) {
+      paused = false;
+      setHighlightOnAudio(true);
+      audioPlayer.play();
+      return;
+    }
+    // Restart from beginning if finished or never started
+    playPlaylist(0);
+  };
+
+  pauseButton.onclick = function() {
+    paused = true;
+    setHighlightOnAudio(false);
+    if (!audioPlayer.paused) audioPlayer.pause();
+  }
+
+  stopButton.onclick = function() {
+    paused = true;
+    finished = true;
+    setHighlightOnAudio(false);
+    audioPlayer.pause();
+    audioPlayer.currentTime = 0;
+    currentTrackIdx = 0;
+    audioPlaylist = [];
+    loading.classList.add('hidden');
+  }
+});
+</script>
+
+<style>
+.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #6366f1;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>

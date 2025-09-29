@@ -5,16 +5,17 @@ load_dotenv()
 
 from langgraph.graph import MessagesState
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+from typing import Annotated
 
 from langgraph.graph import START, StateGraph
-from langgraph.prebuilt import tools_condition
-from langgraph.prebuilt import ToolNode
+from langgraph.prebuilt import tools_condition, ToolNode, InjectedState
 from langgraph.prebuilt.chat_agent_executor import AgentState
 
 
 import asyncio
 from pathlib import Path
 import os
+import logging
 
 from openai import OpenAI
 from app.agents.utils.images import encode_image
@@ -24,8 +25,8 @@ SCRIPT_DIR = Path(__file__).parent.resolve()
 PROJECT_ROOT = SCRIPT_DIR.parent.parent.parent  # Go up to LlamaBot root
 APP_DIR = PROJECT_ROOT / 'app'
 
-# Global tools list
-tools = []
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # System message
 sys_msg = "You are a helpful assistant. Your favorite animal is cyborg llama."
@@ -34,9 +35,36 @@ class LlamaPressState(AgentState):
     api_token: str
     agent_prompt: str
 
+@tool
+async def read_book(
+    state: Annotated[dict, InjectedState],
+) -> str:
+    """
+    Read the contents of a book, give back a summary of the book.
+    """
+    logger.info("Reading book!")
+
+    api_token = state.get("api_token")
+    if not api_token:
+        return "Error: api_token is required but not provided in state."
+
+    result = await make_api_request_to_llamapress(
+        method="GET",
+        endpoint="/books.JSON",
+        api_token=api_token
+    )
+
+    if isinstance(result, str):
+        return result
+
+    return {'toolname': 'read_book', 'tool args': {}, "tool_output": result}
+
+# Global tools list
+tools = [read_book]
+
 # Node
 def leo(state: LlamaPressState):
-#    read_rails_file("app/agents/llamabot/nodes.py") # Testing.
+   breakpoint() # add this line to test if this is being loaded correctly, and that we hit the breakpoint.
    llm = ChatOpenAI(model="gpt-4.1")
    llm_with_tools = llm.bind_tools(tools)
 

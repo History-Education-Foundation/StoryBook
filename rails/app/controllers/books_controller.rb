@@ -1,5 +1,9 @@
 class BooksController < ApplicationController
-  before_action :authenticate_user!
+  include LlamaBotRails::ControllerExtensions
+  include LlamaBotRails::AgentAuth
+  before_action :authenticate_user!, except: [:public_show]
+
+  llama_bot_allow :index
 
   def index
     @books = current_user.books
@@ -42,11 +46,17 @@ class BooksController < ApplicationController
   end
 
   def public_show
+    @hide_navbar = true
     @book = Book.find(params[:id])
     if @book.status != "Published"
       redirect_to root_path, alert: "This book is not published."
     end
-    # Show minimal, public-friendly book details here.
+    @chapters = @book.chapters.includes(:pages).order(:id)
+    @chapters.each { |chapter| chapter.pages.with_attached_image.load }
+    @chapters = @book.chapters.includes(:pages).order(:id)
+    @chapters.each { |chapter| chapter.pages.with_attached_image.load }
+    @chapters = @book.chapters.includes(:pages).order(:id)
+    @chapters.each { |chapter| chapter.pages.with_attached_image.load }
   end
 
   def library

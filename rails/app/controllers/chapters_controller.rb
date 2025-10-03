@@ -1,6 +1,9 @@
 class ChaptersController < ApplicationController
-  before_action :authenticate_user!
+  include LlamaBotRails::ControllerExtensions
+  include LlamaBotRails::AgentAuth
   before_action :set_book
+
+  llama_bot_allow :create, :update
 
   def index
     @chapters = @book.chapters

@@ -3,10 +3,15 @@ class BooksController < ApplicationController
   include LlamaBotRails::AgentAuth
   before_action :authenticate_user!, except: [:public_show]
 
-  llama_bot_allow :index
+  llama_bot_allow :index, :create, :update, :generate_all_pictures
 
   def index
-    @books = current_user.books
+    @books = current_user.books.all
+
+    respond_to do |format|
+      format.html # renders default index.html.erb if requested
+      format.json { render json: @books }
+    end
   end
 
   def new

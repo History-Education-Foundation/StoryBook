@@ -1,7 +1,10 @@
 class PagesController < ApplicationController
-  before_action :authenticate_user!
+  include LlamaBotRails::ControllerExtensions
+  include LlamaBotRails::AgentAuth
   before_action :set_book
   before_action :set_chapter
+
+  llama_bot_allow :create, :update, :generate_image
 
   def index
     @pages = @chapter.pages

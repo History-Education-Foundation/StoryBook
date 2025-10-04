@@ -1,8 +1,17 @@
 class BooksController < ApplicationController
-  before_action :authenticate_user!
+  include LlamaBotRails::ControllerExtensions
+  include LlamaBotRails::AgentAuth
+  before_action :authenticate_user!, except: [:public_show]
+
+  llama_bot_allow :index, :create, :update, :generate_all_pictures
 
   def index
-    @books = current_user.books
+    @books = current_user.books.all
+
+    respond_to do |format|
+      format.html # renders default index.html.erb if requested
+      format.json { render json: @books }
+    end
   end
 
   def new
@@ -42,11 +51,17 @@ class BooksController < ApplicationController
   end
 
   def public_show
+    @hide_navbar = true
     @book = Book.find(params[:id])
     if @book.status != "Published"
       redirect_to root_path, alert: "This book is not published."
     end
-    # Show minimal, public-friendly book details here.
+    @chapters = @book.chapters.includes(:pages).order(:id)
+    @chapters.each { |chapter| chapter.pages.with_attached_image.load }
+    @chapters = @book.chapters.includes(:pages).order(:id)
+    @chapters.each { |chapter| chapter.pages.with_attached_image.load }
+    @chapters = @book.chapters.includes(:pages).order(:id)
+    @chapters.each { |chapter| chapter.pages.with_attached_image.load }
   end
 
   def library
@@ -123,7 +138,13 @@ class BooksController < ApplicationController
           chapter.pages.order(:id).each do |page|
             begin
               if page.content.present?
-                OpenAi.new.generate_audio(page.content, attach_to: page, attachment_name: :audio_file)
+                content_for_audio = page.content
+                if page.this_is_first_page_and_first_chapter?
+                  content_for_audio = "#{@book.title.strip}. #{chapter.title.strip}. #{page.content.strip}"
+                elsif page.this_is_first_page_in_chapter?
+                  content_for_audio = "#{chapter.title.strip}. #{page.content.strip}"
+                end
+                OpenAi.new.generate_audio(content_for_audio, attach_to: page, attachment_name: :audio_file)
               end
             rescue => e
               Rails.logger.error("Audio generation failed for Page \\#{page.id}: \\#{e.message}")

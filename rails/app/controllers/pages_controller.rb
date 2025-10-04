@@ -1,7 +1,10 @@
 class PagesController < ApplicationController
-  before_action :authenticate_user!
+  include LlamaBotRails::ControllerExtensions
+  include LlamaBotRails::AgentAuth
   before_action :set_book
   before_action :set_chapter
+
+  llama_bot_allow :create, :update, :generate_image
 
   def index
     @pages = @chapter.pages
@@ -16,12 +19,23 @@ class PagesController < ApplicationController
     if @page.save
       # Automatically generate AI image using content, if image was not uploaded
       unless @page.image.attached?
-        prompt = "This is the page content from a picture book, please generate an appropriate image that matches the content on the page. Here is the page content: <PAGE> #{@page.content} </PAGE>"
-        begin
-          OpenAi.new.generate_image(prompt, attach_to: @page, attachment_name: :image)
-        rescue => e
-          Rails.logger.error("Automatic AI image generation failed: ", e)
+        book_title = @book.title.to_s.strip
+        book_level = @book.reading_level.to_s.strip
+        learning_objective = @book.learning_outcome.to_s.strip
+        chapter_title = @chapter.title.to_s.strip
+        pages_in_order = @book.chapters.order(:id).map { |c| c.pages.order(:id).to_a }.flatten
+        previous_pages = []
+        pages_in_order.each do |p|
+          break if p.id == @page.id
+          previous_pages << p.content.to_s
         end
+        @page.generate_picture(
+          replace_existing: true,
+          book_title: book_title,
+          book_level: book_level,
+          learning_objective: learning_objective,
+          previous_pages: previous_pages.join("\n")
+        )
       end
       redirect_to book_chapter_pages_path(@book, @chapter), notice: 'Page was successfully created.'
     else
@@ -51,16 +65,30 @@ class PagesController < ApplicationController
   # POST /pages/:id/generate_image
   def generate_image
     @page = @chapter.pages.find(params[:id])
-    prompt = params[:image_description]
-    begin
-      # Overwrite the current image with a new AI generated one
-      @page.image.purge if @page.image.attached?
-      OpenAi.new.generate_image(prompt, attach_to: @page, attachment_name: :image)
-      redirect_to edit_book_chapter_page_path(@book, @chapter, @page), notice: 'Image generated and attached!'
-    rescue => e
-      flash[:alert] = "AI image generation failed: #{e.message}"
-      redirect_to edit_book_chapter_page_path(@book, @chapter, @page)
+    @book = @chapter.book
+    book_title = @book.title.to_s.strip
+    book_level = @book.reading_level.to_s.strip
+    chapter_title = @chapter.title.to_s.strip
+    learning_objective = @book.learning_outcome.to_s.strip
+    pages_in_order = @book.chapters.order(:id).map { |c| c.pages.order(:id).to_a }.flatten
+    previous_pages = []
+    pages_in_order.each do |p|
+      break if p.id == @page.id
+      previous_pages << p.content.to_s
     end
+    @page.image.purge if @page.image.attached?
+    chapter_title = @chapter.title.to_s.strip
+    @page.generate_picture(
+      replace_existing: true,
+      book_title: book_title,
+      book_level: book_level,
+      learning_objective: learning_objective,
+      previous_pages: previous_pages.join("\n"),
+    )
+    redirect_to edit_book_chapter_page_path(@book, @chapter, @page), notice: 'Image generated and attached!'
+  rescue => e
+    flash[:alert] = "AI image generation failed: #{e.message}"
+    redirect_to edit_book_chapter_page_path(@book, @chapter, @page)
   end
 
   private

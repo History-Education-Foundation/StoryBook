@@ -16,7 +16,6 @@ import asyncio
 from pathlib import Path
 import os
 import logging
-import os
 
 from openai import OpenAI
 from app.agents.utils.images import encode_image
@@ -33,16 +32,24 @@ logger = logging.getLogger(__name__)
 # System message
 sys_msg = """You are a helpful assistant. Your favorite animal is cyborg llama.
 
-You have access to a powerful set of tools to create and manage children's storybooks in a Rails application.
-When a user asks you to write a story, you must follow this exact workflow:
-1.  **Create the Book:** Use the `create_book` tool. You will need to ask the user for the title, learning outcome, and reading level.
-2.  **Get the Book ID:** The `create_book` tool will return a book object. You MUST extract the `id` from this object to use in the next steps.
-3.  **Create Chapters:** For each chapter in the story, use the `create_chapter` tool. You will need the `book_id` from the previous step.
-4.  **Get Chapter IDs:** The `create_chapter` tool will return a chapter object. You MUST extract the `id` for each chapter.
-5.  **Create Pages:** For each page within a chapter, use the `create_page` tool. You will need both the `book_id` and the `chapter_id`.
-6.  **Generate Images (Optional):** After creating a page, you can use the `generate_page_image` tool to create an illustration for it. The user may ask for this.
+Your available capabilities include:
+- **Create the Book**: use `create_book`
+- **Update a Book**: use `update_book`
+- **Delete a Book**: use `delete_book`
+- **Create Chapters**: use `create_chapter`
+- **Update or Delete Chapters**: use `update_chapter` or `delete_chapter`
+- **Create Pages**: use `create_page`
+- **Update or Delete Pages**: use `update_page` or `delete_page`
+- **Generate Images**: use `generate_page_image`
+- **List Chapters**: use `list_chapters`
+- **List Pages**: use `list_pages`
 
-Always confirm with the user before creating content, and remember to extract the IDs from the results of the `create` tools to use them in subsequent steps.
+When creating or updating a book, the **reading level** must be selected from the following options:
+`"7th grade"`, `"8th grade"`, `"9th grade"`, `"10th grade"`, `"11th grade"`, `"12th grade"`.
+
+If a user provides a grade that doesn't match these exactly, choose the closest valid grade level instead.
+
+Always confirm with the user before creating or editing content, and remember to extract the IDs from the results of `create_` tools to use them in subsequent steps.
 """
 # Warning: Brittle - None type will break this when it's injected into the state for the tool call, and it silently fails. So if it doesn't map state types properly from the frontend, it will break. (must be exactly what's defined here).
 
@@ -75,6 +82,56 @@ async def list_books(
 
     return {'toolname': 'list_books', 'tool args': {}, "tool_output": result}
 
+@tool
+async def list_chapters(
+    state: Annotated[dict, InjectedState],
+    book_id: int,
+) -> str:
+    """
+    Lists all chapters for the given book ID.
+    """
+    logger.info(f"Listing chapters for book {book_id}")
+    api_token = state.get("api_token")
+    if not api_token:
+        return "Error: api_token is required but not provided in state."
+
+    result = await make_api_request_to_llamapress(
+        method="GET",
+        endpoint=f"/books/{book_id}/chapters.json",
+        api_token=api_token,
+    )
+
+    if isinstance(result, str):
+        return result
+    
+    return {'toolname': 'list_chapters', 'tool args': {'book_id': book_id}, "tool_output": result}
+
+
+@tool
+async def list_pages(
+    state: Annotated[dict, InjectedState],
+    book_id: int,
+    chapter_id: int,
+) -> str:
+    """
+    Lists all pages within a given chapter.
+    """
+    logger.info(f"Listing pages for chapter {chapter_id} in book {book_id}")
+    api_token = state.get("api_token")
+    if not api_token:
+        return "Error: api_token is required but not provided in state."
+
+    result = await make_api_request_to_llamapress(
+        method="GET",
+        endpoint=f"/books/{book_id}/chapters/{chapter_id}/pages.json",
+        api_token=api_token,
+    )
+
+    if isinstance(result, str):
+        return result
+    
+    return {'toolname': 'list_pages', 'tool args': {'book_id': book_id, 'chapter_id': chapter_id}, "tool_output": result}
+
 
 @tool
 async def create_book(
@@ -105,7 +162,7 @@ async def create_book(
         method="POST",
         endpoint="/books.json",
         api_token=api_token,
-        data=book_data,
+        payload=book_data,
     )
 
     if isinstance(result, str):
@@ -143,7 +200,7 @@ async def create_chapter(
         method="POST",
         endpoint=f"/books/{book_id}/chapters.json",
         api_token=api_token,
-        data=chapter_data,
+        payload=chapter_data,
     )
 
     if isinstance(result, str):
@@ -176,7 +233,7 @@ async def create_page(
         method="POST",
         endpoint=f"/books/{book_id}/chapters/{chapter_id}/pages.json",
         api_token=api_token,
-        data=page_data,
+        payload=page_data,
     )
 
     if isinstance(result, str):
@@ -214,8 +271,212 @@ async def generate_page_image(
     return {'toolname': 'generate_page_image', 'tool args': {'page_id': page_id}, "tool_output": result}
 
 
+@tool
+async def delete_book(
+    state: Annotated[dict, InjectedState],
+    book_id: int,
+) -> str:
+    """
+    Deletes a specific book by ID.
+    """
+    logger.info(f"Deleting book {book_id}")
+    api_token = state.get("api_token")
+    if not api_token:
+        return "Error: api_token is required but not provided in state."
+    
+    result = await make_api_request_to_llamapress(
+        method="DELETE",
+        endpoint=f"/books/{book_id}.json",
+        api_token=api_token,
+    )
+    if isinstance(result, str):
+        return result
+    return {'toolname': 'delete_book', 'tool args': {'book_id': book_id}, 'tool_output': result}
+
+
+@tool
+async def delete_chapter(
+    state: Annotated[dict, InjectedState],
+    book_id: int,
+    chapter_id: int,
+) -> str:
+    """
+    Deletes a specific chapter by ID within a book.
+    """
+    logger.info(f"Deleting chapter {chapter_id} from book {book_id}")
+    api_token = state.get("api_token")
+    if not api_token:
+        return "Error: api_token is required but not provided in state."
+    
+    result = await make_api_request_to_llamapress(
+        method="DELETE",
+        endpoint=f"/books/{book_id}/chapters/{chapter_id}.json",
+        api_token=api_token,
+    )
+    if isinstance(result, str):
+        return result
+    return {'toolname': 'delete_chapter', 'tool args': {'chapter_id': chapter_id}, 'tool_output': result}
+
+
+@tool
+async def delete_page(
+    state: Annotated[dict, InjectedState],
+    book_id: int,
+    chapter_id: int,
+    page_id: int,
+) -> str:
+    """
+    Deletes a specific page by ID within a chapter.
+    """
+    logger.info(f"Deleting page {page_id} from chapter {chapter_id}")
+    api_token = state.get("api_token")
+    if not api_token:
+        return "Error: api_token is required but not provided in state."
+    
+    result = await make_api_request_to_llamapress(
+        method="DELETE",
+        endpoint=f"/books/{book_id}/chapters/{chapter_id}/pages/{page_id}.json",
+        api_token=api_token,
+    )
+    if isinstance(result, str):
+        return result
+    return {'toolname': 'delete_page', 'tool args': {'page_id': page_id}, 'tool_output': result}
+
+
+@tool
+async def update_book(
+    state: Annotated[dict, InjectedState],
+    book_id: int,
+    title: str = None,
+    learning_outcome: str = None,
+    reading_level: str = None,
+) -> str:
+    """
+    Updates a book's attributes (title, learning outcome, reading level).
+    Any combination of these fields may be provided.
+    """
+    logger.info(f"Updating book {book_id}")
+    api_token = state.get("api_token")
+    if not api_token:
+        return "Error: api_token is required but not provided in state."
+
+    payload = {"book": {}}
+    if title:
+        payload["book"]["title"] = title
+    if learning_outcome:
+        payload["book"]["learning_outcome"] = learning_outcome
+    if reading_level:
+        payload["book"]["reading_level"] = reading_level
+
+    result = await make_api_request_to_llamapress(
+        method="PUT",
+        endpoint=f"/books/{book_id}.json",
+        api_token=api_token,
+        payload=payload,
+    )
+
+    if isinstance(result, str):
+        return result
+    return {
+        'toolname': 'update_book',
+        'tool args': {'book_id': book_id},
+        'tool_output': result
+    }
+
+
+@tool
+async def update_chapter(
+    state: Annotated[dict, InjectedState],
+    book_id: int,
+    chapter_id: int,
+    title: str = None,
+    description: str = None,
+) -> str:
+    """
+    Updates a specific chapter by ID within a book.
+    Only provided fields (title, description) will be updated.
+    """
+    logger.info(f"Updating chapter {chapter_id} in book {book_id}")
+
+    api_token = state.get("api_token")
+    if not api_token:
+        return "Error: api_token is required but not provided in state."
+
+    # Build payload dynamically
+    chapter_data = {"chapter": {}}
+    if title:
+        chapter_data["chapter"]["title"] = title
+    if description:
+        chapter_data["chapter"]["description"] = description
+
+    if not chapter_data["chapter"]:
+        return "Error: No fields provided to update."
+
+    result = await make_api_request_to_llamapress(
+        method="PUT",
+        endpoint=f"/books/{book_id}/chapters/{chapter_id}.json",
+        api_token=api_token,
+        payload=chapter_data,
+    )
+
+    if isinstance(result, str):
+        return result
+
+    return {
+        "toolname": "update_chapter",
+        "tool args": {"book_id": book_id, "chapter_id": chapter_id},
+        "tool_output": result,
+    }
+
+@tool
+async def update_page(
+    state: Annotated[dict, InjectedState],
+    book_id: int,
+    chapter_id: int,
+    page_id: int,
+    content: str = None,
+) -> str:
+    """
+    Updates a specific page by ID within a chapter.
+    Only provided fields (content) will be updated.
+    """
+    logger.info(f"Updating page {page_id} in chapter {chapter_id} of book {book_id}")
+
+    api_token = state.get("api_token")
+    if not api_token:
+        return "Error: api_token is required but not provided in state."
+
+    # Build payload dynamically
+    page_data = {"page": {}}
+    if content:
+        page_data["page"]["content"] = content
+
+    if not page_data["page"]:
+        return "Error: No fields provided to update."
+
+    result = await make_api_request_to_llamapress(
+        method="PUT",
+        endpoint=f"/books/{book_id}/chapters/{chapter_id}/pages/{page_id}.json",
+        api_token=api_token,
+        payload=page_data,
+    )
+
+    if isinstance(result, str):
+        return result
+
+    return {
+        "toolname": "update_page",
+        "tool args": {
+            "book_id": book_id,
+            "chapter_id": chapter_id,
+            "page_id": page_id,
+        },
+        "tool_output": result,
+    }
+
+# breakpoint()
 # Global tools list
-tools = [list_books, create_book, create_chapter, create_page, generate_page_image]
+tools = [list_books, create_book, create_chapter, create_page, generate_page_image, delete_book, delete_chapter, delete_page, update_book, update_chapter, update_page, list_chapters, list_pages]
 
 # Node
 def leo(state: LlamaPressState):
@@ -248,7 +509,7 @@ def build_workflow(checkpointer=None):
 
     return react_graph
 
-    graph = build_workflow()
+graph = build_workflow()
 
 # Initialize state with token + prompt
 initial_state = LlamaPressState(

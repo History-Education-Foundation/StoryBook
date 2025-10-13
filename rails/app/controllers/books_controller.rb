@@ -2,8 +2,9 @@ class BooksController < ApplicationController
   include LlamaBotRails::ControllerExtensions
   include LlamaBotRails::AgentAuth
   before_action :authenticate_user!, except: [:public_show]
+  skip_before_action :verify_authenticity_token, if: -> { request.format.json? }
 
-  llama_bot_allow :index, :create, :update, :generate_all_pictures
+  llama_bot_allow :index, :create, :update, :destroy, :generate_all_pictures
 
   def index
     @books = current_user.books.all
@@ -21,12 +22,17 @@ class BooksController < ApplicationController
   def create
     @book = current_user.books.new(book_params)
     @book.status = "Draft"
-    if @book.save
-      redirect_to books_path, notice: 'Book was successfully created.'
-    else
-      render :new, status: :unprocessable_entity
+  
+    respond_to do |format|
+      if @book.save
+        format.html { redirect_to books_path, notice: 'Book was successfully created.' }
+        format.json { render json: @book, status: :created }  # ✅ add this
+      else
+        format.html { render :new, status: :unprocessable_entity }
+        format.json { render json: @book.errors, status: :unprocessable_entity }  # ✅ add this
+      end
     end
-  end
+  end  
 
   def edit
     @book = current_user.books.find(params[:id])
@@ -37,17 +43,31 @@ class BooksController < ApplicationController
 
   def update
     @book = current_user.books.find(params[:id])
-    if @book.update(book_params)
-      redirect_to books_path, notice: 'Book was successfully updated.'
-    else
-      render :edit, status: :unprocessable_entity
+  
+    respond_to do |format|
+      if @book.update(book_params)
+        format.html { redirect_to books_path, notice: 'Book was successfully updated.' }
+        format.json { render json: @book, status: :ok }  # ✅ JSON success
+      else
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: @book.errors, status: :unprocessable_entity }  # ✅ JSON failure
+      end
     end
   end
 
   def destroy
     @book = current_user.books.find(params[:id])
-    @book.destroy
-    redirect_to books_path, notice: 'Book was successfully deleted.'
+    if @book.destroy
+      respond_to do |format|
+        format.html { redirect_to books_path, notice: 'Book was successfully deleted.' }
+        format.json { render json: { message: 'Book was successfully deleted.', book: @book }, status: :ok }
+      end
+    else
+      respond_to do |format|
+        format.html { redirect_to books_path, alert: 'Failed to delete book.' }
+        format.json { render json: { errors: @book.errors }, status: :unprocessable_entity }
+      end
+    end
   end
 
   def public_show

@@ -2,11 +2,17 @@ class ChaptersController < ApplicationController
   include LlamaBotRails::ControllerExtensions
   include LlamaBotRails::AgentAuth
   before_action :set_book
+  skip_before_action :verify_authenticity_token, if: -> { request.format.json? }
 
-  llama_bot_allow :create, :update
+  llama_bot_allow :index, :create, :update, :destroy
 
   def index
-    @chapters = @book.chapters
+    @chapters = @book.chapters.order(:created_at)
+
+    respond_to do |format|
+      format.html
+      format.json { render json: @chapters }
+    end
   end
 
   def new
@@ -15,10 +21,15 @@ class ChaptersController < ApplicationController
 
   def create
     @chapter = @book.chapters.new(chapter_params)
-    if @chapter.save
-      redirect_to book_chapters_path(@book), notice: 'Chapter was successfully created.'
-    else
-      render :new, status: :unprocessable_entity
+
+    respond_to do |format|
+      if @chapter.save
+        format.html { redirect_to book_chapters_path(@book), notice: 'Chapter was successfully created.' }
+        format.json { render json: @chapter, status: :created } # ✅ JSON success
+      else
+        format.html { render :new, status: :unprocessable_entity }
+        format.json { render json: @chapter.errors, status: :unprocessable_entity } # ✅ JSON failure
+      end
     end
   end
 
@@ -28,17 +39,31 @@ class ChaptersController < ApplicationController
 
   def update
     @chapter = @book.chapters.find(params[:id])
-    if @chapter.update(chapter_params)
-      redirect_to book_chapters_path(@book), notice: 'Chapter was successfully updated.'
-    else
-      render :edit, status: :unprocessable_entity
+  
+    respond_to do |format|
+      if @chapter.update(chapter_params)
+        format.html { redirect_to book_chapters_path(@book), notice: 'Chapter was successfully updated.' }
+        format.json { render json: @chapter, status: :ok }  # ✅ JSON success
+      else
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: @chapter.errors, status: :unprocessable_entity }  # ✅ JSON failure
+      end
     end
   end
 
   def destroy
     @chapter = @book.chapters.find(params[:id])
-    @chapter.destroy
-    redirect_to book_chapters_path(@book), notice: 'Chapter was successfully deleted.'
+    if @chapter.destroy
+      respond_to do |format|
+        format.html { redirect_to book_chapters_path(@book), notice: 'Chapter was successfully deleted.' }
+        format.json { render json: { message: 'Chapter was successfully deleted.', chapter: @chapter }, status: :ok }
+      end
+    else
+      respond_to do |format|
+        format.html { redirect_to book_chapters_path(@book), alert: 'Failed to delete chapter.' }
+        format.json { render json: { errors: @chapter.errors }, status: :unprocessable_entity }
+      end
+    end
   end
 
   private

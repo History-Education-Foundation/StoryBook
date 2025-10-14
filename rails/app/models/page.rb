@@ -18,21 +18,30 @@ class Page < ApplicationRecord
     Rails.logger.info("[generate_picture] Page #{id} (content=#{content.inspect}) - replace_existing: #{replace_existing}")
     chapter_title = chapter.title.to_s.strip
     return :skipped if image.attached? && !replace_existing
+    chapter = self.chapter
+    book = chapter.book
+    book_title = book.title.to_s.strip
+    book_level = book.reading_level.to_s.strip
+    learning_objective = book.learning_outcome.to_s.strip
+    previous_pages = chapter.pages.order(:id).map { |p| p.content.to_s }.join("\n")
     if book_title && book_level && learning_objective && previous_pages
-      prompt = "This is the page content from a picture book, please generate an appropriate image that matches the content on the page. " \
+      prompt = "This is the page content from a picture book, please generate a very detailed and appropriate prompt to generate an image that matches the content on the page and learning outcomes for the book. " \
               "This book/chapter theme is: <CHAPTER_TITLE> #{chapter_title} </CHAPTER_TITLE>. " \
               "Here is the Book's title: <BOOK_TITLE> #{book_title} </BOOK_TITLE>, " \
               "Here is the book's target reading level: <TARGET_LEVEL> #{book_level} </TARGET_LEVEL>, " \
               "here is the book's subtitle/lesson objective: <LEARNING_OBJECTIVE> #{learning_objective} </LEARNING_OBJECTIVE>, " \
               "and here is all of the previous page's contents up to this page: <PREVIOUS_PAGE_CONTENT> #{previous_pages} </PREVIOUS_PAGE_CONTENT> " \
               "Here is the current page content that we need to generate an image for: <PAGE> #{content} </PAGE>. " \
-              "Please ensure the image is historically and culturally accurate for any people created/portrayed."
+              "Please ensure the image is historically and culturally accurate for any people created/portrayed, including ethnicity, gender, and age. Do NOT include any additional commentary or text, JUST respond with the prompt that we will pass directly into the image generator."
     else
       prompt = "This is the page content from a picture book, please generate an appropriate image that matches the content on the page. Here is the page content: <PAGE> #{content} </PAGE>"
     end
     begin
+      prompt_from_openai = OpenAi.new.generate_text(prompt)
       image.purge if image.attached? && replace_existing
-      OpenAi.new.generate_image(prompt, attach_to: self, attachment_name: :image)
+      byebug
+      OpenAi.new.generate_image(prompt_from_openai, attach_to: self, attachment_name: :image)
+      # Runware.new.generate_image(prompt, attach_to: self, attachment_name: :image)
       Rails.logger.info("[generate_picture] SUCCESS for Page #{id}")
       :generated
     rescue => e

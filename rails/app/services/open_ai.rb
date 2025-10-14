@@ -76,6 +76,17 @@ class OpenAi
     file
   end
 
+  def generate_text(prompt)
+    uri = URI("#{OPENAI_API_URL}/chat/completions")
+    req = Net::HTTP::Post.new(uri, headers)
+    req.body = { model: "gpt-4.1", messages: [{ role: "user", content: prompt }] }.to_json
+
+    res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |http| http.request(req) }
+    raise "Text generation failed: #{res.code} #{res.body}" unless res.is_a?(Net::HTTPSuccess)
+
+    JSON.parse(res.body)["choices"][0]["message"]["content"]
+  end
+
   private
 
   def headers(extra = {})

@@ -6,8 +6,9 @@
 
 <% if @pages.any? %>
   <ul class="mt-6 grid gap-4">
-    <% @pages.each do |page| %>
+    <% @pages.each_with_index do |page, idx| %>
       <li class="bg-white rounded shadow p-4">
+    <span class="mr-2 text-gray-700">Page <%= idx + 1 %></span>
         <% if page.image.attached? %>
           <div class="mb-2">
             <%= image_tag url_for(page.image), class: "rounded border h-24 w-24 object-cover" %>

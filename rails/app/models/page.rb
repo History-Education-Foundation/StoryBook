@@ -18,12 +18,15 @@ class Page < ApplicationRecord
     Rails.logger.info("[generate_picture] Page #{id} (content=#{content.inspect}) - replace_existing: #{replace_existing}")
     chapter_title = chapter.title.to_s.strip
     return :skipped if image.attached? && !replace_existing
+  
     chapter = self.chapter
     book = chapter.book
     book_title = book.title.to_s.strip
     book_level = book.reading_level.to_s.strip
     learning_objective = book.learning_outcome.to_s.strip
     previous_pages = chapter.pages.order(:id).map { |p| p.content.to_s }.join("\n")
+  
+    # --- ORIGINAL PROMPT CONSTRUCTION ---
     if book_title && book_level && learning_objective && previous_pages
       prompt = "This is the page content from a picture book, please generate a very detailed and appropriate prompt to generate an image that matches the content on the page and learning outcomes for the book. " \
               "This book/chapter theme is: <CHAPTER_TITLE> #{chapter_title} </CHAPTER_TITLE>. " \
@@ -36,17 +39,28 @@ class Page < ApplicationRecord
     else
       prompt = "This is the page content from a picture book, please generate an appropriate image that matches the content on the page. Here is the page content: <PAGE> #{content} </PAGE>"
     end
+  
     begin
-      prompt_from_openai = OpenAi.new.generate_text(prompt)
+      # --- FIRST PASS: SAME AS BEFORE ---
+      raw_prompt = OpenAi.new.generate_text(prompt)
+  
+      # --- NEW INTERMEDIATE REFINEMENT ---
+      refined_prompt = OpenAi.new.generate_text(
+        "Rewrite the following into a high-quality AI image generation prompt. " \
+        "Use objective, descriptive language focused only on what is visually in the scene. " \
+        "No story-style narration, no commentary, no instructions like 'generate' or 'create'.\n\n#{raw_prompt}"
+      )
+  
+      # --- FINAL IMAGE CALL (UNCHANGED) ---
       image.purge if image.attached? && replace_existing
-      byebug
-      OpenAi.new.generate_image(prompt_from_openai, attach_to: self, attachment_name: :image)
-      # Runware.new.generate_image(prompt, attach_to: self, attachment_name: :image)
-      Rails.logger.info("[generate_picture] SUCCESS for Page #{id}")
+      OpenAi.new.generate_image(refined_prompt, attach_to: self, attachment_name: :image)
+  
+      Rails.logger.info("[generate_picture] SUCCESS for Page #{id} with refined prompt")
       :generated
+  
     rescue => e
       Rails.logger.error("AI image generation failed for Page #{id}: #{e.message}")
       :failed
     end
-  end
+  end  
 end

@@ -10,9 +10,10 @@
 
 <% if @chapters.any? %>
   <ul class="mt-6 grid gap-4">
-    <% @chapters.each do |chapter| %>
+    <% @chapters.each_with_index do |chapter, idx| %>
       <li class="bg-white rounded shadow p-4">
         <h2 class="text-lg font-bold mb-1">
+          <span class="mr-2 text-gray-700">Chapter <%= idx + 1 %></span>
           <%= link_to chapter.title, book_chapter_pages_path(@book, chapter), class: "hover:underline text-purple-700" %>
         </h2>
         <div class="mb-1 text-sm">Description: <%= chapter.description.presence || 'n/a' %></div>

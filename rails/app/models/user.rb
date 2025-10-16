@@ -27,6 +27,8 @@ class User < ApplicationRecord
 
   def student?
     role == "student"
+  end
+
   before_create :generate_api_token
 
   private

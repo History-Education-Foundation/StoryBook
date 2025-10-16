@@ -18,7 +18,7 @@ class OpenAi
   def generate_image(prompt, size: "1024x1024", attach_to: nil, attachment_name: nil)
     uri = URI("#{OPENAI_API_URL}/images/generations")
     req = Net::HTTP::Post.new(uri, headers)
-    req.body = { model: "gpt-image-1", prompt: prompt, size: size, response_format: "b64_json" }.to_json
+    req.body = { model: "dall-e-3", prompt: prompt, size: size, response_format: "b64_json" }.to_json
 
     res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |http| http.request(req) }
     raise "Image generation failed: #{res.code} #{res.body}" unless res.is_a?(Net::HTTPSuccess)

@@ -10,13 +10,19 @@ See the starting rails project and base image here: https://github.com/kodykenda
 
 ---
 
-## Quick Start:  
+## Quick Start for Devs:  
 ```
-git clone https://github.com/kodykendall/Leonardo && cd Leonardo && cp .env.example .env && cp .env.example .env.rails && docker compose -f docker-compose-dev.yml up -d 
+curl -fsSL "https://raw.githubusercontent.com/KodyKendall/Leonardo/refs/heads/main/bin/install/dev" -o install_leonardo_local.sh && bash install_leonardo_local.sh
+```
+
+## Quick Start Dev
+```
+clone your repo
+bash bin/dev
+open localhost:8000
 ```
 
 ## Repository Layout
-
 ```
 leonardo/
   docker-compose.yml        # Base compose definition (services, volumes)

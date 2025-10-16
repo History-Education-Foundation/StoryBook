@@ -43,9 +43,23 @@ Rails.application.routes.draw do
   root "books#library"
   get "home" => "public#home"
   # root "public#home"
+  root "public#home"
   # root "prototypes#show", page: "home"
   get "home" => "public#home"
   get "chat" => "public#chat"
+
+  namespace :admin do
+    root to: "dashboard#index"
+    
+    resources :users do
+      member do
+        post :impersonate
+      end
+    end
+  end
+  
+  post "/stop_impersonating", to: "application#stop_impersonating"
+
 
   get "/prototypes/*page", to: "prototypes#show"
   # Defines the root path route ("/")

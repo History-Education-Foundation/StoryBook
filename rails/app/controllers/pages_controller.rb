@@ -8,11 +8,17 @@ class PagesController < ApplicationController
   llama_bot_allow :index, :create, :update, :destroy, :generate_image
 
   def index
-    @pages = @chapter.pages
+    @pages = @chapter.pages.order(:id)
 
     respond_to do |format|
       format.html
-      format.json { render json: @pages }
+      format.json {
+        # Add page numbers to each page (1-indexed)
+        pages_with_numbers = @pages.map.with_index(1) do |page, index|
+          page.as_json.merge(page_number: index)
+        end
+        render json: pages_with_numbers
+      }
     end
   end
 

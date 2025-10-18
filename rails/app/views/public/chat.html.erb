@@ -86,6 +86,7 @@
   let connectionCheckInterval;
   let subscription = null;
   let lastToolCallArgs = {}; // Store tool call arguments to use when displaying results
+  let processedMessageIds = new Set(); // Track processed messages to prevent duplicates
 
   function waitForCableConnection(callback) {
     const interval = setInterval(() => {
@@ -113,6 +114,32 @@
       received(data) {
         const parsedData = JSON.parse(data).message;
         console.log("LLM Response:", parsedData);
+
+        // Create a unique ID for this message to prevent duplicates
+        // Use multiple fields to ensure uniqueness: id + type + name (for tools) + tool_call_id + content hash
+        const toolName = parsedData.base_message?.name || '';
+        const toolCallId = parsedData.base_message?.tool_call_id || '';
+        const additionalKwargs = parsedData.base_message?.additional_kwargs?.tool_calls?.[0]?.id || '';
+        const contentPreview = parsedData.content ? parsedData.content.substring(0, 100) : '';
+        const messageId = parsedData.base_message?.id
+          ? `${parsedData.base_message.id}_${parsedData.type}_${toolName}_${toolCallId}_${additionalKwargs}`
+          : `${parsedData.type}_${contentPreview}_${Date.now()}`;
+
+        // Check if we've already processed this message
+        if (processedMessageIds.has(messageId)) {
+          console.log('⚠️ Duplicate message detected, skipping:', messageId);
+          return;
+        }
+
+        // Mark this message as processed
+        processedMessageIds.add(messageId);
+
+        // Clean up old message IDs (keep last 100)
+        if (processedMessageIds.size > 100) {
+          const idsArray = Array.from(processedMessageIds);
+          processedMessageIds = new Set(idsArray.slice(-100));
+        }
+
         switch (parsedData.type) {
           case "AIMessageChunk":
             //NOTE: DISABLE AI Message Chunk for now so that we don't double add messages on accident.

@@ -111,7 +111,8 @@
         <!-- Mobile menu, show/hide based on menu state. -->
         <div class="sm:hidden" id="mobile-menu" data-menu-target="mobileMenu">
           <div class="space-y-1 pb-3 pt-2">
-            <%= link_to "Home", root_path, class: "block border-l-4 border-indigo-500 bg-indigo-50 py-2 pl-3 pr-4 text-base font-medium text-indigo-700" %>
+              <%= link_to "Home", root_path, class: "block border-l-4 border-indigo-500 bg-indigo-50 py-2 pl-3 pr-4 text-base font-medium text-indigo-700" %>
+              <%= link_to "Chat with AI", "/chat", class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-blue-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-900" %>
             <% if user_signed_in? %>
   <%= link_to "Users", users_path, class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700" %>
 <% else %>

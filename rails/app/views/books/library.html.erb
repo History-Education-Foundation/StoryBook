@@ -3,6 +3,8 @@
 <div class="flex gap-2 mb-6">
   <%= link_to "All Books", library_books_path, class: "px-4 py-2 rounded font-semibold #{params[:filter] != 'liked' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}" %>
   <%= link_to "Liked Books", library_books_path(filter: :liked), class: "px-4 py-2 rounded font-semibold #{params[:filter] == 'liked' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}" %>
+  <%= link_to "My Books", books_path, class: "px-4 py-2 rounded font-semibold bg-gray-200 text-gray-700" %>
+  <%= link_to "All Books (Published)", library_books_path, class: "px-4 py-2 rounded font-semibold bg-gray-200 text-gray-700" %>
 </div>
 
 <% liked_ids = current_user.saved_books_library.pluck(:id) %>

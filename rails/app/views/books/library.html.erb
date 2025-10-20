@@ -1,10 +1,22 @@
 <% content_for :header, "My Library" %>
 
-<div class="flex gap-2 mb-6">
+<!-- Desktop navigation -->
+<div class="hidden md:flex gap-2 mb-6">
   <%= link_to "All Books", library_books_path, class: "px-4 py-2 rounded font-semibold #{params[:filter] != 'liked' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}" %>
   <%= link_to "Liked Books", library_books_path(filter: :liked), class: "px-4 py-2 rounded font-semibold #{params[:filter] == 'liked' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}" %>
-  <%= link_to "My Books", books_path, class: "px-4 py-2 rounded font-semibold bg-gray-200 text-gray-700" %>
-  <%= link_to "All Books (Published)", library_books_path, class: "px-4 py-2 rounded font-semibold bg-gray-200 text-gray-700" %>
+</div>
+
+<!-- Mobile burger menu -->
+<div class="md:hidden mb-6">
+  <div class="dropdown">
+    <label tabindex="0" class="btn btn-ghost">
+      <i class="fas fa-bars text-2xl"></i>
+    </label>
+    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+      <li><%= link_to "All Books", library_books_path, class: "#{params[:filter] != 'liked' ? 'font-bold' : ''}" %></li>
+      <li><%= link_to "Liked Books", library_books_path(filter: :liked), class: "#{params[:filter] == 'liked' ? 'font-bold' : ''}" %></li>
+    </ul>
+  </div>
 </div>
 
 <% liked_ids = current_user.saved_books_library.pluck(:id) %>

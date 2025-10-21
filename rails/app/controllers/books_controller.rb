@@ -94,6 +94,7 @@ class BooksController < ApplicationController
   end
 
   def reader
+    @hide_navbar = true
     @book = Book.find(params[:id])
     allowed =
       (current_user.student? && current_user.saved_books_library.exists?(id: @book.id)) ||

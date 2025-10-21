@@ -1,0 +1,53 @@
+<% content_for :header do %>
+  About Us
+<% end %>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="prose prose-lg max-w-none">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold text-gray-900 mb-4">Our Story</h2>
+      <p class="text-lg text-gray-600">Building the future of digital reading</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+      <h3 class="text-2xl font-bold text-gray-900 mb-4">Who We Are</h3>
+      <p class="text-gray-700 mb-4">
+        We are a passionate team dedicated to creating an exceptional reading experience for everyone. 
+        Our platform brings together the best of technology and storytelling to help readers discover, 
+        create, and share amazing books.
+      </p>
+      <p class="text-gray-700">
+        Whether you're a student, educator, or lifelong learner, our mission is to make reading 
+        more accessible, engaging, and enjoyable for all.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6 mb-8">
+      <div class="text-center p-6 bg-gray-50 rounded-lg">
+        <div class="text-4xl mb-3"><i class="fas fa-book text-indigo-600"></i></div>
+        <h4 class="font-bold text-lg mb-2">Rich Library</h4>
+        <p class="text-gray-600 text-sm">Access thousands of books across all genres and reading levels</p>
+      </div>
+      
+      <div class="text-center p-6 bg-gray-50 rounded-lg">
+        <div class="text-4xl mb-3"><i class="fas fa-pencil text-indigo-600"></i></div>
+        <h4 class="font-bold text-lg mb-2">Create & Share</h4>
+        <p class="text-gray-600 text-sm">Publish your own books and share them with the community</p>
+      </div>
+      
+      <div class="text-center p-6 bg-gray-50 rounded-lg">
+        <div class="text-4xl mb-3"><i class="fas fa-users text-indigo-600"></i></div>
+        <h4 class="font-bold text-lg mb-2">Community</h4>
+        <p class="text-gray-600 text-sm">Join a vibrant community of readers and creators</p>
+      </div>
+    </div>
+
+    <div class="bg-indigo-50 rounded-lg p-8 text-center">
+      <h3 class="text-2xl font-bold text-gray-900 mb-4">Get in Touch</h3>
+      <p class="text-gray-700 mb-6">
+        Have questions or feedback? We'd love to hear from you.
+      </p>
+      <%= link_to "Contact Us", new_user_registration_path, class: "btn btn-primary" %>
+    </div>
+  </div>
+</div>

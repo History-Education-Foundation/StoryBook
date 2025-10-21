@@ -1,0 +1,57 @@
+<% content_for :header do %>
+  Pricing
+<% end %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="text-center mb-12">
+    <h2 class="text-3xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h2>
+    <p class="text-lg text-gray-600">Choose the plan that's right for you</p>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-8 mb-12">
+    <!-- Free Plan -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h3 class="card-title text-2xl mb-2">Free</h3>
+        <p class="text-4xl font-bold mb-4">$0<span class="text-lg font-normal text-gray-500">/month</span></p>
+        <ul class="space-y-3 mb-6">
+          <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Access to public books</li>
+          <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Basic reading features</li>
+          <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Save up to 5 books</li>
+        </ul>
+        <%= link_to "Get Started", new_user_registration_path, class: "btn btn-outline btn-primary w-full" %>
+      </div>
+    </div>
+
+    <!-- Pro Plan -->
+    <div class="card bg-base-100 shadow-xl border-2 border-primary">
+      <div class="badge badge-primary absolute top-4 right-4">Popular</div>
+      <div class="card-body">
+        <h3 class="card-title text-2xl mb-2">Pro</h3>
+        <p class="text-4xl font-bold mb-4">$9<span class="text-lg font-normal text-gray-500">/month</span></p>
+        <ul class="space-y-3 mb-6">
+          <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Everything in Free</li>
+          <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Create unlimited books</li>
+          <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Advanced editing tools</li>
+          <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Priority support</li>
+        </ul>
+        <%= link_to "Start Free Trial", new_user_registration_path, class: "btn btn-primary w-full" %>
+      </div>
+    </div>
+
+    <!-- Enterprise Plan -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h3 class="card-title text-2xl mb-2">Enterprise</h3>
+        <p class="text-4xl font-bold mb-4">Custom</p>
+        <ul class="space-y-3 mb-6">
+          <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Everything in Pro</li>
+          <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Custom integrations</li>
+          <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Dedicated support</li>
+          <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> SLA guarantee</li>
+        </ul>
+        <%= link_to "Contact Sales", about_path, class: "btn btn-outline w-full" %>
+      </div>
+    </div>
+  </div>
+</div>

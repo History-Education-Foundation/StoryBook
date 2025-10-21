@@ -21,49 +21,51 @@
 </button>
 
 <!-- Chat Bubble Container -->
-<div id="chat-bubble-container" class="fixed bottom-24 right-6 w-96 h-[600px] bg-white shadow-2xl rounded-lg z-50 hidden flex-col">
-  <!-- Chat Header -->
-  <div class="flex items-center justify-between border-b p-4 bg-indigo-600 text-white rounded-t-lg">
-    <div class="flex items-center space-x-3">
-      <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaBot Logo" class="h-8 w-8">
-      <div id="connectionStatusIconForLlamaBot" class="h-3 w-3 rounded-full bg-yellow-400"></div>
-      <h1 class="text-lg font-bold">Leo the Llama</h1>
+<div id="chat-bubble-container" class="fixed bottom-20 right-4 w-96 bg-white shadow-2xl rounded-lg z-50 hidden" style="height: 500px; max-height: calc(100vh - 120px); display: none;">
+  <div class="flex flex-col h-full">
+    <!-- Chat Header -->
+    <div class="flex items-center justify-between border-b p-4 bg-indigo-600 text-white rounded-t-lg flex-shrink-0">
+      <div class="flex items-center space-x-3">
+        <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaBot Logo" class="h-8 w-8">
+        <div id="connectionStatusIconForLlamaBot" class="h-3 w-3 rounded-full bg-yellow-400"></div>
+        <h1 class="text-lg font-bold">Leo the Llama</h1>
+      </div>
+      <button id="chat-bubble-close" class="hover:bg-indigo-700 rounded-full p-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
-    <button id="chat-bubble-close" class="hover:bg-indigo-700 rounded-full p-1">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    </button>
-  </div>
 
-  <!-- Chat Messages -->
-  <div id="chat-messages" class="flex-grow overflow-y-auto p-4 space-y-4 bg-gray-50">
-    <!-- Messages will be added here dynamically -->
-  </div>
-  
-  <!-- Loading Indicator -->
-  <div id="loading-indicator" class="hidden p-4 text-center bg-gray-50">
-    <span class="inline-flex items-center text-gray-600">
-      Leo is thinking<span class="loading-dots"></span>
-    </span>
-  </div>
-  
-  <!-- Suggested Prompts -->
-  <div id="suggested-prompts" class="p-3 border-t border-gray-200 bg-white">
-    <div class="text-xs text-gray-600 mb-2">Quick actions:</div>
-    <div class="space-y-2">
-      <div class="flex flex-wrap gap-1">
-        <button onclick="selectPrompt(this)" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">List all my books</button>
-        <button onclick="selectPrompt(this)" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Create a new book</button>
-        <button onclick="selectPrompt(this)" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Add a chapter</button>
+    <!-- Chat Messages -->
+    <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 min-h-0">
+      <!-- Messages will be added here dynamically -->
+    </div>
+    
+    <!-- Loading Indicator -->
+    <div id="loading-indicator" class="hidden p-4 text-center bg-gray-50 flex-shrink-0">
+      <span class="inline-flex items-center text-gray-600">
+        Leo is thinking<span class="loading-dots"></span>
+      </span>
+    </div>
+    
+    <!-- Suggested Prompts -->
+    <div id="suggested-prompts" class="p-3 border-t border-gray-200 bg-white flex-shrink-0">
+      <div class="text-xs text-gray-600 mb-2">Quick actions:</div>
+      <div class="space-y-2">
+        <div class="flex flex-wrap gap-1">
+          <button onclick="selectPrompt(this)" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">List all my books</button>
+          <button onclick="selectPrompt(this)" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Create a new book</button>
+          <button onclick="selectPrompt(this)" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Add a chapter</button>
+        </div>
       </div>
     </div>
-  </div>
-  
-  <!-- Chat Input -->
-  <div class="border-t border-gray-200 p-3 flex bg-white rounded-b-lg">
-    <input type="text" id="message-input" class="flex-grow border rounded-l-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Type your message...">
-    <button onclick="sendMessage()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-r-lg text-sm">Send</button>
+    
+    <!-- Chat Input -->
+    <div class="border-t border-gray-200 p-3 flex bg-white rounded-b-lg flex-shrink-0">
+      <input type="text" id="message-input" class="flex-grow border rounded-l-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Type your message...">
+      <button onclick="sendMessage()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-r-lg text-sm">Send</button>
+    </div>
   </div>
 </div>
 
@@ -91,14 +93,16 @@
   // Chat bubble toggle functionality
   document.getElementById('chat-bubble-toggle').addEventListener('click', function() {
     const container = document.getElementById('chat-bubble-container');
-    container.classList.toggle('hidden');
-    container.classList.toggle('flex');
+    if (container.style.display === 'none' || container.style.display === '') {
+      container.style.display = 'block';
+    } else {
+      container.style.display = 'none';
+    }
   });
 
   document.getElementById('chat-bubble-close').addEventListener('click', function() {
     const container = document.getElementById('chat-bubble-container');
-    container.classList.add('hidden');
-    container.classList.remove('flex');
+    container.style.display = 'none';
   });
 
   function waitForCableConnection(callback) {
@@ -326,7 +330,7 @@
         return;
       } else {
         messageDiv.innerHTML = `
-          <div class="prose prose-sm max-w-none bg-white border border-gray-200 rounded-lg py-2 px-3 max-w-[80%] shadow-sm text-sm max-h-96 overflow-y-auto">
+          <div class="prose prose-sm max-w-none bg-white border border-gray-200 rounded-lg py-2 px-3 max-w-[80%] shadow-sm text-sm">
             ${parseMarkdown(text)}
           </div>
         `;
@@ -651,9 +655,21 @@
     @media (max-width: 640px) {
       #chat-bubble-container {
         width: calc(100vw - 2rem);
-        height: calc(100vh - 8rem);
+        height: calc(100vh - 10rem);
+        max-height: calc(100vh - 10rem);
+        left: 1rem;
         right: 1rem;
         bottom: 5rem;
+      }
+      
+      #chat-bubble-toggle {
+        bottom: 1.5rem;
+        right: 1.5rem;
+      }
+      
+      #chat-messages {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
       }
     }
   `;

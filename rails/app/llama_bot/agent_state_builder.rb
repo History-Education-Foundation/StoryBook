@@ -9,12 +9,17 @@ class AgentStateBuilder
   end
 
   def build
+
+    # TODO:  and make it so that in the websocket connection, change the agent name away from "leo" and change it to "leo-student"
+    # that way agent_name: "leo-student" gets passed is
+
     {
       message: @params["message"], # Rails param from JS/chat UI. This is the user's message to the agent.
       thread_id: @params["thread_id"], # This is the thread id for the agent. It is used to track the conversation history.
       api_token: @context["api_token"], # This is an authenticated API token for the agent, so that it can authenticate with us. (It may need access to resources on our Rails app, such as the Rails Console.)
       agent_prompt: LlamaBotRails.agent_prompt_text, # System prompt instructions for the agent. Can be customized in app/llama_bot/prompts/agent_prompt.txt
-      agent_name: "leo" # This routes to the appropriate LangGraph agent as defined in LlamaBot/langgraph.json, and enables us to access different agents on our LlamaBot server.
+      # agent_name: "leo" # This routes to the appropriate LangGraph agent as defined in LlamaBot/langgraph.json, and enables us to access different agents on our LlamaBot server.
+      agent_name: "llamapress"
     }
   end
 end

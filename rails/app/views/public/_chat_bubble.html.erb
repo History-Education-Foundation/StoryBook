@@ -117,6 +117,8 @@
   waitForCableConnection((consumer) => {
     const sessionId = crypto.randomUUID();
 
+    //TODO: this is where you can route to a new agent.
+    // subscription = consumer.subscriptions.create({channel: 'LlamaBotRails::ChatChannel', session_id: sessionId}, {
     subscription = consumer.subscriptions.create({channel: 'LlamaBotRails::ChatChannel', session_id: sessionId}, {
       connected() {
         console.log('Connected to chat channel');

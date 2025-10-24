@@ -31,7 +31,7 @@ services:
       - llama-network
 
   llamabot:
-    image: kody06/llamabot:0.2.18d
+    image: kody06/llamabot:0.2.19
     # build: ../LlamaBot
     env_file:
       - .env
@@ -40,11 +40,11 @@ services:
     # docker compose exec -it llamabot uvicorn main:app --host 0.0.0.0 --port 8000
     volumes:
       - auth_json:/app/auth.json
-      - ./langgraph/agents/leo/nodes.py:/app/app/agents/llamabot/nodes.py
-      - ./langgraph/langgraph.json:/app/app/langgraph.json
-      - ./rails:/app/app/rails
+      - ../LlamaBot/app:/app/app  # Dev: full mount for hot reload
+      - ./rails:/app/app/rails  # Override: Leonardo's Rails code
+      - ./langgraph/langgraph.json:/app/app/langgraph.json  # Override: merged config
+      - ./langgraph/agents:/app/app/user_agents  # Add: custom agents
       - /var/run/docker.sock:/var/run/docker.sock
-      # - ../LlamaBot/app:/app/app
     ports:
       - "8000:8000"
     depends_on:
@@ -80,7 +80,6 @@ services:
   code:
     image: kody06/llamabot-vscode:latest
     container_name: code
-    user: "1000:1000"  # ubuntu user id
     environment:
       - TZ=America/Denver
       - PASSWORD=password

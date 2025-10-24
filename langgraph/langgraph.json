@@ -2,6 +2,7 @@
   "dependencies": ["."],
   "graphs": {
     "leo": "./user_agents/leo/nodes.py:build_workflow",
+    "student": "./user_agents/student/nodes.py:build_workflow",
     "rails_agent": "./agents/rails_agent/nodes.py:build_workflow",
     "rails_ai_builder_agent": "./agents/rails_ai_builder_agent/nodes.py:build_workflow",
     "rails_frontend_starter_agent": "./agents/rails_frontend_starter_agent/nodes.py:build_workflow"

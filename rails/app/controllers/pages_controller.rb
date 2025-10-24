@@ -5,7 +5,7 @@ class PagesController < ApplicationController
   before_action :set_chapter
   skip_before_action :verify_authenticity_token, if: -> { request.format.json? }
 
-  llama_bot_allow :index, :create, :update, :destroy, :generate_image
+  llama_bot_allow :index, :show, :create, :update, :destroy, :generate_image
 
   def index
     @pages = @chapter.pages.order(:id)
@@ -19,6 +19,13 @@ class PagesController < ApplicationController
         end
         render json: pages_with_numbers
       }
+    end
+  end
+
+  def show
+    @page = @chapter.pages.find(params[:id])
+    respond_to do |format|
+      format.json { render json: @page }
     end
   end
 

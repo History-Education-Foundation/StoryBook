@@ -4,7 +4,7 @@ class ChaptersController < ApplicationController
   before_action :set_book
   skip_before_action :verify_authenticity_token, if: -> { request.format.json? }
 
-  llama_bot_allow :index, :create, :update, :destroy
+  llama_bot_allow :index, :show, :create, :update, :destroy
 
   def index
     @chapters = @book.chapters.order(:created_at)
@@ -12,6 +12,13 @@ class ChaptersController < ApplicationController
     respond_to do |format|
       format.html
       format.json { render json: @chapters }
+    end
+  end
+
+  def show
+    @chapter = @book.chapters.find(params[:id])
+    respond_to do |format|
+      format.json { render json: @chapter }
     end
   end
 

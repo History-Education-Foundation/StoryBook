@@ -57,23 +57,15 @@ async def get_book_details(
     if not api_token:
         return "Error: api_token is required but not provided in state."
 
-    # Get all books and find the one with matching ID
+    # Use the show endpoint to get a specific book
     result = await make_api_request_to_llamapress(
         method="GET",
-        endpoint="/books.json",
+        endpoint=f"/books/{book_id}.json",
         api_token=api_token,
     )
 
     if isinstance(result, str):
         return result
-
-    # Filter to find the specific book
-    if isinstance(result, list):
-        book = next((b for b in result if b.get('id') == book_id), None)
-        if book:
-            return {'tool_name': 'get_book_details', 'tool_args': {'book_id': book_id}, "tool_output": book}
-        else:
-            return f"Error: Book with ID {book_id} not found"
     
     return {'tool_name': 'get_book_details', 'tool_args': {'book_id': book_id}, "tool_output": result}
 
@@ -119,23 +111,15 @@ async def get_chapter_details(
     if not api_token:
         return "Error: api_token is required but not provided in state."
 
-    # Get all chapters for the book and find the specific one
+    # Use the show endpoint to get a specific chapter
     result = await make_api_request_to_llamapress(
         method="GET",
-        endpoint=f"/books/{book_id}/chapters.json",
+        endpoint=f"/books/{book_id}/chapters/{chapter_id}.json",
         api_token=api_token,
     )
 
     if isinstance(result, str):
         return result
-    
-    # Filter to find the specific chapter
-    if isinstance(result, list):
-        chapter = next((c for c in result if c.get('id') == chapter_id), None)
-        if chapter:
-            return {'tool_name': 'get_chapter_details', 'tool_args': {'book_id': book_id, 'chapter_id': chapter_id}, "tool_output": chapter}
-        else:
-            return f"Error: Chapter with ID {chapter_id} not found"
     
     return {'tool_name': 'get_chapter_details', 'tool_args': {'book_id': book_id, 'chapter_id': chapter_id}, "tool_output": result}
 
@@ -184,23 +168,15 @@ async def get_page_content(
     if not api_token:
         return "Error: api_token is required but not provided in state."
 
-    # Get all pages for the chapter and find the specific one
+    # Use the show endpoint to get a specific page
     result = await make_api_request_to_llamapress(
         method="GET",
-        endpoint=f"/books/{book_id}/chapters/{chapter_id}/pages.json",
+        endpoint=f"/books/{book_id}/chapters/{chapter_id}/pages/{page_id}.json",
         api_token=api_token,
     )
 
     if isinstance(result, str):
         return result
-    
-    # Filter to find the specific page
-    if isinstance(result, list):
-        page = next((p for p in result if p.get('id') == page_id), None)
-        if page:
-            return {'tool_name': 'get_page_content', 'tool_args': {'book_id': book_id, 'chapter_id': chapter_id, 'page_id': page_id}, "tool_output": page}
-        else:
-            return f"Error: Page with ID {page_id} not found"
     
     return {'tool_name': 'get_page_content', 'tool_args': {'book_id': book_id, 'chapter_id': chapter_id, 'page_id': page_id}, "tool_output": result}
 

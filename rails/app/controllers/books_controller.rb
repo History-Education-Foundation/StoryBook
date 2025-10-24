@@ -4,7 +4,7 @@ class BooksController < ApplicationController
   before_action :authenticate_user!, except: [:public_show]
   skip_before_action :verify_authenticity_token, if: -> { request.format.json? }
 
-  llama_bot_allow :index, :create, :update, :destroy, :generate_all_pictures
+  llama_bot_allow :index, :show, :create, :update, :destroy, :generate_all_pictures
 
   def index
     @books = current_user.books.all
@@ -12,6 +12,13 @@ class BooksController < ApplicationController
     respond_to do |format|
       format.html # renders default index.html.erb if requested
       format.json { render json: @books }
+    end
+  end
+
+  def show
+    @book = current_user.books.find(params[:id])
+    respond_to do |format|
+      format.json { render json: @book }
     end
   end
 

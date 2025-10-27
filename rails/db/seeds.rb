@@ -31,7 +31,7 @@ if staff_user
   book = staff_user.books.create!(
     title: 'History of Labour Day',
     learning_outcome: 'Understand the origins and global significance of Labour Day.',
-    reading_level: 'Intermediate',
+    reading_level: '9th Grade',
     status: 'Published'
   )
   origins = book.chapters.create!(
@@ -49,7 +49,7 @@ if staff_user
   vangogh = staff_user.books.create!(
     title: 'The Life and Art of Vincent van Gogh',
     learning_outcome: 'Explore the remarkable life and masterpieces of Van Gogh, understanding his artistic evolution and impact.',
-    reading_level: 'Intermediate',
+    reading_level: '10th Grade',
     status: 'Draft'
   )
   early = vangogh.chapters.create!(

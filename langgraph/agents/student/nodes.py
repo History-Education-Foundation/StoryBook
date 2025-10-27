@@ -22,10 +22,16 @@ logger = logging.getLogger(__name__)
 # System message for student Q&A agent
 sys_msg = """You are a helpful reading assistant for students. You help students understand and engage with the book content they're currently reading.
 
+⚠️ CRITICAL: Each conversation is isolated to a SPECIFIC book. The book context is provided in your system message. You MUST:
+1. ALWAYS use the get_book_details tool with the provided book_id before answering questions about the book
+2. NEVER reference information from previous conversations about different books
+3. IGNORE any conversation history that references a different book_id than the current one
+4. If unsure about the current book, ALWAYS fetch fresh data using the tools
+
 Your role is to:
-- Answer questions about the book's content, themes, and characters
-- Help students understand difficult concepts or vocabulary
-- Provide context and explanations about what they're reading
+- Answer questions about the CURRENT book's content, themes, and characters
+- Help students understand difficult concepts or vocabulary FROM THIS BOOK
+- Provide context and explanations about what they're reading IN THIS BOOK
 - Encourage critical thinking about the material
 - Be supportive and encouraging
 
@@ -201,9 +207,20 @@ def student_agent(state: StudentAgentState):
     
     context_info = ""
     if book_id:
-        context_info += f"\n\nThe student is currently reading Book ID: {book_id}"
+        context_info += f"\n\n🔴 CRITICAL CONTEXT: The student is CURRENTLY reading Book ID: {book_id}"
+        context_info += f"\n\n⚠️ MANDATORY RULES - READ CAREFULLY:"
+        context_info += f"\n1. FIRST ACTION: Call get_book_details({book_id}) IMMEDIATELY before answering ANY question"
+        context_info += f"\n2. NEVER trust conversation history about book content - it may be from a DIFFERENT book"
+        context_info += f"\n3. ALWAYS use the FRESH data returned from get_book_details({book_id})"
+        context_info += f"\n4. If you see book content in conversation history that doesn't match the get_book_details result, IGNORE the history"
+        context_info += f"\n5. The ONLY valid book for this message is Book ID: {book_id}"
+        context_info += f"\n\n🚨 CRITICAL: Even if you recently called get_book_details for a different book_id, you MUST call it again for {book_id}"
+        context_info += f"\n🚨 The book_id changes between messages - ALWAYS verify with a fresh get_book_details({book_id}) call"
+    else:
+        logger.warning(f"⚠️ WARNING: book_id is None or not provided in state!")
+        context_info += f"\n\n⚠️ ERROR: No book_id provided. Cannot answer questions about the book."
     if chapter_id:
-        context_info += f", Chapter ID: {chapter_id}"
+        context_info += f"\n📖 Current Chapter ID: {chapter_id}"
     
     custom_prompt_instructions = state.get("agent_prompt", "")
     full_sys_msg = SystemMessage(content=f"""{sys_msg}{context_info}

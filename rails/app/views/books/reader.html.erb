@@ -10,7 +10,7 @@
   <% end %>
 </div>
 
-<div class="max-w-2xl mx-auto mt-10 bg-white p-8 rounded shadow">
+<div class="max-w-2xl mx-auto mt-10 bg-white p-8 rounded shadow" id="book-reader-container" data-book-id="<%= @book.id %>">
   <div class="mb-6">
     <div>
       <% ix = 1 %>
@@ -192,6 +192,7 @@ let studentThreadId = null;
 let studentLastPongTime = Date.now();
 let studentProcessedMessageIds = new Set();
 let studentLastToolCallArgs = {};
+let currentBookId = null;
 
 function waitForStudentCableConnection(callback) {
   const interval = setInterval(() => {
@@ -202,59 +203,98 @@ function waitForStudentCableConnection(callback) {
   }, 50);
 }
 
-waitForStudentCableConnection((consumer) => {
-  const sessionId = crypto.randomUUID();
-  const bookId = '<%= @book.id %>';
+function initializeStudentChat() {
+  // Disconnect existing subscription if it exists
+  if (studentChatSubscription) {
+    studentChatSubscription.unsubscribe();
+    studentChatSubscription = null;
+  }
 
-  studentChatSubscription = consumer.subscriptions.create({
-    channel: 'LlamaBotRails::ChatChannel',
-    session_id: sessionId,
-    agent_state_builder_class: "StudentAgentStateBuilder"
-  }, {
-    connected() {
-      console.log('Connected to student chat channel');
-      updateStudentStatusIcon('bg-green-500');
-      studentLastPongTime = Date.now();
-    },
-    disconnected() {
-      console.log('Disconnected from student chat channel');
-      updateStudentStatusIcon('bg-red-500');
-    },
-    received(data) {
-      const parsedData = JSON.parse(data).message;
-      console.log("Student Agent Response:", parsedData);
+  // Reset state for new book and create stable thread_id per book
+  // CRITICAL: Extract bookId from DOM data attribute to avoid Turbo cache issues with ERB
+  const bookReaderContainer = document.getElementById('book-reader-container');
+  const bookId = bookReaderContainer ? bookReaderContainer.dataset.bookId : '<%= @book.id %>';
+  const userId = '<%= current_user.id %>';
+  currentBookId = bookId;
+  
+  // Generate a STABLE thread_id per book (NO timestamp)
+  // Each book gets its own isolated conversation history
+  // This ensures Book A and Book B have completely separate contexts
+  studentThreadId = `student_user_${userId}_book_${bookId}`;
+  
+  studentProcessedMessageIds = new Set();
+  
+  // Clear chat messages and show welcome message
+  const messagesDiv = document.getElementById('student-chat-messages');
+  if (messagesDiv) {
+    messagesDiv.innerHTML = `
+      <div class="text-center text-gray-500 text-sm py-8">
+        <i class="fas fa-book-reader text-3xl mb-2 text-indigo-300"></i>
+        <p>Ask me anything about this book!</p>
+        <p class="text-xs mt-1">Questions about characters, plot, vocabulary, themes, etc.</p>
+      </div>
+    `;
+  }
 
-      const messageId = `${parsedData.type}_${parsedData.content?.substring(0, 50)}_${Date.now()}`;
-      
-      if (studentProcessedMessageIds.has(messageId)) {
-        console.log('⚠️ Duplicate message detected, skipping:', messageId);
-        return;
+  waitForStudentCableConnection((consumer) => {
+    const sessionId = crypto.randomUUID();
+
+    studentChatSubscription = consumer.subscriptions.create({
+      channel: 'LlamaBotRails::ChatChannel',
+      session_id: sessionId,
+      agent_state_builder_class: "StudentAgentStateBuilder"
+    }, {
+      connected() {
+        updateStudentStatusIcon('bg-green-500');
+        studentLastPongTime = Date.now();
+      },
+      disconnected() {
+        updateStudentStatusIcon('bg-red-500');
+      },
+      received(data) {
+        const parsedData = JSON.parse(data).message;
+
+        const messageId = `${parsedData.type}_${parsedData.content?.substring(0, 50)}_${Date.now()}`;
+        
+        if (studentProcessedMessageIds.has(messageId)) {
+          return;
+        }
+
+        studentProcessedMessageIds.add(messageId);
+
+        if (studentProcessedMessageIds.size > 100) {
+          const idsArray = Array.from(studentProcessedMessageIds);
+          studentProcessedMessageIds = new Set(idsArray.slice(-100));
+        }
+
+        switch (parsedData.type) {
+          case "ai":
+            addStudentMessage(parsedData.content, 'ai');
+            break;
+          case "tool":
+            break;
+          case "error":
+            addStudentMessage(parsedData.content, 'error');
+            break;
+          case "pong":
+            studentLastPongTime = Date.now();
+            updateStudentStatusIcon('bg-green-500');
+            break;
+        }
       }
-
-      studentProcessedMessageIds.add(messageId);
-
-      if (studentProcessedMessageIds.size > 100) {
-        const idsArray = Array.from(studentProcessedMessageIds);
-        studentProcessedMessageIds = new Set(idsArray.slice(-100));
-      }
-
-      switch (parsedData.type) {
-        case "ai":
-          addStudentMessage(parsedData.content, 'ai');
-          break;
-        case "tool":
-          console.log('Tool response:', parsedData);
-          break;
-        case "error":
-          addStudentMessage(parsedData.content, 'error');
-          break;
-        case "pong":
-          studentLastPongTime = Date.now();
-          updateStudentStatusIcon('bg-green-500');
-          break;
-      }
-    }
+    });
   });
+}
+
+// Initialize chat on page load
+document.addEventListener('turbo:load', initializeStudentChat);
+
+// Clean up on navigation away
+document.addEventListener('turbo:before-visit', () => {
+  if (studentChatSubscription) {
+    studentChatSubscription.unsubscribe();
+    studentChatSubscription = null;
+  }
 });
 
 function updateStudentStatusIcon(statusClass) {
@@ -285,28 +325,20 @@ function sendStudentMessage() {
     input.value = '';
     showStudentLoading();
 
-    if (!studentThreadId) {
-      const now = new Date();
-      studentThreadId = 'student_' + now.getFullYear() + '-' + 
-                    String(now.getMonth() + 1).padStart(2, '0') + '-' + 
-                    String(now.getDate()).padStart(2, '0') + '_' + 
-                    String(now.getHours()).padStart(2, '0') + '-' + 
-                    String(now.getMinutes()).padStart(2, '0') + '-' + 
-                    String(now.getSeconds()).padStart(2, '0');
-    }
+    // studentThreadId is now generated in initializeStudentChat()
+    // No need to generate it here since each book has its own thread
 
     const messageData = {
       message: message,
       thread_id: studentThreadId,
-      book_id: '<%= @book.id %>',
+      book_id: currentBookId,
       raw_params: {
         controller: 'books',
         action: 'reader',
-        id: '<%= @book.id %>'
+        id: currentBookId
       }
     };
     
-    console.log('Sending student message:', messageData);
     studentChatSubscription.send(messageData);
   }
 }

@@ -72,12 +72,13 @@ services:
       - llama-network
 
   code:
-    image: kody06/llamabot-vscode:latest
+    image: kody06/llamabot-vscode:0.2.0
     container_name: code
-    user: root
     environment:
       - TZ=America/Denver
       - PASSWORD=password
+      - PUID=1000
+      - PGID=1000
     volumes:
       - code_config:/config
       - ./:/config/workspace

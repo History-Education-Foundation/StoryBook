@@ -76,17 +76,17 @@
                 <img class="h-8 w-auto" src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="Logo">
               </div>
                 <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-  <%= link_to "Chat with AI", "/chat", class: "inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-blue-600 hover:border-blue-300 hover:text-blue-900 ml-4" %>
+  <%= link_to "Chat with AI", "/chat", class: "inline-flex items-center border-b-2 #{active_link_class('/chat')} px-1 pt-1 text-sm font-medium ml-4" %>
   <% if user_signed_in? %>
     <% if current_user.student? || current_user.staff? %>
-      <%= link_to "My Library", library_books_path, class: "inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-900" %>
+      <%= link_to "My Library", library_books_path, class: "inline-flex items-center border-b-2 #{active_link_class(library_books_path)} px-1 pt-1 text-sm font-medium" %>
     <% end %>
 
-    <%= link_to "Books", books_path, class: "inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-green-500 hover:text-green-700 ml-4" %>
+    <%= link_to "Books", books_path, class: "inline-flex items-center border-b-2 #{active_link_class(books_path)} px-1 pt-1 text-sm font-medium ml-4" %>
   <% else %>
-    <%= link_to "Pricing", pricing_path, class: "inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700" %>
-    <%= link_to "About", about_path, class: "inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700" %>
-    <%= link_to "Sign In", new_user_session_path, class: "inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700" %>
+    <%= link_to "Pricing", pricing_path, class: "inline-flex items-center border-b-2 #{active_link_class(pricing_path)} px-1 pt-1 text-sm font-medium" %>
+    <%= link_to "About", about_path, class: "inline-flex items-center border-b-2 #{active_link_class(about_path)} px-1 pt-1 text-sm font-medium" %>
+    <%= link_to "Sign In", new_user_session_path, class: "inline-flex items-center border-b-2 #{active_link_class(new_user_session_path)} px-1 pt-1 text-sm font-medium" %>
   <% end %>
 </div>
 
@@ -113,17 +113,17 @@
         <!-- Mobile menu, show/hide based on menu state. -->
         <div class="sm:hidden" id="mobile-menu" data-menu-target="mobileMenu">
           <div class="space-y-1 pb-3 pt-2">
-              <%= link_to "Home", root_path, class: "block border-l-4 border-indigo-500 bg-indigo-50 py-2 pl-3 pr-4 text-base font-medium text-indigo-700" %>
-              <%= link_to "Chat with AI", "/chat", class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-blue-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-900" %>
+              <%= link_to "Home", root_path, class: "block border-l-4 #{active_mobile_link_class(root_path)} py-2 pl-3 pr-4 text-base font-medium" %>
+              <%= link_to "Chat with AI", "/chat", class: "block border-l-4 #{active_mobile_link_class('/chat')} py-2 pl-3 pr-4 text-base font-medium" %>
             <% if user_signed_in? %>
               <% if current_user.student? || current_user.staff? %>
-                <%= link_to "My Library", library_books_path, class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700" %>
+                <%= link_to "My Library", library_books_path, class: "block border-l-4 #{active_mobile_link_class(library_books_path)} py-2 pl-3 pr-4 text-base font-medium" %>
               <% end %>
-              <%= link_to "Books", books_path, class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700" %>
+              <%= link_to "Books", books_path, class: "block border-l-4 #{active_mobile_link_class(books_path)} py-2 pl-3 pr-4 text-base font-medium" %>
             <% else %>
-              <%= link_to "Pricing", pricing_path, class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700" %>
-              <%= link_to "About", about_path, class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700" %>
-              <%= link_to "Sign In", new_user_session_path, class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700" %>
+              <%= link_to "Pricing", pricing_path, class: "block border-l-4 #{active_mobile_link_class(pricing_path)} py-2 pl-3 pr-4 text-base font-medium" %>
+              <%= link_to "About", about_path, class: "block border-l-4 #{active_mobile_link_class(about_path)} py-2 pl-3 pr-4 text-base font-medium" %>
+              <%= link_to "Sign In", new_user_session_path, class: "block border-l-4 #{active_mobile_link_class(new_user_session_path)} py-2 pl-3 pr-4 text-base font-medium" %>
             <% end %>
           </div>
         </div>

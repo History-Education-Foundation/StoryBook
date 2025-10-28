@@ -90,19 +90,69 @@
   let lastToolCallArgs = {};
   let processedMessageIds = new Set();
 
-  // Chat bubble toggle functionality
-  document.getElementById('chat-bubble-toggle').addEventListener('click', function() {
+  // Initialize chat bubble toggle functionality
+  function initializeChatBubble() {
+    const toggleButton = document.getElementById('chat-bubble-toggle');
+    const closeButton = document.getElementById('chat-bubble-close');
     const container = document.getElementById('chat-bubble-container');
-    if (container.style.display === 'none' || container.style.display === '') {
-      container.style.display = 'block';
-    } else {
-      container.style.display = 'none';
+    
+    if (!toggleButton || !closeButton || !container) {
+      console.warn('Chat bubble elements not found, retrying...');
+      setTimeout(initializeChatBubble, 100);
+      return;
     }
+
+    // Restore previous state on page load
+    const chatState = localStorage.getItem('chatBubbleOpen');
+    if (chatState === 'true') {
+      container.style.display = 'block';
+    }
+
+    // Remove any existing listeners to prevent duplicates
+    const newToggleButton = toggleButton.cloneNode(true);
+    toggleButton.parentNode.replaceChild(newToggleButton, toggleButton);
+    
+    const newCloseButton = closeButton.cloneNode(true);
+    closeButton.parentNode.replaceChild(newCloseButton, closeButton);
+
+    // Add fresh event listeners
+    newToggleButton.addEventListener('click', function() {
+      const currentContainer = document.getElementById('chat-bubble-container');
+      if (currentContainer.style.display === 'none' || currentContainer.style.display === '') {
+        currentContainer.style.display = 'block';
+        localStorage.setItem('chatBubbleOpen', 'true');
+      } else {
+        currentContainer.style.display = 'none';
+        localStorage.setItem('chatBubbleOpen', 'false');
+      }
+    });
+
+    newCloseButton.addEventListener('click', function() {
+      const currentContainer = document.getElementById('chat-bubble-container');
+      currentContainer.style.display = 'none';
+      localStorage.setItem('chatBubbleOpen', 'false');
+    });
+
+    console.log('Chat bubble initialized successfully');
+  }
+
+  // Initialize on first page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeChatBubble);
+  } else {
+    initializeChatBubble();
+  }
+
+  // CRITICAL: Re-initialize on Turbo navigation (Rails 7 default behavior)
+  document.addEventListener('turbo:load', function() {
+    console.log('Turbo navigation detected, reinitializing chat bubble...');
+    initializeChatBubble();
   });
 
-  document.getElementById('chat-bubble-close').addEventListener('click', function() {
-    const container = document.getElementById('chat-bubble-container');
-    container.style.display = 'none';
+  // Also handle turbo:render for additional safety
+  document.addEventListener('turbo:render', function() {
+    console.log('Turbo render detected, reinitializing chat bubble...');
+    initializeChatBubble();
   });
 
   function waitForCableConnection(callback) {

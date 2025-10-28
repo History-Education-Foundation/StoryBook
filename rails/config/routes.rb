@@ -47,6 +47,8 @@ Rails.application.routes.draw do
   # root "prototypes#show", page: "home"
   get "home" => "public#home"
   get "chat" => "public#chat"
+  get "pricing" => "static_pages#pricing"
+  get "about" => "static_pages#about"
 
   namespace :admin do
     root to: "dashboard#index"

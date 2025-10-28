@@ -25,10 +25,10 @@
           </svg>
         </button>
         <div class="flex items-center">
-          <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaBot Logo" class="h-8 w-8">
+          <img src="https://llamapress-ai-image-uploads.s3.us-west-2.amazonaws.com/wvtud3dcva3wgihn4a4majbmtsku" alt="LlamaBot Logo" class="h-8 w-auto">
           <div id="connectionStatusIconForLlamaBot" class="ml-2 h-3 w-3 rounded-full bg-yellow-400"></div>
         </div>
-        <h1 class="text-xl font-bold">Leo the Llama</h1>
+        <h1 class="text-xl font-bold">Aristotle</h1>
       </div>
     </div>
     <div id="chat-messages" class="flex-grow overflow-y-auto p-4 space-y-4">
@@ -42,10 +42,16 @@
       </span>
     </div>
     
-    <!-- Suggested Prompts - Always visible above input -->
+    <!-- Suggested Prompts - Collapsible on mobile -->
     <div id="suggested-prompts" class="p-4 border-t border-gray-200">
-      <div class="text-sm text-gray-600 mb-2">Quick actions:</div>
-      <div class="space-y-2">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-sm text-gray-600">Quick actions:</div>
+        <button onclick="togglePrompts()" class="md:hidden text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+          <span id="prompts-toggle-text">Show</span>
+          <i id="prompts-toggle-icon" class="fas fa-chevron-down text-xs"></i>
+        </button>
+      </div>
+      <div id="prompts-content" class="space-y-2 hidden md:block">
         <div class="flex flex-wrap gap-2">
           <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">List all my books</button>
           <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Create a new book</button>
@@ -386,6 +392,24 @@
     setTimeout(() => {
       buttonElement.style.transform = '';
     }, 150);
+  }
+
+  function togglePrompts() {
+    const promptsContent = document.getElementById('prompts-content');
+    const toggleText = document.getElementById('prompts-toggle-text');
+    const toggleIcon = document.getElementById('prompts-toggle-icon');
+    
+    if (promptsContent.classList.contains('hidden')) {
+      promptsContent.classList.remove('hidden');
+      toggleText.textContent = 'Hide';
+      toggleIcon.classList.remove('fa-chevron-down');
+      toggleIcon.classList.add('fa-chevron-up');
+    } else {
+      promptsContent.classList.add('hidden');
+      toggleText.textContent = 'Show';
+      toggleIcon.classList.remove('fa-chevron-up');
+      toggleIcon.classList.add('fa-chevron-down');
+    }
   }
 
   function sendMessage() {

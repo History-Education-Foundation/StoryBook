@@ -1,0 +1,77 @@
+<style>
+  .save-toast {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background-color: #10b981;
+    color: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s forwards;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .save-toast i {
+    font-size: 18px;
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+function showSaveToast(message = 'Saved successfully!', icon = 'fas fa-check-circle') {
+  const toast = document.createElement('div');
+  toast.className = 'save-toast';
+  toast.innerHTML = `
+    <i class="${icon}"></i>
+    <span>${message}</span>
+  `;
+  document.body.appendChild(toast);
+  
+  // Remove after animation completes
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+function showAlertToast(message = 'Something went wrong!', icon = 'fas fa-exclamation-circle') {
+  const toast = document.createElement('div');
+  toast.className = 'save-toast';
+  toast.style.backgroundColor = '#ef4444'; // Red for alerts
+  toast.innerHTML = `
+    <i class="${icon}"></i>
+    <span>${message}</span>
+  `;
+  document.body.appendChild(toast);
+  
+  // Remove after animation completes
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+</script>

@@ -53,48 +53,7 @@
     margin-left: 8px;
   }
   
-  .save-toast {
-    position: fixed;
-    top: 80px;
-    right: 20px;
-    background-color: #10b981;
-    color: white;
-    padding: 16px 24px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
-    animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s forwards;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .save-toast i {
-    font-size: 18px;
-  }
-  
-  @keyframes slideIn {
-    from {
-      transform: translateX(400px);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-  
-  @keyframes slideOut {
-    from {
-      transform: translateX(0);
-      opacity: 1;
-    }
-    to {
-      transform: translateX(400px);
-      opacity: 0;
-    }
-  }
+
 </style>
 
 <div class="fixed top-4 left-4 z-50">
@@ -120,21 +79,21 @@
       </div>
       
       <!-- Book Metadata -->
-      <div class="flex flex-wrap gap-2 mb-4">
+      <div class="flex flex-wrap items-center gap-3 mb-4">
         <!-- Reading Level Selector (Editable) -->
-        <div class="editable-field p-2 rounded cursor-pointer group" style="background-color: #e0e7ff; border: 2px solid #c7d2fe;" data-field="reading_level" data-resource-type="book" data-resource-id="<%= @book.id %>">
-          <div class="flex items-center justify-between gap-3">
-            <div class="flex items-center gap-2 editable-content" style="color: #4338ca;">
+        <div class="editable-field px-3 py-2 rounded cursor-pointer group inline-flex items-center gap-2" style="background-color: #e0e7ff; border: 2px solid #c7d2fe; flex-shrink: 0;" data-field="reading_level" data-resource-type="book" data-resource-id="<%= @book.id %>">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 editable-content" style="color: #4338ca; white-space: nowrap;">
               <i class="fas fa-book-reader"></i>
               <span><%= @book.reading_level.presence || 'Select level' %></span>
             </div>
-            <button class="edit-btn btn btn-xs btn-ghost gap-1" onclick="startEdit(this)">
+            <button class="edit-btn btn btn-xs btn-ghost gap-0 p-1" onclick="startEdit(this)">
               <i class="fas fa-pen-to-square"></i>
             </button>
           </div>
         </div>
         
-        <div class="badge badge-lg" style="background-color: #fef3c7; color: #b45309; border-color: #fde68a;">
+        <div class="badge badge-lg flex-shrink-0" style="background-color: #fef3c7; color: #b45309; border-color: #fde68a;">
           <i class="fas fa-edit"></i>
           Builder Mode
         </div>
@@ -292,10 +251,10 @@ function startEdit(button) {
   input.focus();
   if (input.select) input.select();
   
-  // Replace button with save/cancel
+  // Replace button with save/cancel (place outside the content div)
   button.style.display = 'none';
   const actions = document.createElement('div');
-  actions.className = 'flex gap-2 mt-2';
+  actions.className = 'flex gap-2 ml-2';
   
   const saveBtn = document.createElement('button');
   saveBtn.className = 'btn btn-xs btn-success gap-1';
@@ -317,7 +276,9 @@ function startEdit(button) {
   
   actions.appendChild(saveBtn);
   actions.appendChild(cancelBtn);
-  content.appendChild(actions);
+  // Append actions as a sibling to the inner flex container
+  const innerFlex = field.querySelector('.flex.items-center.justify-between');
+  innerFlex.parentNode.appendChild(actions);
   
   // Handle Enter key to save (only for single-line inputs, not select)
   if (input.tagName !== 'SELECT' && input.tagName !== 'TEXTAREA') {
@@ -340,12 +301,10 @@ function saveEdit(button) {
   console.log('=== SAVE EDIT START ===');
   const actions = button.closest('.flex');
   console.log('actions:', actions);
-  const content = actions.closest('.editable-content');
-  console.log('content:', content);
-  const field = content.closest('.editable-field');
+  const field = actions.closest('.editable-field');
   console.log('field:', field);
   
-  const input = content.querySelector('input, textarea, select');
+  const input = field.querySelector('input, textarea, select');
   console.log('input:', input);
   if (!input) {
     console.error('ERROR: Could not find input, textarea, or select');
@@ -426,8 +385,23 @@ function saveEdit(button) {
     if (res.ok) {
       console.log('Save successful!');
       // Success - update DOM
-      content.innerHTML = newValue.replace(/\n/g, '<br>');
+      const content = field.querySelector('.editable-content');
+      if (fieldName === 'reading_level') {
+        // For reading level, just show the selected value
+        content.innerHTML = '<i class="fas fa-book-reader"></i><span>' + newValue + '</span>';
+      } else {
+        content.innerHTML = newValue.replace(/\n/g, '<br>');
+      }
       field.classList.remove('edit-mode');
+      // Remove the actions div
+      const actions = field.querySelector('.flex.gap-2.ml-2');
+      if (actions) actions.remove();
+      // Show edit button again
+      const editBtn = field.querySelector('.edit-btn');
+      if (editBtn) editBtn.style.display = '';
+      // Remove saving indicator
+      const savingIndicator = field.querySelector('.saving-indicator');
+      if (savingIndicator) savingIndicator.remove();
       showSaved(field);
       showSaveToast(fieldName);
       setTimeout(() => hideSaved(field), 2000);
@@ -467,12 +441,17 @@ function saveEdit(button) {
 
 function cancelEdit(button) {
   const actions = button.closest('.flex');
-  const content = actions.closest('.editable-content');
-  const field = content.closest('.editable-field');
+  const field = actions.closest('.editable-field');
   const editBtn = field.querySelector('.edit-btn');
   
-  // Restore original content
-  location.reload(); // Simple approach: reload page
+  // Remove the actions div
+  actions.remove();
+  
+  // Show edit button again
+  editBtn.style.display = '';
+  
+  // Reload to restore original content
+  location.reload();
 }
 
 function showSaving(element) {
@@ -492,18 +471,5 @@ function hideSaved(field) {
   if (indicator) indicator.remove();
 }
 
-function showSaveToast(fieldName) {
-  const toast = document.createElement('div');
-  toast.className = 'save-toast';
-  toast.innerHTML = `
-    <i class="fas fa-check-circle"></i>
-    <span>Saved successfully!</span>
-  `;
-  document.body.appendChild(toast);
-  
-  // Remove after animation completes
-  setTimeout(() => {
-    toast.remove();
-  }, 3000);
-}
+
 </script>

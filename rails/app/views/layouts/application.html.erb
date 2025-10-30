@@ -63,6 +63,12 @@
     <%# stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    <%= render 'shared/toast' %>
+    <script>
+      // Make toast functions globally available immediately
+      window.showSaveToast = showSaveToast;
+      window.showAlertToast = showAlertToast;
+    </script>
   </head>
 
   <body class="h-full">
@@ -77,7 +83,7 @@
               </div>
                 <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
 <% if user_signed_in? %>
-te inder pageop, ill e say    <%= link_to "Chat with AI", "/chat", class: "inline-flex items-center border-b-2 #{active_link_class('/chat')} px-1 pt-1 text-sm font-medium ml-4" %>
+    <%= link_to "Chat with AI", "/chat", class: "inline-flex items-center border-b-2 #{active_link_class('/chat')} px-1 pt-1 text-sm font-medium ml-4" %>
   <% end %>
   <% if user_signed_in? %>
     <% if current_user.student? || current_user.staff? %>
@@ -147,14 +153,32 @@ te inder pageop, ill e say    <%= link_to "Chat with AI", "/chat", class: "inlin
           <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="px-4 py-8 sm:px-0">
               <% if notice %>
-                <div class="mb-4 p-3 bg-green-100 text-green-900 rounded border border-green-300">
-                  <%= notice %>
-                </div>
+                <script>
+                  (function() {
+                    const showNotification = function() {
+                      if (typeof showSaveToast === 'function') {
+                        showSaveToast('<%= j notice %>', 'fas fa-check-circle');
+                      } else {
+                        setTimeout(showNotification, 100);
+                      }
+                    };
+                    showNotification();
+                  })();
+                </script>
               <% end %>
               <% if alert %>
-                <div class="mb-4 p-3 bg-red-100 text-red-900 rounded border border-red-300">
-                  <%= alert %>
-                </div>
+                <script>
+                  (function() {
+                    const showNotification = function() {
+                      if (typeof showAlertToast === 'function') {
+                        showAlertToast('<%= j alert %>', 'fas fa-exclamation-circle');
+                      } else {
+                        setTimeout(showNotification, 100);
+                      }
+                    };
+                    showNotification();
+                  })();
+                </script>
               <% end %>
               <%= yield %>
             </div>

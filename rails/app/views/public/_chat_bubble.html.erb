@@ -89,6 +89,131 @@
   let subscription = null;
   let lastToolCallArgs = {};
   let processedMessageIds = new Set();
+  let currentPageContext = null;
+
+  // Get current page context (URL and page name)
+  function getCurrentPageContext() {
+    const url = window.location.href;
+    const pathname = window.location.pathname;
+    const pathSegments = pathname.split('/').filter(segment => segment.length > 0);
+    
+    // Helper function to check if a segment is numeric (ID)
+    const isId = (segment) => !isNaN(segment) && segment.length > 0 && segment !== 'new' && segment !== 'edit';
+    
+    let pageName = 'home';
+    let resourceType = null;
+    let resourceId = null;
+    let parentResourceType = null;
+    let parentResourceId = null;
+    let action = null;
+    
+    // FIRST: Try to get page context from data-page-type attribute (most reliable)
+    const pageTypeElement = document.querySelector('[data-page-type]');
+    if (pageTypeElement) {
+      const dataPageType = pageTypeElement.getAttribute('data-page-type');
+      const dataResource = pageTypeElement.getAttribute('data-resource');
+      const dataAction = pageTypeElement.getAttribute('data-action');
+      
+      pageName = dataPageType;
+      resourceType = dataResource;
+      action = dataAction;
+      
+      // Try to extract resourceId and parentResourceId from URL if needed
+      if (pathSegments.length >= 2 && isId(pathSegments[1])) {
+        resourceId = pathSegments[1];
+      }
+      if (pathSegments.length >= 4 && isId(pathSegments[3])) {
+        parentResourceType = pathSegments[2];
+        parentResourceId = pathSegments[3];
+      }
+    } 
+    // FALLBACK: Parse the URL path if data-page-type not found
+    else {
+      if (pathSegments.length === 1) {
+        // /books or /chapters or /pages
+        resourceType = pathSegments[0];
+        action = 'index';
+        pageName = `${resourceType}_index`;
+      } 
+      else if (pathSegments.length === 2) {
+        // /books/new, /books/123, /books/library
+        resourceType = pathSegments[0];
+        
+        if (pathSegments[1] === 'new') {
+          action = 'new';
+          pageName = `${resourceType}_new`;
+        } else if (isId(pathSegments[1])) {
+          resourceId = pathSegments[1];
+          action = 'show';
+          pageName = `${resourceType}_show`;
+        } else {
+          // Custom routes like /books/library
+          action = pathSegments[1];
+          pageName = `${resourceType}_${action}`;
+        }
+      } 
+      else if (pathSegments.length === 3) {
+        // /books/123/chapters, /books/123/read
+        if (isId(pathSegments[1])) {
+          parentResourceType = pathSegments[0];
+          parentResourceId = pathSegments[1];
+          resourceType = pathSegments[2];
+          action = 'index';
+          pageName = `${resourceType}_index`;
+        }
+      } 
+      else if (pathSegments.length === 4) {
+        // /books/123/chapters/new or /books/123/chapters/456
+        if (isId(pathSegments[1]) && !isId(pathSegments[2])) {
+          parentResourceType = pathSegments[0];
+          parentResourceId = pathSegments[1];
+          resourceType = pathSegments[2];
+          
+          if (pathSegments[3] === 'new') {
+            action = 'new';
+          } else if (isId(pathSegments[3])) {
+            resourceId = pathSegments[3];
+            action = 'show';
+          } else if (pathSegments[3] === 'edit') {
+            action = 'edit';
+          }
+          
+          pageName = `${resourceType}_${action}`;
+        }
+      } 
+      else if (pathSegments.length === 5) {
+        // /books/123/chapters/456/pages or /books/123/chapters/456/edit
+        if (isId(pathSegments[1]) && !isId(pathSegments[2]) && isId(pathSegments[3])) {
+          parentResourceType = pathSegments[2];
+          parentResourceId = pathSegments[3];
+          resourceType = pathSegments[4];
+          action = 'index';
+          pageName = `${resourceType}_index`;
+        }
+      }
+    }
+    
+    // Get page title from meta tag or document title
+    const pageTitle = document.querySelector('meta[content-for="header"]')?.content || 
+                      document.querySelector('h1')?.textContent || 
+                      document.title || 
+                      'Unknown';
+    
+    const context = {
+      url: url,
+      pathname: pathname,
+      pageName: pageName,
+      pageTitle: pageTitle,
+      resourceType: resourceType,
+      resourceId: resourceId,
+      parentResourceType: parentResourceType,
+      parentResourceId: parentResourceId,
+      action: action
+    };
+    
+    console.log('📍 Page Context Detected:', context);
+    return context;
+  }
 
   // Initialize chat bubble toggle functionality
   function initializeChatBubble() {
@@ -147,12 +272,18 @@
   document.addEventListener('turbo:load', function() {
     console.log('Turbo navigation detected, reinitializing chat bubble...');
     initializeChatBubble();
+    // Update page context on navigation
+    currentPageContext = getCurrentPageContext();
+    console.log('📍 Page context updated on turbo:load:', currentPageContext);
   });
 
   // Also handle turbo:render for additional safety
   document.addEventListener('turbo:render', function() {
     console.log('Turbo render detected, reinitializing chat bubble...');
     initializeChatBubble();
+    // Update page context on navigation
+    currentPageContext = getCurrentPageContext();
+    console.log('📍 Page context updated on turbo:render:', currentPageContext);
   });
 
   function waitForCableConnection(callback) {
@@ -342,12 +473,29 @@
         currentThreadId = threadId;
       }
 
+      // Capture current page context
+      currentPageContext = getCurrentPageContext();
+      
+      console.log('=== DEBUG: PAGE CONTEXT DETECTION ===');
+      console.log('Current URL:', window.location.href);
+      console.log('Pathname:', window.location.pathname);
+      console.log('Page Type Element:', document.querySelector('[data-page-type]'));
+      if (document.querySelector('[data-page-type]')) {
+        console.log('  - data-page-type:', document.querySelector('[data-page-type]').getAttribute('data-page-type'));
+        console.log('  - data-resource:', document.querySelector('[data-page-type]').getAttribute('data-resource'));
+        console.log('  - data-action:', document.querySelector('[data-page-type]').getAttribute('data-action'));
+      }
+      console.log('Page Title:', document.querySelector('meta[content-for="header"]')?.content);
+      console.log('Detected Context:', currentPageContext);
+      console.log('====================================');
+
       const messageData = {
         message: message,
-        thread_id: threadId
+        thread_id: threadId,
+        page_context: currentPageContext
       };
       
-      console.log('Sending message with data:', messageData);
+      console.log('🚀 Sending message with page context:', messageData);
       subscription.send(messageData);
     }
   }

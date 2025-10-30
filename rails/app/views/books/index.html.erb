@@ -1,5 +1,7 @@
 <% content_for :header, "Your Books" %>
 
+<div data-page-type="books_index" data-resource="books" data-action="index" style="display: none;"></div>
+
 <!-- Add Book Button Section -->
 <div class="mb-6">
   <% if current_user.staff? || current_user.admin? %>

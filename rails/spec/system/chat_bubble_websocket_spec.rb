@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Chat Bubble WebSocket Connection', type: :system, js: true do
-  let(:user) { create(:user) }
+  let(:user) { create(:user) }llama
 
   before do
     login_as(user, scope: :user)

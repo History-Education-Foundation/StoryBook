@@ -1,5 +1,7 @@
 <% content_for :header, "My Library" %>
 
+<div data-page-type="books_library" data-resource="books" data-action="library" style="display: none;"></div>
+
 <!-- Navigation buttons - Desktop and Mobile -->
 <div class="flex gap-3 mb-6">
   <%= link_to library_books_path, class: "btn gap-2 flex-1 md:flex-initial #{params[:filter] != 'liked' ? '' : 'btn-ghost'}", style: "#{params[:filter] != 'liked' ? 'background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;' : 'background-color: #f3f4f6; color: #6b7280; border-color: #e5e7eb;'}" do %>

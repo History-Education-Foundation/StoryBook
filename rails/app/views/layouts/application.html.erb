@@ -76,7 +76,7 @@
                 <img class="h-8 w-auto" src="https://llamapress-ai-image-uploads.s3.us-west-2.amazonaws.com/wvtud3dcva3wgihn4a4majbmtsku" alt="Logo">
               </div>
                 <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-  <% if user_signed_in? %>
+<% if user_signed_in? %>
     <%= link_to "Chat with AI", "/chat", class: "inline-flex items-center border-b-2 #{active_link_class('/chat')} px-1 pt-1 text-sm font-medium ml-4" %>
   <% end %>
   <% if user_signed_in? %>

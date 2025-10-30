@@ -13,6 +13,7 @@ Rails.application.routes.draw do
     end
     member do
       get :public, to: 'books#public_show'
+      get :builder, to: 'books#builder'
       post :save,   to: 'saved_books#create'
       delete :unsave, to: 'saved_books#destroy'
       post :generate_audio, to: 'books#generate_audio'

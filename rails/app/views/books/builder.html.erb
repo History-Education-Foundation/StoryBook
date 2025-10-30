@@ -1,0 +1,509 @@
+<% content_for :header, "" %>
+
+<div data-page-type="books_builder" data-resource="books" data-action="builder" style="display: none;"></div>
+
+<style>
+  .editable-field {
+    position: relative;
+    transition: all 0.2s ease;
+  }
+  
+  .editable-field:hover {
+    background-color: #f0f9ff;
+    outline: 2px dashed #bfdbfe;
+    outline-offset: 2px;
+  }
+  
+  .edit-mode input,
+  .edit-mode textarea {
+    border: 2px solid #3b82f6 !important;
+    background-color: #eff6ff !important;
+  }
+  
+  .edit-btn {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  
+  .editable-field:hover .edit-btn {
+    opacity: 1;
+  }
+  
+  .saving-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #fbbf24;
+    margin-left: 8px;
+    animation: pulse 1s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  
+  .saved-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #10b981;
+    margin-left: 8px;
+  }
+  
+  .save-toast {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background-color: #10b981;
+    color: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s forwards;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .save-toast i {
+    font-size: 18px;
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+  }
+</style>
+
+<div class="fixed top-4 left-4 z-50">
+  <%= link_to library_books_path, class: "btn gap-2 shadow-xl btn-sm", style: "background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;" do %>
+    <i class="fas fa-arrow-left"></i>
+    <span class="hidden sm:inline">My Library</span>
+  <% end %>
+</div>
+
+<div class="max-w-2xl mx-auto mt-10 bg-white p-8 rounded shadow" id="book-builder-container" data-book-id="<%= @book.id %>" data-llama-no-chat-bubble="true">
+  <div class="mb-6">
+    <div>
+      <% ix = 1 %>
+      
+      <!-- Book Title (Editable) -->
+      <div class="editable-field mb-4 p-3 rounded cursor-pointer group" data-field="title" data-resource-type="book" data-resource-id="<%= @book.id %>">
+        <div class="flex items-start justify-between gap-3">
+          <h1 class="text-3xl font-bold flex-1 editable-content" data-read-ix="0"><%= @book.title %></h1>
+          <button class="edit-btn btn btn-xs btn-ghost gap-1" onclick="startEdit(this)">
+            <i class="fas fa-pen-to-square"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Book Metadata -->
+      <div class="flex flex-wrap gap-2 mb-4">
+        <!-- Reading Level Selector (Editable) -->
+        <div class="editable-field p-2 rounded cursor-pointer group" style="background-color: #e0e7ff; border: 2px solid #c7d2fe;" data-field="reading_level" data-resource-type="book" data-resource-id="<%= @book.id %>">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2 editable-content" style="color: #4338ca;">
+              <i class="fas fa-book-reader"></i>
+              <span><%= @book.reading_level.presence || 'Select level' %></span>
+            </div>
+            <button class="edit-btn btn btn-xs btn-ghost gap-1" onclick="startEdit(this)">
+              <i class="fas fa-pen-to-square"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="badge badge-lg" style="background-color: #fef3c7; color: #b45309; border-color: #fde68a;">
+          <i class="fas fa-edit"></i>
+          Builder Mode
+        </div>
+      </div>
+      
+      <!-- Learning Outcome (Editable) -->
+      <div class="editable-field bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg border-l-4 mb-4 cursor-pointer group" style="border-left-color: #818cf8;" data-field="learning_outcome" data-resource-type="book" data-resource-id="<%= @book.id %>">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <i class="fas fa-bullseye text-indigo-600 mt-1"></i>
+              <span class="font-semibold text-indigo-900">Learning Outcome:</span>
+            </div>
+            <div class="text-gray-700 text-sm ml-6 editable-content">
+              <%= simple_format(@book.learning_outcome) %>
+            </div>
+          </div>
+          <button class="edit-btn btn btn-xs btn-ghost gap-1" onclick="startEdit(this)">
+            <i class="fas fa-pen-to-square"></i>
+          </button>
+        </div>
+      </div>
+
+      <% @chapters.each do |chapter| %>
+        <div class="mt-10 chapter-builder-block" data-chapter-id="<%= chapter.id %>">
+          <!-- Chapter Header (Editable) -->
+          <div class="editable-field mb-6 pb-3 border-b-2 rounded p-3 cursor-pointer group" style="border-color: #c7d2fe;" data-field="title" data-resource-type="chapter" data-resource-id="<%= chapter.id %>">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <h2 class="text-2xl font-semibold mb-2 text-indigo-900 editable-content" data-read-ix="<%= ix %>"><%= chapter.title %></h2>
+                <% ix += 1 %>
+              </div>
+              <button class="edit-btn btn btn-xs btn-ghost gap-1" onclick="startEdit(this)">
+                <i class="fas fa-pen-to-square"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Chapter Description (Editable) -->
+          <div class="editable-field mb-4 p-3 rounded cursor-pointer group text-gray-600 text-sm" data-field="description" data-resource-type="chapter" data-resource-id="<%= chapter.id %>">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1 editable-content">
+                <%= simple_format(chapter.description) %>
+              </div>
+              <button class="edit-btn btn btn-xs btn-ghost gap-1" onclick="startEdit(this)">
+                <i class="fas fa-pen-to-square"></i>
+              </button>
+            </div>
+          </div>
+
+          <% chapter.pages.order(:id).each do |page| %>
+            <div class="my-6 p-6 rounded-lg" style="background: linear-gradient(to bottom right, #ffffff, #faf5ff);">
+              <% if page.image.attached? %>
+                <div class="flex justify-center mb-6">
+                  <%= image_tag url_for(page.image),
+                        class: "rounded-lg border-2 max-h-80 object-contain",
+                        style: "border-color: #e0e7ff;",
+                        loading: "lazy",
+                        alt: "" %>
+                </div>
+              <% end %>
+
+              <!-- Page Content (Editable) -->
+              <div class="editable-field p-3 rounded cursor-pointer group text-base text-gray-800 whitespace-pre-line leading-relaxed" data-field="content" data-resource-type="page" data-resource-id="<%= page.id %>" data-read-ix="<%= ix %>">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex-1 editable-content">
+                    <%= page.content %>
+                  </div>
+                  <button class="edit-btn btn btn-xs btn-ghost gap-1" onclick="startEdit(this)">
+                    <i class="fas fa-pen-to-square"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="mt-4 p-3 rounded-lg flex items-center gap-2" style="background-color: #fef3c7; border: 1px solid #fde68a;">
+                <i class="fas fa-info-circle text-amber-600"></i>
+                <span class="text-sm text-amber-800">Audio is only available for published books.</span>
+              </div>
+            </div>
+            <% ix += 1 %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Chat Bubble -->
+<%= render 'public/chat_bubble' %>
+
+<%= javascript_include_tag "llama_bot_rails/application" %>
+<% if defined?(action_cable_meta_tag) %>
+  <%= action_cable_meta_tag %>
+<% end %>
+<link rel="stylesheet" href="https://unpkg.com/@tailwindcss/typography@0.4.x/dist/typography.min.css">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+// Inline Editing System
+function startEdit(button) {
+  const field = button.closest('.editable-field');
+  if (!field) return;
+  
+  field.classList.add('edit-mode');
+  
+  const content = field.querySelector('.editable-content');
+  const fieldName = field.dataset.field;
+  const resourceType = field.dataset.resourceType;
+  const resourceId = field.dataset.resourceId;
+  const originalText = content.innerText.trim();
+  
+  // Check if this is a reading_level field (needs special handling)
+  let input;
+  if (fieldName === 'reading_level') {
+    // Create select element for reading level
+    input = document.createElement('select');
+    input.className = 'w-full p-2 border-2 border-indigo-500 rounded bg-blue-50 text-gray-800';
+    const levels = ['7th Grade', '8th Grade', '9th Grade', '10th Grade', '11th Grade', '12th Grade'];
+    const promptOption = document.createElement('option');
+    promptOption.value = '';
+    promptOption.textContent = 'Select reading level';
+    input.appendChild(promptOption);
+    levels.forEach(level => {
+      const option = document.createElement('option');
+      option.value = level;
+      option.textContent = level;
+      if (level === originalText) {
+        option.selected = true;
+      }
+      input.appendChild(option);
+    });
+  } else {
+    // Determine if we need a textarea or input
+    const isLongText = originalText.length > 100 || originalText.includes('\n');
+    const inputType = isLongText ? 'textarea' : 'input';
+    
+    // Create input element
+    input = document.createElement(inputType);
+    input.className = 'w-full p-2 border-2 border-indigo-500 rounded bg-blue-50 text-gray-800';
+    input.value = originalText;
+    
+    if (inputType === 'textarea') {
+      input.rows = Math.max(3, Math.ceil(originalText.length / 60));
+      input.style.fontFamily = 'inherit';
+      input.style.fontSize = 'inherit';
+      input.style.lineHeight = 'inherit';
+    }
+  }
+  
+  // Replace content
+  content.innerHTML = '';
+  content.appendChild(input);
+  input.focus();
+  if (input.select) input.select();
+  
+  // Replace button with save/cancel
+  button.style.display = 'none';
+  const actions = document.createElement('div');
+  actions.className = 'flex gap-2 mt-2';
+  
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'btn btn-xs btn-success gap-1';
+  saveBtn.innerHTML = '<i class="fas fa-check"></i> Save';
+  saveBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    console.log('Save button clicked');
+    saveEdit(saveBtn);
+  });
+  
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn btn-xs btn-outline gap-1';
+  cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
+  cancelBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    console.log('Cancel button clicked');
+    cancelEdit(cancelBtn);
+  });
+  
+  actions.appendChild(saveBtn);
+  actions.appendChild(cancelBtn);
+  content.appendChild(actions);
+  
+  // Handle Enter key to save (only for single-line inputs, not select)
+  if (input.tagName !== 'SELECT' && input.tagName !== 'TEXTAREA') {
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        saveEdit(actions.querySelector('.btn-success'));
+      }
+    });
+  }
+  
+  // Handle Escape to cancel
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      cancelEdit(actions.querySelector('.btn-outline'));
+    }
+  });
+}
+
+function saveEdit(button) {
+  console.log('=== SAVE EDIT START ===');
+  const actions = button.closest('.flex');
+  console.log('actions:', actions);
+  const content = actions.closest('.editable-content');
+  console.log('content:', content);
+  const field = content.closest('.editable-field');
+  console.log('field:', field);
+  
+  const input = content.querySelector('input, textarea, select');
+  console.log('input:', input);
+  if (!input) {
+    console.error('ERROR: Could not find input, textarea, or select');
+    alert('Error: Could not find input field');
+    return;
+  }
+  
+  const newValue = input.value.trim();
+  const fieldName = field.dataset.field;
+  const resourceType = field.dataset.resourceType;
+  const resourceId = field.dataset.resourceId;
+  
+  console.log('Values:', { newValue, fieldName, resourceType, resourceId });
+  
+  // Show saving indicator
+  showSaving(button);
+  
+  // Determine endpoint and prepare payload with proper nesting
+  let endpoint = '';
+  let payload = {};
+  const bookId = document.querySelector('#book-builder-container').dataset.bookId;
+  
+  if (resourceType === 'book') {
+    endpoint = `/books/${bookId}`;
+    payload = { book: { [fieldName]: newValue } };
+  } else if (resourceType === 'chapter') {
+    endpoint = `/books/${bookId}/chapters/${resourceId}`;
+    payload = { chapter: { [fieldName]: newValue } };
+  } else if (resourceType === 'page') {
+    const chapterId = field.closest('.chapter-builder-block').dataset.chapterId;
+    endpoint = `/books/${bookId}/chapters/${chapterId}/pages/${resourceId}`;
+    payload = { page: { [fieldName]: newValue } };
+  }
+  
+  // Send PATCH request
+  const csrfElement = document.querySelector('[name="csrf-token"]');
+  console.log('CSRF element found:', csrfElement);
+  const csrfToken = csrfElement ? csrfElement.content : null;
+  console.log('CSRF token:', csrfToken ? 'present' : 'MISSING');
+  console.log('Endpoint:', endpoint);
+  console.log('Payload:', payload);
+  
+  if (!csrfToken) {
+    alert('ERROR: CSRF token not found. Page may not be loaded correctly.');
+    return;
+  }
+  
+  // Request JSON response by appending .json to endpoint
+  const jsonEndpoint = endpoint + '.json';
+  
+  // Create FormData instead of JSON for better Rails compatibility
+  const formData = new FormData();
+  
+  // Flatten the payload into FormData
+  if (resourceType === 'book') {
+    formData.append('book[' + fieldName + ']', newValue);
+  } else if (resourceType === 'chapter') {
+    formData.append('chapter[' + fieldName + ']', newValue);
+  } else if (resourceType === 'page') {
+    formData.append('page[' + fieldName + ']', newValue);
+  }
+  
+  // Add authenticity token
+  formData.append('authenticity_token', csrfToken);
+  
+  console.log('Sending FormData with:', fieldName, '=', newValue);
+  console.log('Target endpoint:', jsonEndpoint);
+  
+  fetch(jsonEndpoint, {
+    method: 'PATCH',
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    body: formData
+  })
+  .then(res => {
+    console.log('Response received:', res.status, res.ok);
+    if (res.ok) {
+      console.log('Save successful!');
+      // Success - update DOM
+      content.innerHTML = newValue.replace(/\n/g, '<br>');
+      field.classList.remove('edit-mode');
+      showSaved(field);
+      showSaveToast(fieldName);
+      setTimeout(() => hideSaved(field), 2000);
+      // Try to parse as JSON, but don't fail if it's HTML
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        return res.json();
+      }
+      return res.text();
+    } else {
+      console.error('Save failed with status:', res.status);
+      return res.text().then(text => {
+        console.error('Response body:', text);
+        try {
+          const err = JSON.parse(text);
+          console.error('Parsed error:', err);
+          alert('Failed to save (Status ' + res.status + '): ' + (err.error || err.message || text));
+        } catch (e) {
+          // If response is HTML error page, extract the error message
+          if (text.includes('Exception caught')) {
+            alert('Failed to save (Status ' + res.status + '): Server error. Check console for details.');
+          } else {
+            alert('Failed to save (Status ' + res.status + '): ' + text);
+          }
+        }
+        field.classList.remove('edit-mode');
+      });
+    }
+  })
+  .catch(err => {
+    console.error('Fetch error:', err);
+    console.error('Full error:', err);
+    alert('Error saving changes: ' + err.message);
+    field.classList.remove('edit-mode');
+  });
+}
+
+function cancelEdit(button) {
+  const actions = button.closest('.flex');
+  const content = actions.closest('.editable-content');
+  const field = content.closest('.editable-field');
+  const editBtn = field.querySelector('.edit-btn');
+  
+  // Restore original content
+  location.reload(); // Simple approach: reload page
+}
+
+function showSaving(element) {
+  const indicator = document.createElement('span');
+  indicator.className = 'saving-indicator';
+  element.closest('.editable-field')?.appendChild(indicator);
+}
+
+function showSaved(field) {
+  const indicator = document.createElement('span');
+  indicator.className = 'saved-indicator';
+  field.appendChild(indicator);
+}
+
+function hideSaved(field) {
+  const indicator = field.querySelector('.saved-indicator');
+  if (indicator) indicator.remove();
+}
+
+function showSaveToast(fieldName) {
+  const toast = document.createElement('div');
+  toast.className = 'save-toast';
+  toast.innerHTML = `
+    <i class="fas fa-check-circle"></i>
+    <span>Saved successfully!</span>
+  `;
+  document.body.appendChild(toast);
+  
+  // Remove after animation completes
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+</script>

@@ -1,6 +1,7 @@
 class PagesController < ApplicationController
   include LlamaBotRails::ControllerExtensions
   include LlamaBotRails::AgentAuth
+  before_action :authenticate_user!
   before_action :set_book
   before_action :set_chapter
   skip_before_action :verify_authenticity_token, if: -> { request.format.json? }

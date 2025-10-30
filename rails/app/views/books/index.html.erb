@@ -68,6 +68,13 @@
           <!-- Action Buttons -->
           <div class="card-actions justify-start flex-wrap">
             <% if current_user.staff? || current_user.admin? %>
+              <% if book.status == 'Draft' %>
+                <%= link_to builder_book_path(book), class: "btn btn-sm gap-1", style: "background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;" do %>
+                  <i class="fas fa-robot"></i>
+                  Builder Mode
+                <% end %>
+              <% end %>
+              
               <% if book.status != 'Published' %>
                 <%= link_to edit_book_path(book), class: "btn btn-sm gap-1", style: "background-color: #fef3c7; color: #b45309; border-color: #fde68a;" do %>
                   <i class="fas fa-edit"></i>

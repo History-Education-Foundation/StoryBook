@@ -113,6 +113,16 @@ class BooksController < ApplicationController
     @chapters.each { |chapter| chapter.pages.with_attached_image.load }
   end
 
+  def builder
+    @hide_navbar = true
+    @book = current_user.books.find(params[:id])
+    unless @book.status == "Draft"
+      redirect_to books_path, alert: 'Only unpublished (Draft) books can be edited in builder mode.' and return
+    end
+    @chapters = @book.chapters.includes(:pages).order(:id)
+    @chapters.each { |chapter| chapter.pages.with_attached_image.load }
+  end
+
   def audio_playlist
     @book = Book.find(params[:id])
     allowed =

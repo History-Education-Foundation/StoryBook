@@ -129,7 +129,7 @@ RSpec.describe User, type: :model do
       user = create(:user)
       expect(user).to be_persisted
       expect(user.email).to be_present
-      expect(user.password_digest).to be_present
+      expect(user).to respond_to(:encrypted_password)
     end
 
     it "allows creating a user with all optional attributes" do

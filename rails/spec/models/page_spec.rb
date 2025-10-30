@@ -101,7 +101,7 @@ RSpec.describe Page, type: :model do
   describe "image attachment" do
     it "can have an attached image" do
       page = create(:page)
-      image = fixture_file_upload('spec/fixtures/sample_image.jpg', 'image/jpeg')
+      image = fixture_file_upload('sample_image.jpg', 'image/jpeg')
       page.image.attach(image)
       expect(page.image.attached?).to be_truthy
     end

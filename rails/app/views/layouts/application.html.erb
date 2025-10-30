@@ -76,7 +76,9 @@
                 <img class="h-8 w-auto" src="https://llamapress-ai-image-uploads.s3.us-west-2.amazonaws.com/wvtud3dcva3wgihn4a4majbmtsku" alt="Logo">
               </div>
                 <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-  <%= link_to "Chat with AI", "/chat", class: "inline-flex items-center border-b-2 #{active_link_class('/chat')} px-1 pt-1 text-sm font-medium ml-4" %>
+  <% if user_signed_in? %>
+    <%= link_to "Chat with AI", "/chat", class: "inline-flex items-center border-b-2 #{active_link_class('/chat')} px-1 pt-1 text-sm font-medium ml-4" %>
+  <% end %>
   <% if user_signed_in? %>
     <% if current_user.student? || current_user.staff? %>
       <%= link_to "My Library", library_books_path, class: "inline-flex items-center border-b-2 #{active_link_class(library_books_path)} px-1 pt-1 text-sm font-medium" %>
@@ -114,7 +116,9 @@
         <div class="sm:hidden" id="mobile-menu" data-menu-target="mobileMenu">
           <div class="space-y-1 pb-3 pt-2">
               <%= link_to "Home", root_path, class: "block border-l-4 #{active_mobile_link_class(root_path)} py-2 pl-3 pr-4 text-base font-medium" %>
+            <% if user_signed_in? %>
               <%= link_to "Chat with AI", "/chat", class: "block border-l-4 #{active_mobile_link_class('/chat')} py-2 pl-3 pr-4 text-base font-medium" %>
+            <% end %>
             <% if user_signed_in? %>
               <% if current_user.student? || current_user.staff? %>
                 <%= link_to "My Library", library_books_path, class: "block border-l-4 #{active_mobile_link_class(library_books_path)} py-2 pl-3 pr-4 text-base font-medium" %>

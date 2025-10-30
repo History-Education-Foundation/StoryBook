@@ -5,20 +5,35 @@
     <%= f.text_area :content, class: "w-full border rounded px-3 py-2 resize-y", rows: 4 %>
   </div>
 
-  <div class="mb-4">
-    <%= f.label :image, "Image", class: "block font-bold mb-1" %>
-    <%= f.file_field :image, direct_upload: true, class: "w-full border rounded px-3 py-2" %>
+  <!-- Image Management Section -->
+  <div class="mb-6" id="image-container-<%= page.id %>">
+    <label class="block font-bold mb-3">Image</label>
+    
     <% if page.image.attached? %>
-      <div class="mt-2">
-        <%# Only variant if variable? %>
-        <% if page.image.variable? %>
-          <%= image_tag page.image.variant(resize_to_limit: [300, 300]) %>
-        <% else %>
-          <%= image_tag page.image %>
-        <% end %>
-        <span class="text-sm text-gray-600 ml-2">Current image is attached.</span>
+      <!-- Image Display with Checkbox to Delete -->
+      <div class="mb-4">
+        <div class="flex justify-center mb-4">
+          <%= image_tag page.image, class: "rounded-lg border-2 max-h-80 object-contain", style: "border-color: #e0e7ff;", loading: "lazy", alt: "" %>
+        </div>
+        <div class="flex items-center gap-2 p-3 rounded bg-red-50 border border-red-200">
+          <%= f.check_box :delete_image, { class: "w-4 h-4 text-red-600 rounded cursor-pointer" }, "true", "false" %>
+          <label for="page_delete_image" class="text-sm text-red-700 cursor-pointer font-medium">Delete this image (will be removed when you save)</label>
+        </div>
+      </div>
+    <% else %>
+      <!-- Placeholder -->
+      <div class="flex justify-center mb-4">
+        <div class="rounded-lg border-2 border-dashed p-8 text-center" style="border-color: #e0e7ff; background-color: #f3f4f6; width: 100%; max-width: 400px;">
+          <i class="fas fa-image text-4xl mb-2" style="color: #9ca3af;"></i>
+          <p class="text-gray-500 text-sm">No image yet</p>
+        </div>
       </div>
     <% end %>
+
+    <!-- File Input -->
+    <div class="w-full">
+      <%= f.file_field :image, direct_upload: true, class: "w-full border rounded px-3 py-2" %>
+    </div>
   </div>
 
   <div class="mb-4">

@@ -6,7 +6,7 @@ class PagesController < ApplicationController
   before_action :set_chapter
   skip_before_action :verify_authenticity_token, if: -> { request.format.json? }
 
-  llama_bot_allow :index, :show, :create, :update, :destroy, :generate_image
+  llama_bot_allow :index, :show, :create, :update, :destroy, :generate_image, :delete_image
 
   def index
     @pages = @chapter.pages.order(:id)
@@ -55,9 +55,18 @@ class PagesController < ApplicationController
 
   def update
     @page = @chapter.pages.find(params[:id])
+    
+    # Handle soft delete of image
+    params_to_use = page_params.dup
+    if params_to_use[:delete_image] == "true" && @page.image.attached?
+      @page.image.purge
+      params_to_use.delete(:delete_image)
+    else
+      params_to_use.delete(:delete_image)
+    end
   
     respond_to do |format|
-      if @page.update(page_params)
+      if @page.update(params_to_use)
         format.html { redirect_to book_chapter_pages_path(@book, @chapter), notice: 'Page was successfully updated.' }
         format.json { render json: @page, status: :ok }  # ✅ JSON success
       else
@@ -96,6 +105,22 @@ class PagesController < ApplicationController
     end
   end
 
+  def delete_image
+    @page = @chapter.pages.find(params[:id])
+    if @page.image.attached?
+      @page.image.purge
+      respond_to do |format|
+        format.html { redirect_to edit_book_chapter_page_path(@book, @chapter, @page), notice: 'Image was successfully deleted.' }
+        format.json { render json: @page, status: :ok }
+      end
+    else
+      respond_to do |format|
+        format.html { redirect_to edit_book_chapter_page_path(@book, @chapter, @page), alert: 'No image to delete.' }
+        format.json { render json: { error: 'No image to delete' }, status: :unprocessable_entity }
+      end
+    end
+  end
+
   private
 
   def set_book
@@ -107,7 +132,7 @@ class PagesController < ApplicationController
   end
 
   def page_params
-    params.require(:page).permit(:content, :image, :audio_file)
+    params.require(:page).permit(:content, :image, :audio_file, :delete_image)
   end
 
   def generate_image_for_page(page)

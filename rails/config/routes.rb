@@ -8,6 +8,7 @@ Rails.application.routes.draw do
       resources :pages do
         member do
           post :generate_image
+          post :delete_image
         end
       end
     end

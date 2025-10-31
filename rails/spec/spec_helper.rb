@@ -1,3 +1,6 @@
+ENV['RAILS_ENV'] = 'test' # Force into test environment so we don't destroy dev or prod data
+abort("Tests are running in #{ENV['RAILS_ENV']}!") unless ENV['RAILS_ENV'] == 'test'
+
 require 'simplecov'
 SimpleCov.start 'rails' do
   add_filter '/bin/'

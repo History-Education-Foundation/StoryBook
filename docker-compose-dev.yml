@@ -32,7 +32,7 @@ services:
       - llama-network
 
   llamabot:
-    image: kody06/llamabot:0.2.19c
+    image: kody06/llamabot:0.2.19e
     # build: ../LlamaBot
     env_file:
       - .env

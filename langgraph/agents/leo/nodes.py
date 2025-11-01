@@ -6,11 +6,22 @@ load_dotenv()
 from langgraph.graph import MessagesState
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from typing import Annotated
+import operator
+
+from langchain_core.tools import tool, InjectedToolCallId
+from langgraph.types import Command
+from langchain_core.messages import ToolMessage
+from langgraph.prebuilt import InjectedState
+from tavily import TavilyClient
+import os
 
 from langgraph.graph import START, StateGraph
 from langgraph.prebuilt import tools_condition, ToolNode, InjectedState
 from langgraph.prebuilt.chat_agent_executor import AgentState
 
+from typing import NotRequired, Annotated
+from typing import Literal
+from typing_extensions import TypedDict
 
 import asyncio
 from pathlib import Path
@@ -30,33 +41,254 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # System message
-sys_msg = """You are a helpful assistant. Your favorite animal is cyborg llama.
+sys_msg = """You are a helpful assistant that helps teachers create lesson plans and articles.
+
+These lesson plans/articles are saved and represented in the database as "books".
+
+An article = a book in our schema. 
+A section of the article = a chapter in our schema.
+The actual paragraphs/content = a page in our schema. 
+
+This is for organization purposes within the database, but articles are the same as books.
+
+ALWAYS plan out the content of what you're doing using the WRITE_TODO planning tool. This is essential to stay on task. 
+
+Always mark TODO tasks as done as you make progress, this helps the content be much better than it otherwise would be.
+
+For example, write each chapter as a TODO item.
 
 Your available capabilities include:
-- **Create the Book**: use `create_book`
-- **Update a Book**: use `update_book`
-- **Delete a Book**: use `delete_book`
-- **Create Chapters**: use `create_chapter`
+- **Create a new article for a lesson **: use `create_book`
+- **Create sections for the articles (Chapters)**: use `create_chapter`
 - **Update or Delete Chapters**: use `update_chapter` or `delete_chapter`
-- **Create Pages**: use `create_page`
+- **Create actual text content for the article/sections**: use `create_page`
 - **Update or Delete Pages**: use `update_page` or `delete_page`
 - **Generate Images**: use `generate_page_image`
 - **List Chapters**: use `list_chapters`
 - **List Pages**: use `list_pages`
 
-When creating or updating a book, the **reading level** must be selected from the following options:
+When creating or updating a lesson plan, book, the **reading level** must be selected from the following options:
 `"7th grade"`, `"8th grade"`, `"9th grade"`, `"10th grade"`, `"11th grade"`, `"12th grade"`.
 
 If a user provides a grade that doesn't match these exactly, choose the closest valid grade level instead.
 
-Always confirm with the user before creating or editing content, and remember to extract the IDs from the results of `create_` tools to use them in subsequent steps.
+The teachers want to send just one or two messages before you make your TODO plan and execute it. Do not ask them a million questions, just a single clarifying questions.
 """
 # Warning: Brittle - None type will break this when it's injected into the state for the tool call, and it silently fails. So if it doesn't map state types properly from the frontend, it will break. (must be exactly what's defined here).
+
+class Todo(TypedDict):
+    """A structured task item for tracking progress through complex workflows.
+
+    Attributes:
+        content: Short, specific description of the task
+        status: Current state - pending, in_progress, or completed
+    """
+
+    content: str
+    status: Literal["pending", "in_progress", "completed"]
 
 class LlamaPressState(AgentState):
     api_token: str
     agent_prompt: str
+    todos: Annotated[NotRequired[list[Todo]], operator.add] # why did claude code change to annotated.?
 
+WRITE_TODOS_DESCRIPTION = """Use this tool to create and manage a structured task list for your current work session. This helps you track progress, organize complex tasks, and demonstrate thoroughness to the user.
+It also helps the user understand the progress of the task and overall progress of their requests.
+
+## When to Use This Tool
+Use this tool proactively in these scenarios:
+
+1. Complex multi-step tasks - When a task requires 3 or more distinct steps or actions
+2. Non-trivial and complex tasks - Tasks that require careful planning or multiple operations
+3. User explicitly requests todo list - When the user directly asks you to use the todo list
+4. User provides multiple tasks - When users provide a list of things to be done (numbered or comma-separated)
+5. After receiving new instructions - Immediately capture user requirements as todos
+6. When you start working on a task - Mark it as in_progress BEFORE beginning work. Ideally you should only have one todo as in_progress at a time
+7. After completing a task - Mark it as completed and add any new follow-up tasks discovered during implementation
+
+## When NOT to Use This Tool
+
+Skip using this tool when:
+1. There is only a single, straightforward task
+2. The task is trivial and tracking it provides no organizational benefit
+3. The task can be completed in less than 3 trivial steps
+4. The task is purely conversational or informational
+
+NOTE that you should not use this tool if there is only one trivial task to do. In this case you are better off just doing the task directly.
+
+## Examples of When to Use the Todo List
+
+<example>
+User: I want to add a dark mode toggle to the application settings. Make sure you run the tests and build when you're done!
+Assistant: I'll help add a dark mode toggle to your application settings. Let me create a todo list to track this implementation.
+*Creates todo list with the following items:*
+1. Create dark mode toggle component in Settings page
+2. Add dark mode state management (context/store)
+3. Implement CSS-in-JS styles for dark theme
+4. Update existing components to support theme switching
+5. Run tests and build process, addressing any failures or errors that occur
+*Begins working on the first task*
+
+<reasoning>
+The assistant used the todo list because:
+1. Adding dark mode is a multi-step feature requiring UI, state management, and styling changes
+2. The user explicitly requested tests and build be run afterward
+3. The assistant inferred that tests and build need to pass by adding "Ensure tests and build succeed" as the final task
+</reasoning>
+</example>
+
+<example>
+User: Help me plan a comprehensive marketing campaign for our new product launch, including social media, email marketing, and press releases.
+Assistant: I'll help you plan a comprehensive marketing campaign for your product launch. Let me create a todo list to organize all the components.
+*Creates todo list with the following items:*
+1. Define target audience and key messaging
+2. Create social media content calendar and posting schedule
+3. Design email marketing sequence and automation flows
+4. Draft press release and identify media contacts
+5. Set up tracking and analytics for campaign performance
+6. Create visual assets and brand materials
+7. Coordinate launch timeline and deliverables
+*Begins working on the first task*
+
+<reasoning>
+The assistant used the todo list because:
+1. Marketing campaign planning involves multiple distinct channels and activities
+2. Each component requires careful coordination and planning
+3. The systematic approach ensures all aspects of the launch are covered
+4. Progress tracking helps maintain timeline and deliverables
+</reasoning>
+</example>
+
+<example>
+User: Help me rename the function getCwd to getCurrentWorkingDirectory across my project
+Assistant: Let me first search through your codebase to find all occurrences of 'getCwd'.
+*Uses search tools to locate all instances of getCwd in the codebase*
+Assistant: I've found 15 instances of 'getCwd' across 8 different files. Let me create a todo list to track these changes.
+*Creates todo list with specific items for each file that needs updating*
+
+<reasoning>
+The assistant used the todo list because:
+1. First, the assistant searched to understand the scope of the task
+2. Upon finding multiple occurrences across different files, it determined this was a complex task with multiple steps
+3. The todo list helps ensure every instance is tracked and updated systematically
+4. This approach prevents missing any occurrences and maintains consistency
+</reasoning>
+</example>
+
+<example>
+User: I need help organizing my home office: decluttering the desk, setting up a filing system, organizing digital files, and creating a daily workflow.
+Assistant: I'll help you organize your home office systematically. Let me create a todo list to track each area of organization.
+*Creates todo list with items like: 1) Sort and declutter desk items, 2) Set up physical filing system for documents, 3) Organize digital files and folders, 4) Create daily workflow and productivity systems, 5) Establish maintenance routines*
+Let's start with decluttering your desk space to create a clean foundation for the other organizational systems.
+
+<reasoning>
+The assistant used the todo list because:
+1. The user provided multiple distinct organizational tasks
+2. Each area requires different approaches and careful planning
+3. Home organization benefits from systematic, step-by-step completion
+4. Progress tracking ensures all areas are addressed thoroughly
+</reasoning>
+</example>
+
+## Examples of When NOT to Use the Todo List
+
+<example>
+User: How do I print 'Hello World' in Python?
+Assistant: In Python, you can print "Hello World" with this simple code:
+
+python
+print("Hello World")
+
+This will output the text "Hello World" to the console when executed.</assistant>
+
+<reasoning>
+The assistant did not use the todo list because this is a single, trivial task that can be completed in one step. There's no need to track multiple tasks or steps for such a straightforward request.
+</reasoning>
+</example>
+
+<example>
+User: What's the best way to water houseplants?
+Assistant: The best way to water houseplants depends on the specific plant type, but here are some general guidelines:
+
+- Check soil moisture by inserting your finger about 1-2 inches into the soil
+- Water thoroughly when the top inch feels dry, allowing water to drain from the bottom
+- Use room temperature water and water in the morning when possible
+- Avoid overwatering, which is more harmful than underwatering for most plants
+
+Different plants have different needs, so it's important to research your specific varieties for optimal care.
+
+<reasoning>
+The assistant did not use the todo list because this is an informational request with no actual tasks to complete. The user is simply asking for advice and explanation, not for the assistant to perform multiple steps or activities.
+</reasoning>
+</example>
+
+<example>
+User: Can you add a comment to the calculateTotal function to explain what it does?
+Assistant: Sure, let me add a comment to the calculateTotal function to explain what it does.
+* Uses the Edit tool to add a comment to the calculateTotal function *
+
+<reasoning>
+The assistant did not use the todo list because this is a single, straightforward task confined to one location. Adding a comment doesn't require tracking multiple steps or systematic organization.
+</reasoning>
+</example>
+
+<example>
+User: What time is it in Tokyo right now?
+Assistant: I'll check the current time in Tokyo for you.
+
+*Searches for current time in Tokyo*
+
+The current time in Tokyo, Japan is [current time]. Tokyo is in the Japan Standard Time (JST) zone, which is UTC+9.
+
+<reasoning>
+The assistant did not use the todo list because this is a single information lookup with immediate results. There are no multiple steps to track or organize, making the todo list unnecessary for this straightforward request.
+</reasoning>
+</example>
+
+## Task States and Management
+
+1. **Task States**: Use these states to track progress:
+   - pending: Task not yet started
+   - in_progress: Currently working on (limit to ONE task at a time)
+   - completed: Task finished successfully
+
+2. **Task Management**:
+   - Update task status in real-time as you work
+   - Mark tasks complete IMMEDIATELY after finishing (don't batch completions)
+   - Only have ONE task in_progress at any time
+   - Complete current tasks before starting new ones
+   - Remove tasks that are no longer relevant from the list entirely
+
+3. **Task Completion Requirements**:
+   - ONLY mark a task as completed when you have FULLY accomplished it
+   - If you encounter errors, blockers, or cannot finish, keep the task as in_progress
+   - When blocked, create a new task describing what needs to be resolved
+   - Never mark a task as completed if:
+     - There are unresolved issues or errors
+     - Work is partial or incomplete
+     - You encountered blockers that prevent completion
+     - You couldn't find necessary resources or dependencies
+     - Quality standards haven't been met
+
+4. **Task Breakdown**:
+   - Create specific, actionable items
+   - Break complex tasks into smaller, manageable steps
+   - Use clear, descriptive task names
+
+When in doubt, use this tool. Being proactive with task management demonstrates attentiveness and ensures you complete all requirements successfully."""
+
+@tool(description=WRITE_TODOS_DESCRIPTION)
+def write_todos(
+    todos: list[Todo], tool_call_id: Annotated[str, InjectedToolCallId]
+) -> Command:
+    return Command(
+        update={
+            "todos": todos,
+            "messages": [
+                ToolMessage(f"Updated todo list to {todos}", tool_call_id=tool_call_id)
+            ],
+        }
+    )
 
 @tool
 async def list_books(
@@ -565,7 +797,7 @@ async def update_page(
 
 # breakpoint()
 # Global tools list
-tools = [list_books, create_book, create_chapter, create_page, generate_page_image, delete_book, delete_chapter, delete_page, update_book, update_chapter, update_page, list_chapters, list_pages]
+tools = [write_todos, list_books, create_book, create_chapter, create_page, generate_page_image, delete_book, delete_chapter, delete_page, update_book, update_chapter, update_page, list_chapters, list_pages]
 
 # Node
 def leo(state: LlamaPressState):

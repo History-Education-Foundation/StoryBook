@@ -1,4 +1,5 @@
-<% content_for :header, "Add a Chapter to '#{@book.title}'" %>
+<!-- NOTE: chapter = section in frontend -->
+<% content_for :header, "Add a Section to '#{@book.title}'" %>
 <div class="max-w-xl mx-auto">
   <%= render "form", chapter: @chapter %>
 </div>

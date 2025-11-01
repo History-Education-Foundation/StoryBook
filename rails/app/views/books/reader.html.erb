@@ -16,7 +16,7 @@
       <% ix = 1 %>
       <h1 class="text-3xl font-bold mb-4" data-read-ix="0"><%= @book.title %></h1>
       
-      <!-- Book Metadata -->
+      <!-- Article Metadata (book = article in frontend) -->
       <div class="flex flex-wrap gap-2 mb-4">
         <div class="badge badge-lg gap-1" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
           <i class="fas fa-book-reader"></i>
@@ -43,15 +43,17 @@
         </div>
       </div>
 
+      <!-- NOTE: chapters = sections in frontend, pages = paragraphs in frontend -->
       <% @chapters.each do |chapter| %>
         <div class="mt-10 chapter-read-block">
-          <!-- Chapter Header -->
+          <!-- Section Header (chapter = section in frontend) -->
           <div class="mb-6 pb-3 border-b-2" style="border-color: #c7d2fe;">
             <h2 class="text-2xl font-semibold mb-2 text-indigo-900" data-read-ix="<%= ix %>"><%= chapter.title %></h2>
             <% ix += 1 %>
             <div class="text-gray-600 text-sm"><%= simple_format(chapter.description) %></div>
           </div>
 
+          <!-- Paragraphs (pages = paragraphs in frontend) -->
           <% chapter.pages.order(:id).each do |page| %>
             <div class="my-6 p-6 rounded-lg" style="background: linear-gradient(to bottom right, #ffffff, #faf5ff);">
               <% if page.image.attached? %>
@@ -82,7 +84,7 @@
               <% else %>
                 <div class="mt-4 p-3 rounded-lg flex items-center gap-2" style="background-color: #fef3c7; border: 1px solid #fde68a;">
                   <i class="fas fa-info-circle text-amber-600"></i>
-                  <span class="text-sm text-amber-800">No audio available for this page.</span>
+                  <span class="text-sm text-amber-800">No audio available for this paragraph.</span>
                 </div>
               <% end %>
             </div>
@@ -123,7 +125,8 @@
       <i class="fas fa-comments text-indigo-600 text-base sm:text-xl"></i>
     </div>
     <div class="flex-1 min-w-0">
-      <h3 class="text-base sm:text-lg font-bold text-indigo-900">Ask Questions About This Book</h3>
+      <!-- NOTE: 'book' = 'article' in frontend -->
+      <h3 class="text-base sm:text-lg font-bold text-indigo-900">Ask Questions About This Article</h3>
       <p class="text-xs sm:text-sm text-gray-600 hidden sm:block">I'm here to help you understand what you're reading!</p>
     </div>
     <div id="student-chat-status" class="flex-shrink-0 h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-yellow-400"></div>
@@ -133,7 +136,8 @@
   <div id="student-chat-messages" class="space-y-2 sm:space-y-3 mb-3 sm:mb-4 max-h-[50vh] sm:max-h-96 overflow-y-auto p-2 sm:p-3 bg-gray-50 rounded-lg min-h-[160px] sm:min-h-[200px]">
     <div class="text-center text-gray-500 text-xs sm:text-sm py-6 sm:py-8">
       <i class="fas fa-book-reader text-2xl sm:text-3xl mb-2 text-indigo-300"></i>
-      <p>Ask me anything about this book!</p>
+      <!-- NOTE: 'book' = 'article' in frontend -->
+      <p>Ask me anything about this article!</p>
       <p class="text-xs mt-1">Questions about characters, plot, vocabulary, themes, etc.</p>
     </div>
   </div>
@@ -225,12 +229,13 @@ function initializeStudentChat() {
   studentProcessedMessageIds = new Set();
   
   // Clear chat messages and show welcome message
+  // NOTE: 'book' = 'article' in frontend
   const messagesDiv = document.getElementById('student-chat-messages');
   if (messagesDiv) {
     messagesDiv.innerHTML = `
       <div class="text-center text-gray-500 text-sm py-8">
         <i class="fas fa-book-reader text-3xl mb-2 text-indigo-300"></i>
-        <p>Ask me anything about this book!</p>
+        <p>Ask me anything about this article!</p>
         <p class="text-xs mt-1">Questions about characters, plot, vocabulary, themes, etc.</p>
       </div>
     `;

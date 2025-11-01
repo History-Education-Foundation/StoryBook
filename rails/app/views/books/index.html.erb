@@ -1,24 +1,24 @@
-<% content_for :header, "Your Books" %>
+<% content_for :header, "Your Articles" %>
 
 <div data-page-type="books_index" data-resource="books" data-action="index" style="display: none;"></div>
 
-<!-- Add Book Button Section -->
+<!-- Add Article Button Section (book = article in frontend) -->
 <div class="mb-6">
   <% if current_user.staff? || current_user.admin? %>
     <%= link_to new_book_path, class: "btn gap-2 !bg-indigo-100 !text-indigo-700 !border-indigo-200 hover:!bg-indigo-200 hover:!border-indigo-300", style: "background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;" do %>
       <i class="fas fa-plus"></i>
-      Add Book
+      Add Article
     <% end %>
   <% end %>
 </div>
 
 <% if @books.any? %>
-  <!-- Books Grid -->
+  <!-- Articles Grid -->
   <div class="grid gap-6 md:grid-cols-1 lg:grid-cols-1">
     <% @books.each do |book| %>
       <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow duration-200">
         <div class="card-body">
-          <!-- Book Title & Status -->
+          <!-- Article Title & Status (book = article in frontend) -->
           <div class="flex flex-wrap items-center gap-2 mb-3">
             <h2 class="card-title text-2xl flex-grow">
               <%= link_to book.title, book_chapters_path(book), class: "link link-primary hover:link-hover" %>
@@ -40,6 +40,7 @@
                 Share
               <% end %>
               
+              <!-- NOTE: pages = paragraphs in frontend -->
               <% if book.pages.any? && book.pages.all? { |page| page.audio_file.attached? } %>
                 <div class="badge gap-1" style="background-color: #ccfbf1; color: #0f766e; border-color: #99f6e4;">
                   <i class="fas fa-volume-up"></i>
@@ -49,7 +50,7 @@
             <% end %>
           </div>
 
-          <!-- Book Details -->
+          <!-- Article Details -->
           <div class="space-y-1 mb-4">
             <div class="flex items-center gap-2 text-sm">
               <i class="fas fa-book-reader text-base-content/60"></i>
@@ -128,13 +129,13 @@
   <div class="card bg-base-100 shadow-lg">
     <div class="card-body items-center text-center">
       <i class="fas fa-book-open text-6xl text-indigo-200 mb-4"></i>
-      <h3 class="card-title text-slate-600">No books yet</h3>
-      <p class="text-slate-500">Get started by adding your first book!</p>
+      <h3 class="card-title text-slate-600">No articles yet</h3>
+      <p class="text-slate-500">Get started by adding your first article!</p>
       <% if current_user.staff? || current_user.admin? %>
         <div class="card-actions">
           <%= link_to new_book_path, class: "btn gap-2 mt-4", style: "background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;" do %>
             <i class="fas fa-plus"></i>
-            Add Your First Book
+            Add Your First Article
           <% end %>
         </div>
       <% end %>

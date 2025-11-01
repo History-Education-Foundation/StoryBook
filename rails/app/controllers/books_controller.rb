@@ -32,7 +32,7 @@ class BooksController < ApplicationController
   
     respond_to do |format|
       if @book.save
-        format.html { redirect_to books_path, notice: 'Book was successfully created.' }
+        format.html { redirect_to books_path, notice: 'Article was successfully created.' }
         format.json { render json: @book, status: :created }  # ✅ add this
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -44,7 +44,7 @@ class BooksController < ApplicationController
   def edit
     @book = current_user.books.find(params[:id])
     if @book.status == "Published" && params[:from_publish].blank?
-      redirect_to books_path, alert: "You cannot edit published books."
+      redirect_to books_path, alert: "You cannot edit published articles."
     end
   end
 
@@ -53,7 +53,7 @@ class BooksController < ApplicationController
   
     respond_to do |format|
       if @book.update(book_params)
-        format.html { redirect_to books_path, notice: 'Book was successfully updated.' }
+        format.html { redirect_to books_path, notice: 'Article was successfully updated.' }
         format.json { render json: @book, status: :ok }  # ✅ JSON success
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -66,12 +66,12 @@ class BooksController < ApplicationController
     @book = current_user.books.find(params[:id])
     if @book.destroy
       respond_to do |format|
-        format.html { redirect_to books_path, notice: 'Book was successfully deleted.' }
-        format.json { render json: { message: 'Book was successfully deleted.', book: @book }, status: :ok }
+        format.html { redirect_to books_path, notice: 'Article was successfully deleted.' }
+        format.json { render json: { message: 'Article was successfully deleted.', book: @book }, status: :ok }
       end
     else
       respond_to do |format|
-        format.html { redirect_to books_path, alert: 'Failed to delete book.' }
+        format.html { redirect_to books_path, alert: 'Failed to delete article.' }
         format.json { render json: { errors: @book.errors }, status: :unprocessable_entity }
       end
     end
@@ -81,7 +81,7 @@ class BooksController < ApplicationController
     @hide_navbar = true
     @book = Book.find(params[:id])
     if @book.status != "Published"
-      redirect_to root_path, alert: "This book is not published."
+      redirect_to root_path, alert: "This article is not published."
     end
     @chapters = @book.chapters.includes(:pages).order(:id)
     @chapters.each { |chapter| chapter.pages.with_attached_image.load }
@@ -107,7 +107,7 @@ class BooksController < ApplicationController
       (current_user.student? && current_user.saved_books_library.exists?(id: @book.id)) ||
       (current_user.staff? && current_user.books.exists?(id: @book.id))
     unless allowed
-      redirect_to books_path, alert: 'You must save this book to your library before reading.' and return
+      redirect_to books_path, alert: 'You must save this article to your library before reading.' and return
     end
     @chapters = @book.chapters.includes(:pages).order(:id)
     @chapters.each { |chapter| chapter.pages.with_attached_image.load }
@@ -117,7 +117,7 @@ class BooksController < ApplicationController
     @hide_navbar = true
     @book = current_user.books.find(params[:id])
     unless @book.status == "Draft"
-      redirect_to books_path, alert: 'Only unpublished (Draft) books can be edited in builder mode.' and return
+      redirect_to books_path, alert: 'Only unpublished (Draft) articles can be edited in builder mode.' and return
     end
     @chapters = @book.chapters.includes(:pages).order(:id)
     @chapters.each { |chapter| chapter.pages.with_attached_image.load }
@@ -132,7 +132,7 @@ class BooksController < ApplicationController
       render json: { error: 'Not authorized' }, status: :unauthorized and return
     end
     unless @book.status == 'Published'
-      render json: { error: 'Audio playlist is only available for published books.' }, status: :forbidden and return
+      render json: { error: 'Audio playlist is only available for published articles.' }, status: :forbidden and return
     end
     playlist = []
     @book.chapters.order(:id).each do |chapter|
@@ -158,13 +158,13 @@ class BooksController < ApplicationController
       render json: { error: 'Not authorized' }, status: :unauthorized and return
     end
     unless @book.status == 'Published'
-      render json: { error: 'Audio generation is only available for published books.' }, status: :forbidden and return
+      render json: { error: 'Audio generation is only available for published articles.' }, status: :forbidden and return
     end
     if @book.audio_file.attached?
       send_data @book.audio_file.download, type: @book.audio_file.content_type, disposition: 'inline', filename: @book.audio_file.filename.to_s
       return
     end
-    render json: { error: 'Full book audio not available yet for this book.' }, status: :not_found
+      render json: { error: 'Full article audio not available yet for this article.' }, status: :not_found
   end
 
   def publish
@@ -196,9 +196,9 @@ class BooksController < ApplicationController
         audio_path = nil
       end
       @book.update(status: "Published", audio: audio_path)
-      redirect_to books_path, notice: "Book published successfully."
+      redirect_to books_path, notice: "Article published successfully."
     else
-      redirect_to edit_book_path(@book), alert: "Only draft or archived books can be published."
+      redirect_to edit_book_path(@book), alert: "Only draft or archived articles can be published."
     end
   end
 
@@ -206,9 +206,9 @@ class BooksController < ApplicationController
     @book = current_user.books.find(params[:id])
     if @book.status == "Published"
       @book.update(status: "Archived")
-      redirect_to books_path, notice: "Book archived successfully."
+      redirect_to books_path, notice: "Article archived successfully."
     else
-      redirect_to books_path, alert: "Only published books can be archived."
+      redirect_to books_path, alert: "Only published articles can be archived."
     end
   end
 
@@ -216,9 +216,9 @@ class BooksController < ApplicationController
     @book = current_user.books.find(params[:id])
     if @book.status == "Archived"
       @book.update(status: "Draft")
-      redirect_to books_path, notice: "Book was restored to draft."
+      redirect_to books_path, notice: "Article was restored to draft."
     else
-      redirect_to books_path, alert: "Only archived books can be unarchived."
+      redirect_to books_path, alert: "Only archived articles can be unarchived."
     end
   end
 

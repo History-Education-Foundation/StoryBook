@@ -1,28 +1,29 @@
-<% content_for :header, "Pages in Chapter: '#{@chapter.title}'" %>
+<!-- NOTE: pages = paragraphs, chapter = section in frontend -->
+<% content_for :header, "Paragraphs in Section: '#{@chapter.title}'" %>
 
 <!-- Navigation and Action Buttons -->
 <div class="flex flex-wrap gap-3 mb-6">
   <%= link_to book_chapters_path(@book), class: "btn gap-2", style: "background-color: #f3f4f6; color: #374151; border-color: #e5e7eb;" do %>
     <i class="fas fa-arrow-left"></i>
-    Back to Chapters
+    Back to Sections
   <% end %>
   
   <%= link_to new_book_chapter_page_path(@book, @chapter), class: "btn gap-2", style: "background-color: #ddd6fe; color: #5b21b6; border-color: #c4b5fd;" do %>
     <i class="fas fa-plus"></i>
-    Add Page
+    Add Paragraph
   <% end %>
 </div>
 
 <% if @pages.any? %>
-  <!-- Pages Grid -->
+  <!-- Paragraphs Grid (pages = paragraphs in frontend) -->
   <div class="grid gap-6 md:grid-cols-1 lg:grid-cols-1">
     <% @pages.each_with_index do |page, idx| %>
       <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow duration-200">
         <div class="card-body">
-          <!-- Page Header -->
+          <!-- Paragraph Header (page = paragraph in frontend) -->
           <div class="flex items-center gap-3 mb-3">
             <div class="badge badge-lg" style="background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">
-              Page <%= idx + 1 %>
+              Paragraph <%= idx + 1 %>
             </div>
             <% if page.image.attached? %>
               <div class="badge gap-1" style="background-color: #d1fae5; color: #047857; border-color: #a7f3d0;">
@@ -37,14 +38,14 @@
             <% end %>
           </div>
 
-          <!-- Page Image -->
+          <!-- Paragraph Image -->
           <% if page.image.attached? %>
             <div class="mb-4">
               <%= image_tag url_for(page.image), class: "rounded-lg border-2 border-base-300 h-48 w-48 object-cover shadow-md" %>
             </div>
           <% end %>
 
-          <!-- Page Content -->
+          <!-- Paragraph Content -->
           <div class="mb-4">
             <div class="text-sm">
               <div class="flex items-center gap-2 mb-2">
@@ -63,7 +64,7 @@
                 Edit
               <% end %>
               
-              <%= link_to book_chapter_page_path(@book, @chapter, page), data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to delete this page?' }, class: "btn btn-sm gap-1", style: "background-color: #ffe4e6; color: #be123c; border-color: #fecdd3;" do %>
+              <%= link_to book_chapter_page_path(@book, @chapter, page), data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to delete this paragraph?' }, class: "btn btn-sm gap-1", style: "background-color: #ffe4e6; color: #be123c; border-color: #fecdd3;" do %>
                 <i class="fas fa-trash"></i>
                 Delete
               <% end %>
@@ -78,12 +79,12 @@
   <div class="card bg-base-100 shadow-lg">
     <div class="card-body items-center text-center">
       <i class="fas fa-file-alt text-6xl text-indigo-200 mb-4"></i>
-      <h3 class="card-title text-slate-600">No pages yet</h3>
-      <p class="text-slate-500">Start building this chapter by adding your first page!</p>
+      <h3 class="card-title text-slate-600">No paragraphs yet</h3>
+      <p class="text-slate-500">Start building this section by adding your first paragraph!</p>
       <div class="card-actions">
         <%= link_to new_book_chapter_page_path(@book, @chapter), class: "btn gap-2 mt-4", style: "background-color: #ddd6fe; color: #5b21b6; border-color: #c4b5fd;" do %>
           <i class="fas fa-plus"></i>
-          Add Your First Page
+          Add Your First Paragraph
         <% end %>
       </div>
     </div>

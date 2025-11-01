@@ -87,10 +87,10 @@
   <% end %>
   <% if user_signed_in? %>
     <% if current_user.student? || current_user.staff? %>
-      <%= link_to "My Library", library_books_path, class: "inline-flex items-center border-b-2 #{active_link_class(library_books_path)} px-1 pt-1 text-sm font-medium" %>
+      <%= link_to "My Lessons", library_books_path, class: "inline-flex items-center border-b-2 #{active_link_class(library_books_path)} px-1 pt-1 text-sm font-medium" %>
     <% end %>
 
-    <%= link_to "Books", books_path, class: "inline-flex items-center border-b-2 #{active_link_class(books_path)} px-1 pt-1 text-sm font-medium ml-4" %>
+    <%= link_to "Articles", books_path, class: "inline-flex items-center border-b-2 #{active_link_class(books_path)} px-1 pt-1 text-sm font-medium ml-4" %>
   <% else %>
     <%= link_to "Pricing", pricing_path, class: "inline-flex items-center border-b-2 #{active_link_class(pricing_path)} px-1 pt-1 text-sm font-medium" %>
     <%= link_to "About", about_path, class: "inline-flex items-center border-b-2 #{active_link_class(about_path)} px-1 pt-1 text-sm font-medium" %>

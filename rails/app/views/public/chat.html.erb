@@ -52,17 +52,18 @@
         </button>
       </div>
       <div id="prompts-content" class="space-y-2 hidden md:block">
+        <!-- NOTE: book=article, chapter=section, page=paragraph -->
         <div class="flex flex-wrap gap-2">
-          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">List all my books</button>
-          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Create a new book</button>
-          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Add a chapter to my latest book</button>
-          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Generate a page image</button>        
+          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">List all my articles</button>
+          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Create a new article</button>
+          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Add a section to my latest article</button>
+          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Generate a paragraph image</button>        
         </div>
         <div class="flex flex-wrap gap-2">
-          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Rewrite this page more clearly</button>
-          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Summarize this chapter</button>
-          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">List chapters in Book 1</button>
-          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Show me all pages in Chapter 1</button>        
+          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Rewrite this paragraph more clearly</button>
+          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Summarize this section</button>
+          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">List sections in Article 1</button>
+          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Show me all paragraphs in Section 1</button>        
         </div>
       </div>
     </div>

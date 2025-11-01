@@ -1,4 +1,4 @@
-<%# == Page Edit / New == %>
+<%# == Paragraph Edit / New (page = paragraph in frontend) == %>
 <%= form_with model: [@book, @chapter, page], html: { multipart: true } do |f| %>
   <div class="mb-4">
     <%= f.label :content, class: "block font-bold mb-1" %>

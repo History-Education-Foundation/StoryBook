@@ -4,14 +4,15 @@
 
 <!-- Navigation buttons - Desktop and Mobile -->
 <div class="flex gap-3 mb-6">
+  <!-- NOTE: 'book' refers to 'article' in the database model -->
   <%= link_to library_books_path, class: "btn gap-2 flex-1 md:flex-initial #{params[:filter] != 'liked' ? '' : 'btn-ghost'}", style: "#{params[:filter] != 'liked' ? 'background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe;' : 'background-color: #f3f4f6; color: #6b7280; border-color: #e5e7eb;'}" do %>
     <i class="fas fa-book"></i>
-    <span class="hidden sm:inline">All Books</span>
+    <span class="hidden sm:inline">All Articles</span>
     <span class="sm:hidden">All</span>
   <% end %>
   <%= link_to library_books_path(filter: :liked), class: "btn gap-2 flex-1 md:flex-initial #{params[:filter] == 'liked' ? '' : 'btn-ghost'}", style: "#{params[:filter] == 'liked' ? 'background-color: #fce7f3; color: #be185d; border-color: #fbcfe8;' : 'background-color: #f3f4f6; color: #6b7280; border-color: #e5e7eb;'}" do %>
     <i class="fas fa-heart"></i>
-    <span class="hidden sm:inline">Liked Books</span>
+    <span class="hidden sm:inline">Liked Articles</span>
     <span class="sm:hidden">Liked</span>
   <% end %>
 </div>
@@ -24,7 +25,7 @@
     <% @books.each do |book| %>
       <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow duration-200">
         <div class="card-body">
-          <!-- Book Title & Status -->
+          <!-- Article Title & Status (book = article in frontend) -->
           <div class="flex flex-wrap items-center gap-2 mb-3">
             <h2 class="card-title text-2xl flex-grow">
               <%= link_to book.title, read_books_path(book), class: "link link-primary hover:link-hover" %>
@@ -48,7 +49,7 @@
             <% end %>
           </div>
 
-          <!-- Book Details -->
+          <!-- Article Details -->
           <div class="space-y-2 mb-4">
             <div class="flex items-center gap-2 text-sm">
               <i class="fas fa-book-reader text-base-content/60"></i>
@@ -81,7 +82,7 @@
             
             <%= link_to read_books_path(book), class: 'btn btn-sm gap-1', style: "background-color: #dbeafe; color: #1e40af; border-color: #bfdbfe;" do %>
               <i class="fas fa-book-open"></i>
-              Read Book
+              Read Article
             <% end %>
           </div>
         </div>
@@ -95,16 +96,16 @@
       <i class="fas <%= params[:filter] == 'liked' ? 'fa-heart-crack' : 'fa-book-open' %> text-6xl text-indigo-200 mb-4"></i>
       <h3 class="card-title text-slate-600">
         <% if params[:filter] == 'liked' %>
-          No liked books yet
+          No liked articles yet
         <% else %>
-          No published books found
+          No published articles found
         <% end %>
       </h3>
       <p class="text-slate-500">
         <% if params[:filter] == 'liked' %>
-          Start liking books to build your collection!
+          Start liking articles to build your collection!
         <% else %>
-          Check back soon for new books.
+          Check back soon for new articles.
         <% end %>
       </p>
     </div>

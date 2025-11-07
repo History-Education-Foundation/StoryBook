@@ -30,6 +30,7 @@
         </div>
         <h1 class="text-xl font-bold">Aristotle</h1>
       </div>
+
     </div>
     <div id="chat-messages" class="flex-grow overflow-y-auto p-4 space-y-4">
       <!-- Messages will be added here dynamically -->
@@ -156,6 +157,30 @@
             addMessage(parsedData.content, parsedData.type, parsedData.base_message);
             break;
           case "tool":
+            // Check if this is a write_todos tool message by looking at content
+            try {
+              const toolContent = JSON.parse(parsedData.content);
+              // Check if it has the todos structure (from write_todos tool)
+              if (toolContent && Array.isArray(toolContent.todos)) {
+                displayTodoUpdate(toolContent.todos);
+                break; // Don't display as generic tool message
+              }
+            } catch (e) {
+              // Not JSON or doesn't have todos structure, continue to generic display
+            }
+            
+            // Check if this is a write_todos tool by name
+            if (parsedData.base_message?.name === 'write_todos') {
+              try {
+                const toolContent = JSON.parse(parsedData.content);
+                if (toolContent && toolContent.todos) {
+                  displayTodoUpdate(toolContent.todos);
+                  break; // Don't display as generic tool message
+                }
+              } catch (e) {
+                // If not valid JSON, fall through to generic display
+              }
+            }
             addMessage(parsedData.content, parsedData.type, parsedData.base_message);
             break;
           case "error":
@@ -462,6 +487,60 @@
   }
 
   /**
+  * Display a todo list update with visual formatting (matches tool call styling)
+  * @param {array} todos - Array of todo objects with {content, status}
+  */
+  function displayTodoUpdate(todos) {
+    const messagesDiv = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'flex mb-4';
+    
+    // Generate unique ID for this todo update
+    const todoId = `todos-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Format each todo with appropriate styling
+    const todoLines = todos.map((todo, index) => {
+      let icon = '☐';
+      let content = todo.content;
+      let statusColor = 'text-gray-600';
+      
+      if (todo.status === 'in_progress') {
+        icon = '[*]';
+        statusColor = 'text-blue-600 font-medium';
+      } else if (todo.status === 'completed') {
+        icon = '✅';
+        content = `<span style="text-decoration: line-through; opacity: 0.6;">${content}</span>`;
+        statusColor = 'text-green-600';
+      }
+      
+      return `<div class="text-sm ${statusColor} py-1">${icon} ${content}</div>`;
+    }).join('');
+    
+    messageDiv.innerHTML = `
+      <div class="bg-white border-l-4 border-blue-400 shadow-sm rounded-lg py-3 px-4 max-w-[80%]">
+        <!-- Todo Header -->
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center">
+            <span class="mr-2 text-lg">📋</span>
+            <span class="font-semibold text-gray-800">Update Todos</span>
+          </div>
+          <button onclick="toggleToolSection('${todoId}-todos')" class="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 rounded hover:bg-gray-100">
+            Hide ▲
+          </button>
+        </div>
+
+        <!-- Todos List -->
+        <div id="${todoId}-todos" class="space-y-0 text-sm">
+          ${todoLines}
+        </div>
+      </div>
+    `;
+    
+    messagesDiv.appendChild(messageDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  /**
   * @param {string} text - The text content of the message
   * @param {string} sender - The sender of the message. This matches LangGraph schema -- either 'ai', 'tool', or 'human'. 'error' if an error occurs somewhere in the stack.
   * @param {object} base_message - The base message object. This is the object that is sent from LangGraph, and is used to parse the message.
@@ -640,6 +719,13 @@
                 html = html.replace(/\son\w+="[^"]*"/gi, '');
                 html = html.replace(/\son\w+='[^']*'/gi, '');
                 
+                // Replace builder URLs with styled buttons
+                // Convert [View Here](/books/123/builder) to a clickable button
+                html = html.replace(
+                    /\[View Here\]\(\/books\/(\d+)\/builder\)/g,
+                    '<a href="/books/$1/builder" class="inline-block bg-blue-500 hover:bg-blue-600 text-blue-600 px-4 py-2 rounded text-sm font-semibold transition-colors mt-2">View Here</a>'
+                );
+                
                 return html;
             } catch (error) {
                 console.error('Markdown parsing error:', error);
@@ -745,33 +831,61 @@
 
     // Handle create operations
     if (toolname === 'create_book' && output) {
+      const bookTitle = output.title || 'Book';
+      const readingLevel = output.reading_level || '';
+      const learningOutcome = output.learning_outcome || '';
+      
       return `
-        <div class="space-y-1 text-sm">
-          <div class="flex items-center text-green-600 font-medium">
-            ✅ Created book${output.title ? `: "${output.title}"` : ''}
+        <div class="space-y-2 text-sm">
+          <div class="text-gray-600 font-medium">Result:</div>
+          <div class="font-semibold text-gray-800">📚 ${bookTitle}</div>
+          <div class="text-green-600 font-medium">✅ Created</div>
+          <div class="text-gray-700 bg-blue-50 p-3 rounded border border-blue-200 max-h-48 overflow-y-auto">
+            ${readingLevel ? `<div><span class="font-medium">Reading Level:</span><br/>${readingLevel}</div>` : ''}
+            ${readingLevel && learningOutcome ? `<br/>` : ''}
+            ${learningOutcome ? `<div><span class="font-medium">Learning Outcome:</span><br/>${learningOutcome}</div>` : ''}
           </div>
-          ${output.reading_level ? `<div class="text-gray-600"><span class="font-medium">Reading Level:</span> ${output.reading_level}</div>` : ''}
-          ${output.learning_outcome ? `<div class="text-gray-600"><span class="font-medium">Learning Outcome:</span> ${output.learning_outcome}</div>` : ''}
         </div>
       `;
     }
 
     if (toolname === 'create_chapter' && output) {
+      const bookName = output.book?.title || 'Unknown Book';
+      const chapterTitle = output.title || 'Chapter';
+      const chapterDescription = output.description || '';
+      
       return `
-        <div class="space-y-1 text-sm">
-          <div class="flex items-center text-green-600 font-medium">
-            ✅ Created chapter${output.title ? `: "${output.title}"` : ''}
+        <div class="space-y-2 text-sm">
+          <div class="text-gray-600 font-medium">Result:</div>
+          <div class="font-semibold text-gray-800">📖 Chapter in (${bookName})</div>
+          <div class="text-green-600 font-medium">✅ Created</div>
+          <div class="text-gray-700 bg-purple-50 p-3 rounded border border-purple-200 max-h-48 overflow-y-auto">
+            <span class="font-medium">Title:</span><br/>${chapterTitle}
+            ${chapterDescription ? `<br/><br/><span class="font-medium">Description:</span><br/>${chapterDescription}` : ''}
           </div>
-          ${output.description ? `<div class="text-gray-600"><span class="font-medium">Description:</span> ${output.description}</div>` : ''}
         </div>
       `;
     }
 
     if (toolname === 'create_page' && output) {
+      // Use book_id and chapter_id from tool arguments to display context
+      const bookId = toolArgs.book_id || (output.book_id ? output.book_id : 'Unknown');
+      const chapterId = toolArgs.chapter_id || (output.chapter_id ? output.chapter_id : 'Unknown');
+      
+      // Try to get names from nested structure first, fallback to IDs
+      const bookName = output.chapter?.book?.title || output.book?.title || `Book #${bookId}`;
+      const chapterName = output.chapter?.title || `Chapter #${chapterId}`;
+      const pageContent = output.content || 'No content';
+      
       return `
-        <div class="space-y-1 text-sm">
-          <div class="flex items-center text-green-600 font-medium">✅ Created page</div>
-          ${output.content ? `<div class="text-gray-600">${output.content.substring(0, 100)}${output.content.length > 100 ? '...' : ''}</div>` : ''}
+        <div class="space-y-2 text-sm">
+          <div class="text-gray-600 font-medium">Result:</div>
+          <div class="font-semibold text-gray-800">📄 Page in ${chapterName}(${bookName})</div>
+          <div class="text-green-600 font-medium">✅ Created</div>
+          <div class="text-gray-700 bg-green-50 p-3 rounded border border-green-200 max-h-48 overflow-y-auto">
+            <span class="font-medium block mb-2">Content:</span>
+            ${pageContent}
+          </div>
         </div>
       `;
     }
@@ -780,15 +894,115 @@
     if (toolname.startsWith('update_') && output) {
       const resourceType = toolname.replace('update_', '');
 
-      // For the header, we want to show what type of resource was updated
-      // e.g., "Book", "Chapter", "Page"
-      let resourceName = resourceType.charAt(0).toUpperCase() + resourceType.slice(1);
+      // SPECIAL HANDLING FOR UPDATE_PAGE - More detailed output
+      if (resourceType === 'page') {
+        const bookName = output.chapter?.book?.title || 'Unknown Book';
+        const chapterName = output.chapter?.title || 'Unknown Chapter';
+        const pageContent = output.content || 'No content';
+        
+        return `
+          <div class="space-y-2 text-sm">
+            <div class="text-gray-600 font-medium">Result:</div>
+            <div class="font-semibold text-gray-800">📝 Page in ${chapterName}(${bookName})</div>
+            <div class="text-green-600 font-medium">✅ Updated</div>
+            <div class="text-gray-700 bg-yellow-50 p-3 rounded border border-yellow-200 max-h-48 overflow-y-auto">
+              <span class="font-medium block mb-2">Updated Content:</span>
+              ${pageContent}
+            </div>
+          </div>
+        `;
+      }
 
-      // Add the resource name if available (for books, use title; for others, use a generic label)
+      // SPECIAL HANDLING FOR UPDATE_CHAPTER - More detailed output
+      if (resourceType === 'chapter') {
+        const bookName = output.book?.title || 'Unknown Book';
+        const chapterTitle = output.title || 'Chapter';
+        const chapterDescription = output.description || '';
+        
+        // Build list of updated fields
+        let updatedContent = '';
+        const chapterFieldMapping = {
+          'title': 'Title',
+          'description': 'Description'
+        };
+        
+        // Get list of field keys that were updated (from toolArgs)
+        const chapterUpdatedKeys = Object.keys(toolArgs).filter(key => chapterFieldMapping[key]);
+        
+        if (chapterUpdatedKeys.length > 0) {
+          chapterUpdatedKeys.forEach(key => {
+            let value = output[key];
+            if (value !== undefined) {
+              updatedContent += `<div class="text-gray-700 bg-purple-50 p-2 rounded border border-purple-200 max-h-40 overflow-y-auto">
+                <span class="font-medium">${chapterFieldMapping[key]}:</span><br/>${value}
+              </div>`;
+            }
+          });
+        }
+        
+        return `
+          <div class="space-y-2 text-sm">
+            <div class="text-gray-600 font-medium">Result:</div>
+            <div class="font-semibold text-gray-800">📖 Chapter in (${bookName})</div>
+            <div class="text-green-600 font-medium">✅ Updated</div>
+            <div class="space-y-2">
+              ${updatedContent}
+            </div>
+          </div>
+        `;
+      }
+
+      // SPECIAL HANDLING FOR UPDATE_BOOK - More detailed output
+      if (resourceType === 'book') {
+        const bookTitle = output.title || 'Book';
+        
+        // Build list of updated fields
+        let updatedContent = '';
+        const bookFieldMapping = {
+          'title': 'Title',
+          'reading_level': 'Reading Level',
+          'learning_outcome': 'Learning Outcome'
+        };
+        
+        // Get list of field keys that were updated (from toolArgs)
+        const bookUpdatedKeys = Object.keys(toolArgs).filter(key => bookFieldMapping[key]);
+        
+        if (bookUpdatedKeys.length > 0) {
+          bookUpdatedKeys.forEach(key => {
+            let value = output[key];
+            if (value !== undefined) {
+              updatedContent += `<div class="text-gray-700 bg-blue-50 p-2 rounded border border-blue-200 max-h-40 overflow-y-auto">
+                <span class="font-medium">${bookFieldMapping[key]}:</span><br/>${value}
+              </div>`;
+            }
+          });
+        }
+        
+        return `
+          <div class="space-y-2 text-sm">
+            <div class="text-gray-600 font-medium">Result:</div>
+            <div class="font-semibold text-gray-800">📚 ${bookTitle}</div>
+            <div class="text-green-600 font-medium">✅ Updated</div>
+            <div class="space-y-2">
+              ${updatedContent}
+            </div>
+          </div>
+        `;
+      }
+
+      // Build descriptive resource context for other update types
+      let resourceName = resourceType.charAt(0).toUpperCase() + resourceType.slice(1);
+      let contextLabel = '';
+
       if (resourceType === 'book' && output.title) {
         resourceName = output.title;
-      } else if (resourceType === 'chapter' || resourceType === 'page') {
-        resourceName = resourceType.charAt(0).toUpperCase() + resourceType.slice(1);
+        contextLabel = 'Book';
+      } else if (resourceType === 'chapter') {
+        const bookName = output.book?.title || 'Unknown Book';
+        contextLabel = `Chapter in "${bookName}"`;
+        if (output.title) {
+          resourceName = output.title;
+        }
       }
 
       // Build a list of fields that were ACTUALLY updated (present in toolArgs, excluding IDs)
@@ -807,43 +1021,46 @@
       console.log('📝 Update Debug - output:', output);
 
       // Get list of field keys from toolArgs (these indicate what was updated)
+      // Filter to only include fields we care about (not IDs)
       const updatedFieldKeys = Object.keys(toolArgs).filter(key => fieldMapping[key]);
 
       // Use the fields identified in toolArgs and get values from output
       updatedFieldKeys.forEach(key => {
         let value = output[key];
         if (value !== undefined) {
-          if (key === 'content' && value.length > 150) {
-            value = value.substring(0, 150) + '...';
-          }
+          const isLongContent = (key === 'content' || key === 'description') && value.length > 100;
+          const displayValue = isLongContent ? value : value;
           console.log('📝 Adding field:', fieldMapping[key], '=', value);
-          updatedFields.push(`<div class="text-gray-700">
-            <span class="font-medium">${fieldMapping[key]}:</span> ${value}
+          
+          updatedFields.push(`<div class="text-gray-700 bg-gray-50 p-2 rounded border border-gray-200 max-h-40 overflow-y-auto">
+            <span class="font-medium">${fieldMapping[key]}:</span><br/>${displayValue}
           </div>`);
         }
       });
 
       console.log('📝 Final updatedFields array:', updatedFields);
 
-      // If no fields were identified, show generic message
+      // If no fields were identified, show generic message with context
       if (updatedFields.length === 0) {
         return `
           <div class="text-sm">
             <div class="font-semibold text-gray-800">
               ✅ ${resourceName}
             </div>
+            ${contextLabel ? `<div class="text-gray-600 text-xs">Result: ${contextLabel}</div>` : ''}
             <div class="text-gray-600 mt-1">Updated</div>
           </div>
         `;
       }
 
       return `
-        <div class="space-y-1 text-sm">
+        <div class="space-y-2 text-sm">
           <div class="font-semibold text-gray-800">
             ✅ ${resourceName}
           </div>
-          <div class="text-gray-600 text-xs mb-1">Updated:</div>
-          <div class="space-y-1 pl-2">
+          ${contextLabel ? `<div class="text-gray-600 text-xs mb-2">Result: ${contextLabel}</div>` : ''}
+          <div class="text-gray-600 text-xs mb-2 font-medium">Updated:</div>
+          <div class="space-y-2">
             ${updatedFields.join('')}
           </div>
         </div>
@@ -856,38 +1073,64 @@
 
       console.log('🗑️ Delete operation - output:', output);
 
-      // Get what was deleted from the output (title if available)
-      // The structure can be output.title or output.chapter.title or output.book.title or output.page
-      let deletedName = '';
-      if (output && output.title) {
-        deletedName = output.title;
-      } else if (output && output.chapter && output.chapter.title) {
-        deletedName = output.chapter.title;
-      } else if (output && output.book && output.book.title) {
-        deletedName = output.book.title;
-      } else if (output && output.page) {
-        // For pages, show content preview if available
-        if (output.page.content) {
-          const preview = output.page.content.substring(0, 60);
-          deletedName = preview + (output.page.content.length > 60 ? '...' : '');
-        } else {
-          deletedName = 'Page';
+      let deletedContent = '';
+      let deletedContext = '';
+
+      if (resourceType === 'book' && output && output.title) {
+        deletedContent = `
+          <div class="space-y-2 text-sm">
+            <div class="text-gray-600 font-medium">Result:</div>
+            <div class="font-semibold text-gray-800">📚 ${output.title}</div>
+            <div class="text-red-600 font-medium">🗑️ Deleted</div>
+          </div>
+        `;
+      } else if (resourceType === 'chapter') {
+        if (output && output.title) {
+          const bookName = output.book?.title || 'Unknown Book';
+          deletedContent = `
+            <div class="space-y-2 text-sm">
+              <div class="text-gray-600 font-medium">Result:</div>
+              <div class="font-semibold text-gray-800">📖 Chapter in (${bookName})</div>
+              <div class="text-red-600 font-medium">🗑️ Deleted</div>
+            </div>
+          `;
         }
-      } else {
-        // Fallback to generic resource type if no title
-        deletedName = resourceType.charAt(0).toUpperCase() + resourceType.slice(1);
+      } else if (resourceType === 'page') {
+        if (output && output.chapter) {
+          const bookName = output.chapter.book?.title || 'Unknown Book';
+          const chapterName = output.chapter.title || 'Unknown Chapter';
+          deletedContent = `
+            <div class="space-y-2 text-sm">
+              <div class="text-gray-600 font-medium">Result:</div>
+              <div class="font-semibold text-gray-800">📄 Page in ${chapterName}(${bookName})</div>
+              <div class="text-red-600 font-medium">🗑️ Deleted</div>
+            </div>
+          `;
+        } else if (output && output.page) {
+          // Fallback structure
+          deletedContent = `
+            <div class="space-y-2 text-sm">
+              <div class="text-gray-600 font-medium">Result:</div>
+              <div class="font-semibold text-gray-800">📄 Page</div>
+              <div class="text-red-600 font-medium">🗑️ Deleted</div>
+            </div>
+          `;
+        }
       }
 
-      console.log('🗑️ Deleted name:', deletedName);
+      console.log('🗑️ Deleted context:', deletedContext);
 
-      return `
-        <div class="space-y-1 text-sm">
-          <div class="font-semibold text-gray-800">
-            ✅ ${deletedName}
+      if (deletedContent) {
+        return deletedContent;
+      } else {
+        return `
+          <div class="space-y-1 text-sm">
+            <div class="flex items-center text-red-600 font-medium">
+              🗑️ ${resourceType.charAt(0).toUpperCase() + resourceType.slice(1)} deleted
+            </div>
           </div>
-          <div class="text-red-600 text-xs">Deleted</div>
-        </div>
-      `;
+        `;
+      }
     }
 
     // Handle generate_page_image

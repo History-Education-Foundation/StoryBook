@@ -103,11 +103,9 @@ class BooksController < ApplicationController
   def reader
     @hide_navbar = true
     @book = Book.find(params[:id])
-    allowed =
-      (current_user.student? && current_user.saved_books_library.exists?(id: @book.id)) ||
-      (current_user.staff? && current_user.books.exists?(id: @book.id))
-    unless allowed
-      redirect_to books_path, alert: 'You must save this article to your library before reading.' and return
+    # Allow reading any published book
+    unless @book.status == 'Published'
+      redirect_to books_path, alert: 'This article is not published.' and return
     end
     @chapters = @book.chapters.includes(:pages).order(:id)
     @chapters.each { |chapter| chapter.pages.with_attached_image.load }

@@ -21,7 +21,11 @@
           <!-- Article Title & Status (book = article in frontend) -->
           <div class="flex flex-wrap items-center gap-2 mb-3">
             <h2 class="card-title text-2xl flex-grow">
-              <%= link_to book.title, book_chapters_path(book), class: "link link-primary hover:link-hover" %>
+              <% if current_user.staff? || current_user.admin? %>
+                <%= link_to book.title, builder_book_path(book), class: "link link-primary hover:link-hover" %>
+              <% else %>
+                <%= link_to book.title, book_chapters_path(book), class: "link link-primary hover:link-hover" %>
+              <% end %>
             </h2>
             
             <% if book.status.present? %>
@@ -74,9 +78,7 @@
                   <i class="fas fa-robot"></i>
                   Builder Mode
                 <% end %>
-              <% end %>
-              
-              <% if book.status != 'Published' %>
+              <% elsif book.status != 'Published' %>
                 <%= link_to edit_book_path(book), class: "btn btn-sm gap-1", style: "background-color: #fef3c7; color: #b45309; border-color: #fde68a;" do %>
                   <i class="fas fa-edit"></i>
                   Edit

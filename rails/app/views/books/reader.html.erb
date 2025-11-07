@@ -30,6 +30,11 @@
           else 'background-color: #f3f4f6; color: #4b5563; border-color: #e5e7eb;' end %>">
           <%= @book.status %>
         </div>
+
+        <div class="badge badge-lg gap-1" style="background-color: #f3e8ff; color: #6d28d9; border-color: #e9d5ff;">
+          <i class="fas fa-user"></i>
+          <%= @book.user.email %>
+        </div>
       </div>
       
       <!-- Learning Outcome -->

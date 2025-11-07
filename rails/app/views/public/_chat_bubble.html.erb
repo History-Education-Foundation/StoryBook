@@ -746,62 +746,127 @@
     }
 
     if (toolname === 'create_book' && output) {
+      const bookTitle = output.title || 'Book';
+      const readingLevel = output.reading_level || '';
+      const learningOutcome = output.learning_outcome || '';
       return `
         <div class="space-y-1 text-xs">
-          <div class="flex items-center text-green-600 font-medium">
-            ✅ Created book${output.title ? `: "${output.title}"` : ''}
+          <div class="font-semibold text-gray-800">📚 ${bookTitle}</div>
+          <div class="text-green-600 font-medium">✅ Created</div>
+          <div class="bg-blue-50 p-1 rounded border border-blue-200 mt-1">
+            ${readingLevel ? `<div class="text-gray-700"><span class="font-medium">Level:</span> ${readingLevel}</div>` : ''}
+            ${learningOutcome ? `<div class="text-gray-700"><span class="font-medium">Outcome:</span> ${learningOutcome.substring(0, 50)}${learningOutcome.length > 50 ? '...' : ''}</div>` : ''}
           </div>
-          ${output.reading_level ? `<div class="text-gray-600"><span class="font-medium">Reading Level:</span> ${output.reading_level}</div>` : ''}
         </div>
       `;
     }
 
     if (toolname === 'create_chapter' && output) {
+      const bookName = output.book?.title || 'Unknown Book';
+      const chapterTitle = output.title || 'Chapter';
+      const chapterDescription = output.description || '';
       return `
         <div class="space-y-1 text-xs">
-          <div class="flex items-center text-green-600 font-medium">
-            ✅ Created chapter${output.title ? `: "${output.title}"` : ''}
+          <div class="font-semibold text-gray-800">📖 Chapter in (${bookName})</div>
+          <div class="text-green-600 font-medium">✅ Created</div>
+          <div class="bg-purple-50 p-1 rounded border border-purple-200 mt-1">
+            <div class="text-gray-700"><span class="font-medium">Title:</span> ${chapterTitle}</div>
+            ${chapterDescription ? `<div class="text-gray-700"><span class="font-medium">Desc:</span> ${chapterDescription.substring(0, 50)}${chapterDescription.length > 50 ? '...' : ''}</div>` : ''}
           </div>
         </div>
       `;
     }
 
     if (toolname === 'create_page' && output) {
+      const bookName = output.chapter?.book?.title || output.book?.title || 'Unknown Book';
+      const chapterName = output.chapter?.title || 'Unknown Chapter';
+      const pageContent = output.content || 'No content';
       return `
         <div class="space-y-1 text-xs">
-          <div class="flex items-center text-green-600 font-medium">✅ Created page</div>
+          <div class="font-semibold text-gray-800">📄 Page in ${chapterName}(${bookName})</div>
+          <div class="text-green-600 font-medium">✅ Created</div>
+          <div class="bg-green-50 p-1 rounded border border-green-200 mt-1 max-h-16 overflow-y-auto">
+            <div class="text-gray-700">${pageContent.substring(0, 100)}${pageContent.length > 100 ? '...' : ''}</div>
+          </div>
         </div>
       `;
     }
 
-    if (toolname.startsWith('update_') && output) {
-      const resourceType = toolname.replace('update_', '');
-      let resourceName = resourceType.charAt(0).toUpperCase() + resourceType.slice(1);
-
-      if (resourceType === 'book' && output.title) {
-        resourceName = output.title;
-      }
-
+    if (toolname === 'update_book' && output) {
+      const bookTitle = output.title || 'Book';
+      const readingLevel = output.reading_level || '';
+      const learningOutcome = output.learning_outcome || '';
       return `
         <div class="space-y-1 text-xs">
-          <div class="font-semibold text-gray-800">
-            ✅ ${resourceName}
+          <div class="font-semibold text-gray-800">📚 ${bookTitle}</div>
+          <div class="text-green-600 font-medium">✅ Updated</div>
+          <div class="bg-blue-50 p-1 rounded border border-blue-200 mt-1">
+            ${readingLevel ? `<div class="text-gray-700"><span class="font-medium">Level:</span> ${readingLevel}</div>` : ''}
+            ${learningOutcome ? `<div class="text-gray-700"><span class="font-medium">Outcome:</span> ${learningOutcome.substring(0, 50)}${learningOutcome.length > 50 ? '...' : ''}</div>` : ''}
           </div>
-          <div class="text-gray-600">Updated</div>
         </div>
       `;
     }
 
-    if (toolname.startsWith('delete_')) {
-      const resourceType = toolname.replace('delete_', '');
-      let deletedName = resourceType.charAt(0).toUpperCase() + resourceType.slice(1);
-
+    if (toolname === 'update_chapter' && output) {
+      const bookName = output.book?.title || 'Unknown Book';
+      const chapterTitle = output.title || 'Chapter';
+      const chapterDescription = output.description || '';
       return `
         <div class="space-y-1 text-xs">
-          <div class="font-semibold text-gray-800">
-            ✅ ${deletedName}
+          <div class="font-semibold text-gray-800">📖 Chapter in (${bookName})</div>
+          <div class="text-green-600 font-medium">✅ Updated</div>
+          <div class="bg-purple-50 p-1 rounded border border-purple-200 mt-1">
+            <div class="text-gray-700"><span class="font-medium">Title:</span> ${chapterTitle}</div>
+            ${chapterDescription ? `<div class="text-gray-700"><span class="font-medium">Desc:</span> ${chapterDescription.substring(0, 50)}${chapterDescription.length > 50 ? '...' : ''}</div>` : ''}
           </div>
-          <div class="text-red-600">Deleted</div>
+        </div>
+      `;
+    }
+
+    if (toolname === 'update_page' && output) {
+      const bookName = output.chapter?.book?.title || 'Unknown Book';
+      const chapterName = output.chapter?.title || 'Unknown Chapter';
+      const pageContent = output.content || 'No content';
+      return `
+        <div class="space-y-1 text-xs">
+          <div class="font-semibold text-gray-800">📝 Page in ${chapterName}(${bookName})</div>
+          <div class="text-green-600 font-medium">✅ Updated</div>
+          <div class="bg-yellow-50 p-1 rounded border border-yellow-200 mt-1 max-h-16 overflow-y-auto">
+            <div class="text-gray-700"><span class="font-medium">Updated Content:</span></div>
+            <div class="text-gray-700">${pageContent.substring(0, 100)}${pageContent.length > 100 ? '...' : ''}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (toolname === 'delete_book' && output) {
+      const bookTitle = output.title || 'Book';
+      return `
+        <div class="space-y-1 text-xs">
+          <div class="font-semibold text-gray-800">📚 ${bookTitle}</div>
+          <div class="text-red-600 font-medium">🗑️ Deleted</div>
+        </div>
+      `;
+    }
+
+    if (toolname === 'delete_chapter' && output) {
+      const bookName = output.book?.title || 'Unknown Book';
+      return `
+        <div class="space-y-1 text-xs">
+          <div class="font-semibold text-gray-800">📖 Chapter in (${bookName})</div>
+          <div class="text-red-600 font-medium">🗑️ Deleted</div>
+        </div>
+      `;
+    }
+
+    if (toolname === 'delete_page' && output) {
+      const bookName = output.chapter?.book?.title || 'Unknown Book';
+      const chapterName = output.chapter?.title || 'Unknown Chapter';
+      return `
+        <div class="space-y-1 text-xs">
+          <div class="font-semibold text-gray-800">📄 Page in ${chapterName}(${bookName})</div>
+          <div class="text-red-600 font-medium">🗑️ Deleted</div>
         </div>
       `;
     }

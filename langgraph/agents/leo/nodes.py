@@ -51,6 +51,50 @@ The actual paragraphs/content = a page in our schema.
 
 This is for organization purposes within the database, but articles are the same as books.
 
+## 🎯 **MANDATORY RULE: CALL `write_todos` FIRST ON EVERY USER REQUEST**
+
+**NO EXCEPTIONS - YOU MUST DO THIS:**
+1. User sends ANY request → YOU IMMEDIATELY CALL `write_todos` with their task as the first item
+2. Status must be "in_progress" for the main task
+3. Create subtasks as "pending" for all planned steps
+4. As you work, call `write_todos` AGAIN after EACH major action:
+   - Mark current subtask as "completed"
+   - Mark next subtask as "in_progress"
+5. When done, call `write_todos` one final time with main task as "completed"
+
+**IMMEDIATE EXAMPLES:**
+- User: "Add a page about climate" → First action: `write_todos([{"content": "Add page about climate", "status": "in_progress"}])`
+- User: "List my chapters" → First action: `write_todos([{"content": "List chapters", "status": "in_progress"}])`
+- User: "Create a book on biology" → First action: `write_todos([{"content": "Create book on biology", "status": "in_progress"}, {"content": "Add chapters", "status": "pending"}])`
+
+**DO NOT SKIP THIS - IT IS NOT OPTIONAL. EVERY USER MESSAGE REQUIRES AN IMMEDIATE `write_todos` CALL.**
+
+## CRITICAL: VALIDATION BEFORE UPDATE OPERATIONS
+**ALWAYS verify that a resource exists BEFORE attempting to update it:**
+1. Before calling `update_book`: First call `list_books` to confirm the book exists
+2. Before calling `update_chapter`: First call `list_chapters` with the book_id to confirm the chapter exists
+3. Before calling `update_page`: First call `list_pages` to confirm the page exists
+4. NEVER skip this validation step - always check first, then update
+If the resource doesn't exist, inform the user instead of attempting the update
+
+This prevents errors and ensures you're updating the correct resource.
+## CRITICAL: BUILDER URL REQUIREMENT - ALWAYS INCLUDE
+**After EVERY create, update, or delete operation on books, chapters, or pages:**
+1. The tool will return structured data including a `builder_url` field in the tool_output
+2. YOU MUST extract the book_id from the builder_url and include it in your natural language response using EXACTLY this format: `[View Here](/books/{book_id}/builder)`
+3. NEVER skip this step - ALWAYS provide this link so users can immediately open the builder to view/edit their changes
+4. Place the link at the end of your message, after describing what was changed
+5. The link will be automatically converted to a styled button on the frontend
+
+**EXAMPLES OF CORRECT RESPONSES:**
+- "The reading level for 'Early England Colonies: Foundations of American Government' has been updated to 11th grade. If you'd like to make additional changes or need help with chapters or content, just let me know! [Edit in Builder](/books/123/builder)"
+- "Created new chapter 'Chapter 1: Introduction' for your book. [View Here](/books/456/builder)"
+- "Successfully updated the page content. [View Here](/books/789/builder)"
+
+**For chapter and page operations:** Still link to the parent book's builder using the book_id: `[View Here](/books/{book_id}/builder)`
+
+**CRITICAL REMINDER:** When you see a tool response with `builder_url` in the tool_output, extract the book_id from that URL and ALWAYS include it in your response message to the user. This is non-negotiable - every CRUD response must include this link.
+
 ## CRITICAL REQUIREMENT: AGGRESSIVE TODO PLANNING FOR COMPLETE CONTENT
 
 **YOU MUST:**
@@ -62,11 +106,11 @@ This is for organization purposes within the database, but articles are the same
 
 Example of proper TODO structure:
 ```
-1. Create book "The Solar System" (pending)
-   - Chapter 1: Introduction to the Sun (pending)
-     - Page 1: What is the Sun? (pending)
-     - Page 2: The Sun's Composition (pending)
-     - Page 3: Solar Energy (pending)
+1. Create book "The Solar System" (in_progress)
+   - Chapter 1: Introduction to the Sun (in_progress)
+     - Page 1: What is the Sun? (complete)
+     - Page 2: The Sun's Composition (complete)
+     - Page 3: Solar Energy (in_progress)
    - Chapter 2: Planets in Our Solar System (pending)
      - Page 1: Mercury and Venus (pending)
      - Page 2: Earth and Mars (pending)
@@ -75,6 +119,8 @@ Example of proper TODO structure:
      - Page 1: The Asteroid Belt (pending)
      - Page 2: Comets and Meteors (pending)
 ```
+
+You **MUST** call the update TODO tool call very frequently, as you make progress on each next task. Focus on the in_progress tasks, then complete them, mark them as complete, and then move to the next in_progress task.
 
 **NEVER create content piecemeal.** If a user asks for an article with 3 chapters and 5 pages each, you must plan all 15 pages AND their content sequentially.
 
@@ -330,15 +376,18 @@ When in doubt, use this tool. Being proactive with task management demonstrates 
 @tool(description=WRITE_TODOS_DESCRIPTION)
 def write_todos(
     todos: list[Todo], tool_call_id: Annotated[str, InjectedToolCallId]
-) -> Command:
-    return Command(
-        update={
-            "todos": todos,
-            "messages": [
-                ToolMessage(f"Updated todo list to {todos}", tool_call_id=tool_call_id)
-            ],
-        }
-    )
+) -> str:
+    """Updates the todo list and returns a JSON representation for frontend display."""
+    import json
+    
+    # Return JSON that the frontend can parse and display
+    todo_json = json.dumps({
+        "todos": todos
+    })
+    
+    # Also update the state via Command (for backend tracking)
+    # But this return value is what gets sent to the frontend
+    return todo_json
 
 @tool
 async def list_books(
@@ -450,6 +499,10 @@ async def create_book(
     if isinstance(result, str):
         return result
 
+    # Add builder URL to the result
+    if isinstance(result, dict) and 'id' in result:
+        result['builder_url'] = f"/books/{result['id']}/builder"
+
     return {'toolname': 'create_book', 'tool args': {'title': title}, "tool_output": result}
 
 
@@ -488,7 +541,24 @@ async def create_chapter(
     if isinstance(result, str):
         return result
 
-    return {'toolname': 'create_chapter', 'tool args': {'book_id': book_id, 'title': title}, "tool_output": result}
+    # Fetch book name to enrich the response
+    try:
+        book_result = await make_api_request_to_llamapress(
+            method="GET",
+            endpoint=f"/books/{book_id}.json",
+            api_token=api_token,
+        )
+        if isinstance(book_result, dict) and 'title' in book_result:
+            if isinstance(result, dict):
+                result['book'] = {'title': book_result['title']}
+    except Exception as e:
+        logger.warning(f"Failed to fetch book name: {e}")
+
+    # Add builder URL to the result
+    if isinstance(result, dict):
+        result['builder_url'] = f"/books/{book_id}/builder"
+
+    return {'toolname': 'create_chapter', 'tool args': {'book_id': book_id, 'title': title, 'description': description}, "tool_output": result}
 
 
 @tool
@@ -521,7 +591,33 @@ async def create_page(
     if isinstance(result, str):
         return result
 
-    return {'toolname': 'create_page', 'tool args': {'chapter_id': chapter_id}, "tool_output": result}
+    # Fetch book and chapter names to enrich the response
+    try:
+        book_result = await make_api_request_to_llamapress(
+            method="GET",
+            endpoint=f"/books/{book_id}.json",
+            api_token=api_token,
+        )
+        if isinstance(book_result, dict) and 'title' in book_result:
+            if isinstance(result, dict):
+                result['book'] = {'title': book_result['title']}
+        
+        chapter_result = await make_api_request_to_llamapress(
+            method="GET",
+            endpoint=f"/books/{book_id}/chapters/{chapter_id}.json",
+            api_token=api_token,
+        )
+        if isinstance(chapter_result, dict) and 'title' in chapter_result:
+            if isinstance(result, dict):
+                result['chapter'] = {'title': chapter_result['title']}
+    except Exception as e:
+        logger.warning(f"Failed to fetch book/chapter names: {e}")
+
+    # Add builder URL to the result
+    if isinstance(result, dict):
+        result['builder_url'] = f"/books/{book_id}/builder"
+
+    return {'toolname': 'create_page', 'tool args': {'book_id': book_id, 'chapter_id': chapter_id, 'content': content}, "tool_output": result}
 
 
 @tool
@@ -607,6 +703,19 @@ async def delete_chapter(
         api_token=api_token,
     )
 
+    # Fetch book name to enrich the response
+    try:
+        book_result = await make_api_request_to_llamapress(
+            method="GET",
+            endpoint=f"/books/{book_id}.json",
+            api_token=api_token,
+        )
+        if isinstance(book_result, dict) and 'title' in book_result:
+            if isinstance(chapter_info, dict):
+                chapter_info['book'] = {'title': book_result['title']}
+    except Exception as e:
+        logger.warning(f"Failed to fetch book name: {e}")
+
     # Now delete the chapter
     result = await make_api_request_to_llamapress(
         method="DELETE",
@@ -655,6 +764,26 @@ async def delete_page(
 
     logger.info(f"Page number {page_number} corresponds to page ID {page_id}")
 
+    # Fetch book and chapter names to enrich the response
+    try:
+        book_result = await make_api_request_to_llamapress(
+            method="GET",
+            endpoint=f"/books/{book_id}.json",
+            api_token=api_token,
+        )
+        chapter_result = await make_api_request_to_llamapress(
+            method="GET",
+            endpoint=f"/books/{book_id}/chapters/{chapter_id}.json",
+            api_token=api_token,
+        )
+        if isinstance(chapter_result, dict):
+            page_to_delete['chapter'] = {
+                'title': chapter_result.get('title', 'Unknown Chapter'),
+                'book': {'title': book_result.get('title', 'Unknown Book') if isinstance(book_result, dict) else 'Unknown Book'}
+            }
+    except Exception as e:
+        logger.warning(f"Failed to fetch book/chapter names: {e}")
+
     # Now delete the page
     result = await make_api_request_to_llamapress(
         method="DELETE",
@@ -666,7 +795,7 @@ async def delete_page(
 
     # Return the page info as the output, including the page number for display
     page_to_delete['page_number'] = page_number
-    return {'toolname': 'delete_page', 'tool args': {'page_number': page_number, 'chapter_id': chapter_id, 'book_id': book_id}, 'tool_output': {'page': page_to_delete}}
+    return {'toolname': 'delete_page', 'tool args': {'page_number': page_number, 'chapter_id': chapter_id, 'book_id': book_id}, 'tool_output': page_to_delete}
 
 
 @tool
@@ -713,6 +842,10 @@ async def update_book(
     if reading_level:
         updated_args['reading_level'] = reading_level
 
+    # Add builder URL to the result
+    if isinstance(result, dict):
+        result['builder_url'] = f"/books/{book_id}/builder"
+
     return {
         'toolname': 'update_book',
         'tool args': updated_args,
@@ -758,6 +891,19 @@ async def update_chapter(
     if isinstance(result, str):
         return result
 
+    # Fetch book name to enrich the response
+    try:
+        book_result = await make_api_request_to_llamapress(
+            method="GET",
+            endpoint=f"/books/{book_id}.json",
+            api_token=api_token,
+        )
+        if isinstance(book_result, dict) and 'title' in book_result:
+            if isinstance(result, dict):
+                result['book'] = {'title': book_result['title']}
+    except Exception as e:
+        logger.warning(f"Failed to fetch book name: {e}")
+
     # Build tool args with only the fields that were actually updated
     updated_args = {"book_id": book_id, "chapter_id": chapter_id}
     if title:
@@ -767,6 +913,10 @@ async def update_chapter(
 
     logger.info(f"📝 update_chapter returning - updated_args: {updated_args}")
     logger.info(f"📝 update_chapter returning - title param: {title}, description param: {description}")
+
+    # Add builder URL to the result
+    if isinstance(result, dict):
+        result['builder_url'] = f"/books/{book_id}/builder"
 
     return {
         "toolname": "update_chapter",
@@ -830,6 +980,28 @@ async def update_page(
     if isinstance(result, str):
         return result
 
+    # Fetch book and chapter names to enrich the response
+    try:
+        book_result = await make_api_request_to_llamapress(
+            method="GET",
+            endpoint=f"/books/{book_id}.json",
+            api_token=api_token,
+        )
+        if isinstance(book_result, dict) and 'title' in book_result:
+            if isinstance(result, dict):
+                result['book'] = {'title': book_result['title']}
+        
+        chapter_result = await make_api_request_to_llamapress(
+            method="GET",
+            endpoint=f"/books/{book_id}/chapters/{chapter_id}.json",
+            api_token=api_token,
+        )
+        if isinstance(chapter_result, dict) and 'title' in chapter_result:
+            if isinstance(result, dict):
+                result['chapter'] = {'title': chapter_result['title'], 'book': {'title': book_result.get('title', 'Unknown Book')}}
+    except Exception as e:
+        logger.warning(f"Failed to fetch book/chapter names: {e}")
+
     # Build tool args with only the fields that were actually updated
     updated_args = {
         "book_id": book_id,
@@ -838,6 +1010,10 @@ async def update_page(
     }
     if content:
         updated_args['content'] = content
+
+    # Add builder URL to the result
+    if isinstance(result, dict):
+        result['builder_url'] = f"/books/{book_id}/builder"
 
     return {
         "toolname": "update_page",

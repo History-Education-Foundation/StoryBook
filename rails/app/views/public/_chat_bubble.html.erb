@@ -26,9 +26,9 @@
     <!-- Chat Header -->
     <div class="flex items-center justify-between border-b p-4 bg-indigo-600 text-white rounded-t-lg flex-shrink-0">
       <div class="flex items-center space-x-3">
-        <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaBot Logo" class="h-8 w-8">
+        <img src="https://llamapress-ai-image-uploads.s3.us-west-2.amazonaws.com/wvtud3dcva3wgihn4a4majbmtsku" alt="Aristotle Logo" class="h-8 w-auto">
         <div id="connectionStatusIconForLlamaBot" class="h-3 w-3 rounded-full bg-yellow-400"></div>
-        <h1 class="text-lg font-bold">Leo the Llama</h1>
+        <h1 class="text-lg font-bold">Aristotle</h1>
       </div>
       <button id="chat-bubble-close" class="hover:bg-indigo-700 rounded-full p-1">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -87,8 +87,8 @@
   let errorModalShown = false;
   let connectionCheckInterval;
   let subscription = null;
-  let lastToolCallArgs = {};
-  let processedMessageIds = new Set();
+  let lastToolCallArgs = {}; // Store tool call arguments to use when displaying results
+  let processedMessageIds = new Set(); // Track processed messages to prevent duplicates
   let currentPageContext = null;
 
   // Get current page context (URL and page name)
@@ -295,6 +295,136 @@
     }, 50);
   }
   
+  // Toggle sidebar
+  document.addEventListener('DOMContentLoaded', function() {
+    const toggleSidebarBtn = document.getElementById('toggle-sidebar');
+    if (toggleSidebarBtn) {
+      toggleSidebarBtn.addEventListener('click', function() {
+        const sidebar = document.getElementById('threads-sidebar');
+        const toggleButton = this;
+        isSidebarCollapsed = !isSidebarCollapsed;
+        
+        if (sidebar) {
+          sidebar.classList.toggle('hidden');
+        }
+        toggleButton.classList.toggle('rotate-180');
+      });
+    }
+  });
+
+  async function loadThreads() {
+    try {
+      const response = await fetch('/llama_bot/agent/threads');
+      const threads = await response.json();
+      console.log('Loaded threads:', threads);
+      
+      const threadsList = document.getElementById('threads-list');
+      if (threadsList) {
+        threadsList.innerHTML = '';
+        
+        if (!threads || threads.length === 0) {
+          console.log('No threads available');
+          startNewConversation();
+          return;
+        }
+        
+        // Sort conversation threads by creation date
+        threads.sort((a, b) => {
+          const checkpoint_id_a = a.state[2].configurable.checkpoint_id;
+          const checkpoint_id_b = b.state[2].configurable.checkpoint_id;
+          if (checkpoint_id_a === checkpoint_id_b) {
+            return a.thread_id.localeCompare(b.thread_id);
+          } else {
+            return checkpoint_id_b.localeCompare(checkpoint_id_a);
+          }
+        });
+        
+        threads.forEach(thread => {
+          const threadElement = createThreadElement(thread);
+          threadsList.appendChild(threadElement);
+        });
+      }
+
+      startNewConversation();
+    } catch (error) {
+      console.error('Error loading threads:', error);
+      startNewConversation();
+    }
+  }
+
+  function createThreadElement(thread) {
+    const threadElement = document.createElement('div');
+    threadElement.className = 'p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-200 text-sm';
+    const threadId = thread.thread_id || thread.id;
+    
+    // Parse timestamp from thread ID and format it nicely
+    let displayText;
+    if (threadId && threadId.match(/^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}$/)) {
+      const [datePart, timePart] = threadId.split('_');
+      const [year, month, day] = datePart.split('-');
+      const [hour, minute, second] = timePart.split('-');
+      
+      const date = new Date(year, month - 1, day, hour, minute, second);
+      displayText = date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    } else {
+      displayText = threadId || 'New Chat';
+    }
+    
+    threadElement.textContent = displayText;
+    threadElement.dataset.threadId = threadId;
+    threadElement.onclick = () => {
+      console.log('Clicked thread with ID:', threadId);
+      loadThread(threadId);
+    };
+    return threadElement;
+  }
+
+  async function loadThread(threadId) {
+    console.log('Loading thread:', threadId);
+    
+    if (!threadId) {
+      console.error('No thread ID provided');
+      return;
+    }
+    
+    currentThreadId = threadId;
+    const messagesDiv = document.getElementById('chat-messages');
+    messagesDiv.innerHTML = '';
+
+    try {
+      const response = await fetch(`/llama_bot/agent/chat-history/${threadId}`);
+      const threadState = await response.json();
+      console.log('Loaded thread state:', threadState);
+      
+      if (Array.isArray(threadState) && threadState.length > 0) {
+        const messages = threadState[0].messages || [];
+        console.log('Processing messages:', messages);
+        messages.forEach(message => {
+          if (message) {
+            addMessage(message.content, message.type, message);
+          }
+        });
+      }
+
+      // Update active thread in sidebar
+      document.querySelectorAll('[data-thread-id]').forEach(item => {
+        item.classList.remove('bg-indigo-50', 'text-indigo-700');
+        if (item.dataset.threadId === threadId) {
+          item.classList.add('bg-indigo-50', 'text-indigo-700');
+        }
+      });
+    } catch (error) {
+      console.error('Error loading chat history:', error);
+      addMessage('Error loading chat history', 'error');
+    }
+  }
+
   waitForCableConnection((consumer) => {
     const sessionId = crypto.randomUUID();
 
@@ -304,8 +434,8 @@
       connected() {
         console.log('Connected to chat channel');
         lastPongTime = Date.now();
+        loadThreads();
         startConnectionCheck();
-        startNewConversation();
       },
       disconnected() {
         console.log('Disconnected from chat channel');
@@ -340,6 +470,30 @@
             addMessage(parsedData.content, parsedData.type, parsedData.base_message);
             break;
           case "tool":
+            // Check if this is a write_todos tool message by looking at content
+            try {
+              const toolContent = JSON.parse(parsedData.content);
+              // Check if it has the todos structure (from write_todos tool)
+              if (toolContent && Array.isArray(toolContent.todos)) {
+                displayTodoUpdate(toolContent.todos);
+                break; // Don't display as generic tool message
+              }
+            } catch (e) {
+              // Not JSON or doesn't have todos structure, continue to generic display
+            }
+            
+            // Check if this is a write_todos tool by name
+            if (parsedData.base_message?.name === 'write_todos') {
+              try {
+                const toolContent = JSON.parse(parsedData.content);
+                if (toolContent && toolContent.todos) {
+                  displayTodoUpdate(toolContent.todos);
+                  break; // Don't display as generic tool message
+                }
+              } catch (e) {
+                // If not valid JSON, fall through to generic display
+              }
+            }
             addMessage(parsedData.content, parsedData.type, parsedData.base_message);
             break;
           case "error":
@@ -433,12 +587,36 @@
   function selectPrompt(buttonElement) {
     const promptText = buttonElement.textContent;
     const messageInput = document.getElementById('message-input');
+    
+    // Populate the input field
     messageInput.value = promptText;
+    
+    // Focus the input field for better UX
     messageInput.focus();
+    
+    // Add a subtle animation to show the prompt was selected
     buttonElement.style.transform = 'scale(0.98)';
     setTimeout(() => {
       buttonElement.style.transform = '';
     }, 150);
+  }
+
+  function togglePrompts() {
+    const promptsContent = document.getElementById('prompts-content');
+    const toggleText = document.getElementById('prompts-toggle-text');
+    const toggleIcon = document.getElementById('prompts-toggle-icon');
+    
+    if (promptsContent.classList.contains('hidden')) {
+      promptsContent.classList.remove('hidden');
+      toggleText.textContent = 'Hide';
+      toggleIcon.classList.remove('fa-chevron-down');
+      toggleIcon.classList.add('fa-chevron-up');
+    } else {
+      promptsContent.classList.add('hidden');
+      toggleText.textContent = 'Show';
+      toggleIcon.classList.remove('fa-chevron-up');
+      toggleIcon.classList.add('fa-chevron-down');
+    }
   }
 
   function sendMessage() {
@@ -498,6 +676,60 @@
       console.log('🚀 Sending message with page context:', messageData);
       subscription.send(messageData);
     }
+  }
+
+  /**
+  * Display a todo list update with visual formatting (matches tool call styling)
+  * @param {array} todos - Array of todo objects with {content, status}
+  */
+  function displayTodoUpdate(todos) {
+    const messagesDiv = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'flex mb-4';
+    
+    // Generate unique ID for this todo update
+    const todoId = `todos-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Format each todo with appropriate styling
+    const todoLines = todos.map((todo, index) => {
+      let icon = '☐';
+      let content = todo.content;
+      let statusColor = 'text-gray-600';
+      
+      if (todo.status === 'in_progress') {
+        icon = '[*]';
+        statusColor = 'text-blue-600 font-medium';
+      } else if (todo.status === 'completed') {
+        icon = '✅';
+        content = `<span style="text-decoration: line-through; opacity: 0.6;">${content}</span>`;
+        statusColor = 'text-green-600';
+      }
+      
+      return `<div class="text-xs ${statusColor} py-1">${icon} ${content}</div>`;
+    }).join('');
+    
+    messageDiv.innerHTML = `
+      <div class="bg-white border-l-4 border-blue-400 shadow-sm rounded-lg py-2 px-3 max-w-[80%]">
+        <!-- Todo Header -->
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center">
+            <span class="mr-2 text-lg">📋</span>
+            <span class="font-semibold text-gray-800 text-sm">Update Todos</span>
+          </div>
+          <button onclick="toggleToolSection('${todoId}-todos')" class="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 rounded hover:bg-gray-100">
+            Hide ▲
+          </button>
+        </div>
+
+        <!-- Todos List -->
+        <div id="${todoId}-todos" class="space-y-0 text-xs">
+          ${todoLines}
+        </div>
+      </div>
+    `;
+    
+    messagesDiv.appendChild(messageDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
   }
 
   function addMessage(text, sender, base_message=null) {
@@ -645,13 +877,25 @@
     if (!text) return '';
     
     try {
+      // Parse markdown to HTML
       let html = marked.parse(text);
+      
+      // Basic XSS prevention - remove script tags and event handlers
       html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
       html = html.replace(/\son\w+="[^"]*"/gi, '');
       html = html.replace(/\son\w+='[^']*'/gi, '');
+      
+      // Replace builder URLs with styled buttons
+      // Convert [View Here](/books/123/builder) to a clickable button
+      html = html.replace(
+          /\[View Here\]\(\/books\/(\d+)\/builder\)/g,
+          '<a href="/books/$1/builder" class="inline-block bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs font-semibold transition-colors mt-2">View Here</a>'
+      );
+      
       return html;
     } catch (error) {
       console.error('Markdown parsing error:', error);
+      // Fallback to plain text with line breaks
       return text.replace(/\n/g, '<br>');
     }
   }
@@ -917,6 +1161,29 @@
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
 
+    #threads-sidebar {
+      transition: all 0.3s ease-in-out;
+    }
+
+    #threads-sidebar.hidden {
+      display: none;
+    }
+
+    #toggle-sidebar {
+      transition: transform 0.3s ease-in-out;
+    }
+
+    #toggle-sidebar.rotate-180 {
+      transform: rotate(180deg);
+    }
+
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
     @media (max-width: 640px) {
       #chat-bubble-container {
         width: calc(100vw - 2rem);
@@ -925,6 +1192,10 @@
         left: 1rem;
         right: 1rem;
         bottom: 5rem;
+      }
+      
+      #threads-sidebar {
+        display: none;
       }
       
       #chat-bubble-toggle {

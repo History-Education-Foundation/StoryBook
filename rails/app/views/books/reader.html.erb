@@ -25,7 +25,7 @@
         
         <div class="badge badge-lg" style="<%= case @book.status
           when 'Draft' then 'background-color: #fef3c7; color: #b45309; border-color: #fde68a;'
-          when 'Published' then 'background-color: #d1fae5; color: #047857; border-color: #a7f3d0;'
+          when 'Published' then 'background-color: #15803d; color: #ffffff; border-color: #15803d;'
           when 'Archived' then 'background-color: #f1f5f9; color: #475569; border-color: #e2e8f0;'
           else 'background-color: #f3f4f6; color: #4b5563; border-color: #e5e7eb;' end %>">
           <%= @book.status %>
@@ -187,6 +187,13 @@
   </div>
 </div>
 
+<script>
+  // Guard: Prevent llama_bot_rails from initializing chat features on reader page
+  window.disableLlamaBotThreads = true;
+  window.disableLlamaBotConversations = true;
+  window.skipLlamaBotInitialization = true;
+</script>
+
 <%= javascript_include_tag "llama_bot_rails/application" %>
 <% if defined?(action_cable_meta_tag) %>
   <%= action_cable_meta_tag %>
@@ -195,13 +202,24 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <script>
-// Student Chat Agent Setup
-let studentChatSubscription = null;
-let studentThreadId = null;
-let studentLastPongTime = Date.now();
-let studentProcessedMessageIds = new Set();
-let studentLastToolCallArgs = {};
-let currentBookId = null;
+// Student Chat Agent Setup - use window to prevent re-declaration errors on Turbo navigation
+if (!window.studentChatState) {
+  window.studentChatState = {
+    subscription: null,
+    threadId: null,
+    lastPongTime: Date.now(),
+    processedMessageIds: new Set(),
+    lastToolCallArgs: {},
+    currentBookId: null
+  };
+}
+
+// Use window object to avoid re-declaration errors on Turbo navigation
+window.studentChatSubscription = window.studentChatState.subscription;
+window.studentThreadId = window.studentChatState.threadId;
+window.studentLastPongTime = window.studentChatState.lastPongTime;
+window.studentProcessedMessageIds = window.studentChatState.processedMessageIds;
+window.studentLastToolCallArgs = window.studentChatState.lastToolCallArgs;
 
 function waitForStudentCableConnection(callback) {
   const interval = setInterval(() => {
@@ -214,9 +232,9 @@ function waitForStudentCableConnection(callback) {
 
 function initializeStudentChat() {
   // Disconnect existing subscription if it exists
-  if (studentChatSubscription) {
-    studentChatSubscription.unsubscribe();
-    studentChatSubscription = null;
+  if (window.studentChatState.subscription) {
+    window.studentChatState.subscription.unsubscribe();
+    window.studentChatState.subscription = null;
   }
 
   // Reset state for new book and create stable thread_id per book
@@ -224,14 +242,14 @@ function initializeStudentChat() {
   const bookReaderContainer = document.getElementById('book-reader-container');
   const bookId = bookReaderContainer ? bookReaderContainer.dataset.bookId : '<%= @book.id %>';
   const userId = '<%= current_user.id %>';
-  currentBookId = bookId;
+  window.studentChatState.currentBookId = bookId;
   
   // Generate a STABLE thread_id per book (NO timestamp)
   // Each book gets its own isolated conversation history
   // This ensures Book A and Book B have completely separate contexts
-  studentThreadId = `student_user_${userId}_book_${bookId}`;
+  window.studentChatState.threadId = `student_user_${userId}_book_${bookId}`;
   
-  studentProcessedMessageIds = new Set();
+  window.studentChatState.processedMessageIds = new Set();
   
   // Clear chat messages and show welcome message
   // NOTE: 'book' = 'article' in frontend
@@ -249,14 +267,14 @@ function initializeStudentChat() {
   waitForStudentCableConnection((consumer) => {
     const sessionId = crypto.randomUUID();
 
-    studentChatSubscription = consumer.subscriptions.create({
+    window.studentChatState.subscription = consumer.subscriptions.create({
       channel: 'LlamaBotRails::ChatChannel',
       session_id: sessionId,
       agent_state_builder_class: "StudentAgentStateBuilder"
     }, {
       connected() {
         updateStudentStatusIcon('bg-green-500');
-        studentLastPongTime = Date.now();
+        window.studentChatState.lastPongTime = Date.now();
       },
       disconnected() {
         updateStudentStatusIcon('bg-red-500');
@@ -266,15 +284,15 @@ function initializeStudentChat() {
 
         const messageId = `${parsedData.type}_${parsedData.content?.substring(0, 50)}_${Date.now()}`;
         
-        if (studentProcessedMessageIds.has(messageId)) {
+        if (window.studentChatState.processedMessageIds.has(messageId)) {
           return;
         }
 
-        studentProcessedMessageIds.add(messageId);
+        window.studentChatState.processedMessageIds.add(messageId);
 
-        if (studentProcessedMessageIds.size > 100) {
-          const idsArray = Array.from(studentProcessedMessageIds);
-          studentProcessedMessageIds = new Set(idsArray.slice(-100));
+        if (window.studentChatState.processedMessageIds.size > 100) {
+          const idsArray = Array.from(window.studentChatState.processedMessageIds);
+          window.studentChatState.processedMessageIds = new Set(idsArray.slice(-100));
         }
 
         switch (parsedData.type) {
@@ -287,7 +305,7 @@ function initializeStudentChat() {
             addStudentMessage(parsedData.content, 'error');
             break;
           case "pong":
-            studentLastPongTime = Date.now();
+            window.studentChatState.lastPongTime = Date.now();
             updateStudentStatusIcon('bg-green-500');
             break;
         }
@@ -309,6 +327,7 @@ document.addEventListener('turbo:before-visit', () => {
 
 function updateStudentStatusIcon(statusClass) {
   const statusIndicator = document.getElementById('student-chat-status');
+  if (!statusIndicator) return; // Safety check: element may not exist on all pages
   statusIndicator.classList.remove('bg-green-500', 'bg-yellow-400', 'bg-red-500');
   statusIndicator.classList.add(statusClass);
 }
@@ -324,7 +343,7 @@ function sendStudentMessage() {
   const input = document.getElementById('student-message-input');
   const message = input.value.trim();
   
-  if (message && studentChatSubscription) {
+  if (message && window.studentChatState.subscription) {
     // Remove welcome message if exists
     const welcomeMessage = document.querySelector('#student-chat-messages .text-center');
     if (welcomeMessage) {
@@ -335,21 +354,21 @@ function sendStudentMessage() {
     input.value = '';
     showStudentLoading();
 
-    // studentThreadId is now generated in initializeStudentChat()
+    // window.studentChatState.threadId is now generated in initializeStudentChat()
     // No need to generate it here since each book has its own thread
 
     const messageData = {
       message: message,
-      thread_id: studentThreadId,
-      book_id: currentBookId,
+      thread_id: window.studentChatState.threadId,
+      book_id: window.studentChatState.currentBookId,
       raw_params: {
         controller: 'books',
         action: 'reader',
-        id: currentBookId
+        id: window.studentChatState.currentBookId
       }
     };
     
-    studentChatSubscription.send(messageData);
+    window.studentChatState.subscription.send(messageData);
   }
 }
 
@@ -461,21 +480,38 @@ document.addEventListener('turbo:load', function() {
   async function fetchAudioPlaylist() {
     const matches = window.location.pathname.match(/books\/(\d+)\/read/);
     const bookId = matches ? matches[1] : null;
-    if (!bookId) return [];
+    if (!bookId) {
+      console.error('Could not extract bookId from URL:', window.location.pathname);
+      return [];
+    }
+    console.log('Fetching audio playlist for bookId:', bookId);
     const resp = await fetch(`/books/${bookId}/audio_playlist`);
-    if (!resp.ok) return [];
+    console.log('Audio playlist response status:', resp.status, resp.statusText);
+    if (!resp.ok) {
+      console.error('Audio playlist fetch failed:', resp.status, resp.statusText);
+      const errorText = await resp.text();
+      console.error('Error details:', errorText);
+      return [];
+    }
     const data = await resp.json();
-    return (data.audios || []).map(entry => entry.url);
+    console.log('Audio playlist data:', data);
+    const urls = (data.audios || []).map(entry => entry.url);
+    console.log('Audio URLs extracted:', urls.length, 'files');
+    return urls;
   }
 
   async function playPlaylist(startAt = 0) {
+    console.log('playPlaylist called with startAt:', startAt);
     setHighlightOnAudio(true);
     loading.classList.remove('hidden');
     audioPlayer.classList.add('hidden');
     if (!audioPlaylist.length) {
+      console.log('Audio playlist is empty, fetching...');
       audioPlaylist = await fetchAudioPlaylist();
     }
+    console.log('Audio playlist after fetch:', audioPlaylist.length, 'items');
     if (!audioPlaylist.length) {
+      console.error('No audio files found for this book');
       alert('No audio files found for this book.');
       loading.classList.add('hidden');
       setHighlightOnAudio(false);
@@ -484,6 +520,7 @@ document.addEventListener('turbo:load', function() {
     }
     finished = false;
     paused = false;
+    console.log('Starting playback at track', startAt);
     playTrack(startAt);
   }
 

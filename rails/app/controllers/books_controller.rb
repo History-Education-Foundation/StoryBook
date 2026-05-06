@@ -123,12 +123,16 @@ class BooksController < ApplicationController
 
   def audio_playlist
     @book = Book.find(params[:id])
+    
+    # Allow access if book is published, OR if user owns it
     allowed =
-      (current_user.student? && current_user.saved_books_library.exists?(id: @book.id)) ||
+      (@book.status == 'Published') ||
       (current_user.staff? && current_user.books.exists?(id: @book.id))
+    
     unless allowed
       render json: { error: 'Not authorized' }, status: :unauthorized and return
     end
+    
     unless @book.status == 'Published'
       render json: { error: 'Audio playlist is only available for published articles.' }, status: :forbidden and return
     end

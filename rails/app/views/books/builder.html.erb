@@ -14,6 +14,10 @@
     outline-offset: 2px;
   }
   
+  .editable-content {
+    cursor: pointer;
+  }
+  
   /* Hide edit buttons for published books */
   <% if @book.status == 'Published' %>
     .edit-btn {
@@ -769,6 +773,36 @@ function setupImageDescriptionSync(pageId) {
   setupSync();
 }
 
+// Setup click-to-edit on all editable content using event delegation
+function setupClickToEdit() {
+  // Remove any existing handler to prevent duplicates
+  const container = document.querySelector('#book-builder-container');
+  if (!container) return;
+  
+  // Use event delegation on the container
+  container.removeEventListener('click', handleEditFieldClick);
+  container.addEventListener('click', handleEditFieldClick);
+}
+
+function handleEditFieldClick(e) {
+  // Check if we clicked on an editable-content or edit button
+  const editBtn = e.target.closest('.edit-btn');
+  const content = e.target.closest('.editable-content');
+  
+  if (!editBtn && !content) return;
+  
+  // Don't trigger if already in edit mode
+  const field = e.target.closest('.editable-field');
+  if (!field || field.classList.contains('edit-mode')) return;
+  
+  e.stopPropagation();
+  
+  const button = field.querySelector('.edit-btn');
+  if (button) {
+    startEdit(button);
+  }
+}
+
 // Call setup on document load for each page
 document.addEventListener('turbo:load', function() {
   const pages = document.querySelectorAll('[data-page-id]');
@@ -776,6 +810,7 @@ document.addEventListener('turbo:load', function() {
     const pageId = pageEl.dataset.pageId;
     setupImageDescriptionSync(pageId);
   });
+  setupClickToEdit();
 });
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -784,6 +819,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const pageId = pageEl.dataset.pageId;
     setupImageDescriptionSync(pageId);
   });
+  setupClickToEdit();
 });
 
 function deletePageImage(pageId) {

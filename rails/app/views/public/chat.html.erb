@@ -45,33 +45,24 @@
     
     <!-- Suggested Prompts - Collapsible on mobile -->
     <div id="suggested-prompts" class="p-4 border-t border-gray-200">
-      <div class="flex items-center justify-between mb-2">
-        <div class="text-sm text-gray-600">Quick actions:</div>
-        <button onclick="togglePrompts()" class="md:hidden text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
-          <span id="prompts-toggle-text">Show</span>
-          <i id="prompts-toggle-icon" class="fas fa-chevron-down text-xs"></i>
-        </button>
-      </div>
-      <div id="prompts-content" class="space-y-2 hidden md:block">
-        <!-- NOTE: book=article, chapter=section, page=paragraph -->
+      <div id="prompts-content" class="space-y-2 block !block">
+        <div class="text-sm text-gray-600">Lesson Suggestions:</div>
         <div class="flex flex-wrap gap-2">
-          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">List all my articles</button>
-          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Create a new article</button>
-          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Add a section to my latest article</button>
-          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Generate a paragraph image</button>        
+          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 whitespace-nowrap inline-block visible" title="Create an article about the Utes use of horses in 1825, for a 7th grade Utah History Course">Utes use of horses (7th grade) ...</button>
+          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 whitespace-nowrap inline-block visible" title="Explain how Lake Bonneville shaped Utah's landforms and climate, for a 6th grade Earth Science and Utah Geography lesson. Focus: How the ancient lake's rise and fall created Utah's valleys, salt flats, and Great Salt Lake basin.">Lake Bonneville landforms (6th grade) ...</button>
+          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 whitespace-nowrap inline-block visible" title="Describe how the Fremont people built their homes and stored food, for a 4th grade Utah Native Peoples unit. Focus: Agriculture, pit houses, granaries, and how their environment shaped daily life.">Fremont homes & storage (4th grade) ...</button>
         </div>
         <div class="flex flex-wrap gap-2">
-          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Rewrite this paragraph more clearly</button>
-          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Summarize this section</button>
-          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">List sections in Article 1</button>
-          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700">Show me all paragraphs in Section 1</button>        
+          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 whitespace-nowrap inline-block visible" title="Explore how the Transcontinental Railroad changed Utah in 1869, for an 8th grade U.S. History and Utah Studies course. Focus: Economic development, migration, Native displacement, and statehood momentum.">Transcontinental Railroad (8th grade) ...</button>
+          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 whitespace-nowrap inline-block visible" title="Create an article about how Utah's pioneers managed money and trade before banks, for a 7th grade Financial Literacy and Utah History lesson. Focus: Barter systems, tithing houses, and the beginnings of cooperative stores.">Pioneer money & trade (7th grade) ...</button>
+          <button onclick="selectPrompt(this)" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 whitespace-nowrap inline-block visible" title="Write a lesson about how Lake Bonneville fossils help scientists understand ancient ecosystems, for a 6th grade Science and History cross-curricular unit. Focus: Paleontology, geology, and how evidence tells the story of Utah's prehistoric past.">Lake Bonneville fossils (6th grade) ...</button>
         </div>
       </div>
     </div>
     
-    <div class="border-t border-gray-200 p-4 flex">
-      <input type="text" id="message-input" class="flex-grow border rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Type your message...">
-      <button onclick="sendMessage()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-r-lg">Send</button>
+    <div class="border-t border-gray-200 p-4 flex flex-col gap-2">
+      <textarea id="message-input" class="flex-grow border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" placeholder="Type your message..." rows="3"></textarea>
+      <button onclick="sendMessage()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg self-end">Send</button>
     </div>
   </div>
 </div>
@@ -385,10 +376,10 @@
   function showWelcomeMessage() {
     const messagesDiv = document.getElementById('chat-messages');
     const welcomeDiv = document.createElement('div');
-    welcomeDiv.className = 'flex flex-col items-center justify-center h-full p-8 text-center text-gray-600';
+    welcomeDiv.className = 'flex flex-col items-center justify-center h-full p-8 text-center space-y-2';
     welcomeDiv.innerHTML = `
-      <h2 class="text-2xl font-bold mb-2">Welcome</h2>
-      <p class="text-lg">What's on the agenda?</p>
+      <h1 class="text-2xl text-gray-600">Welcome</h1>
+      <h2 class="text-3xl font-bold text-gray-800">Create Your Lesson for Students</h2>
     `;
     messagesDiv.appendChild(welcomeDiv);
   }
@@ -404,7 +395,8 @@
   }
 
   function selectPrompt(buttonElement) {
-    const promptText = buttonElement.textContent;
+    // Use title attribute if available (for lesson suggestions), otherwise use textContent
+    const promptText = buttonElement.getAttribute('title') || buttonElement.textContent;
     const messageInput = document.getElementById('message-input');
     
     // Populate the input field

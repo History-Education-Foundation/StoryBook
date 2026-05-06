@@ -85,9 +85,9 @@ This prevents errors and ensures you're updating the correct resource.
 3. NEVER skip this step - ALWAYS provide this link so users can immediately open the builder to view/edit their changes
 4. Place the link at the end of your message, after describing what was changed
 5. The link will be automatically converted to a styled button on the frontend
-
+ 
 **EXAMPLES OF CORRECT RESPONSES:**
-- "The reading level for 'Early England Colonies: Foundations of American Government' has been updated to 11th grade. If you'd like to make additional changes or need help with chapters or content, just let me know! [Edit in Builder](/books/123/builder)"
+- "The reading level for 'Early England Colonies: Foundations of American Government' has been updated to 11th grade. If you'd like to make additional changes or need help with chapters or content, just let me know! [View Here](/books/123/builder)"
 - "Created new chapter 'Chapter 1: Introduction' for your book. [View Here](/books/456/builder)"
 - "Successfully updated the page content. [View Here](/books/789/builder)"
 

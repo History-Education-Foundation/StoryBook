@@ -261,29 +261,43 @@
     console.log('Chat bubble initialized successfully');
   }
 
-  // Initialize on first page load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeChatBubble);
-  } else {
-    initializeChatBubble();
+  // Check if we're on the reader page (where student chat is already present)
+  function isReaderPage() {
+    const pathname = window.location.pathname;
+    return pathname.includes('/books/') && pathname.includes('/read');
+  }
+
+  // Initialize on first page load (but skip reader pages)
+  if (!isReaderPage()) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeChatBubble);
+    } else {
+      initializeChatBubble();
+    }
   }
 
   // CRITICAL: Re-initialize on Turbo navigation (Rails 7 default behavior)
   document.addEventListener('turbo:load', function() {
-    console.log('Turbo navigation detected, reinitializing chat bubble...');
-    initializeChatBubble();
-    // Update page context on navigation
-    currentPageContext = getCurrentPageContext();
-    console.log('📍 Page context updated on turbo:load:', currentPageContext);
+    if (!isReaderPage()) {
+      console.log('Turbo navigation detected, reinitializing chat bubble...');
+      initializeChatBubble();
+      // Update page context on navigation
+      currentPageContext = getCurrentPageContext();
+      console.log('📍 Page context updated on turbo:load:', currentPageContext);
+    } else {
+      console.log('Reader page detected, skipping chat bubble initialization');
+    }
   });
 
   // Also handle turbo:render for additional safety
   document.addEventListener('turbo:render', function() {
-    console.log('Turbo render detected, reinitializing chat bubble...');
-    initializeChatBubble();
-    // Update page context on navigation
-    currentPageContext = getCurrentPageContext();
-    console.log('📍 Page context updated on turbo:render:', currentPageContext);
+    if (!isReaderPage()) {
+      console.log('Turbo render detected, reinitializing chat bubble...');
+      initializeChatBubble();
+      // Update page context on navigation
+      currentPageContext = getCurrentPageContext();
+      console.log('📍 Page context updated on turbo:render:', currentPageContext);
+    }
   });
 
   function waitForCableConnection(callback) {
@@ -537,6 +551,7 @@
 
   function updateStatusIcon(statusClass) {
     const statusIndicator = document.getElementById('connectionStatusIconForLlamaBot');
+    if (!statusIndicator) return; // Safety check: element may not exist on all pages
     statusIndicator.classList.remove('bg-green-500', 'bg-yellow-400', 'bg-red-500');
     statusIndicator.classList.add(statusClass);
   }

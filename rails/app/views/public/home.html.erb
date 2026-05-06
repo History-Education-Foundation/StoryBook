@@ -105,15 +105,29 @@
 
   <!-- Mission Section -->
   <section id="mission" class="py-24 bg-white">
-    <div class="max-w-4xl mx-auto px-6 lg:px-8">
-      <h2 class="text-4xl font-bold text-center text-slate-900 mb-12">Our Mission and What We Do</h2>
-      <div class="prose prose-lg text-slate-600 mx-auto space-y-8">
-        <p class="text-center text-xl leading-relaxed">
-          We believe a healthy democracy depends on an informed public. Our nonprofit works to expand civic literacy and media education, giving individuals the knowledge and skills they need to understand institutions, assess information critically, and participate meaningfully in civic life.
-        </p>
-        <p class="text-center text-xl leading-relaxed">
-          Through educational resources and public-facing programs, we help communities build the foundation for thoughtful civic engagement in an evolving media landscape.
-        </p>
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="flex flex-col lg:flex-row items-center gap-16">
+        <!-- Logo on the Left -->
+        <div class="flex-1 flex justify-center lg:justify-start">
+          <img src="<%= asset_path('logo-transparent.png') %>" alt="Foundation Logo" class="h-48 lg:h-64 w-auto object-contain transition-transform duration-500 hover:scale-105">
+        </div>
+        
+        <!-- Text on the Right -->
+        <div class="flex-1 text-center lg:text-left">
+          <h2 class="text-4xl lg:text-5xl font-bold text-slate-900 mb-8 leading-tight">Our Mission and What We Do</h2>
+          <div class="prose prose-lg text-slate-600 space-y-6 max-w-none">
+            <p class="text-xl leading-relaxed">
+              We believe a healthy democracy depends on an informed public. Our nonprofit works to expand civic literacy and media education, giving individuals the knowledge and skills they need to understand institutions, assess information critically, and participate meaningfully in civic life.
+            </p>
+            <p class="text-xl leading-relaxed">
+              Through educational resources and public-facing programs, we help communities build the foundation for thoughtful civic engagement in an evolving media landscape.
+            </p>
+          </div>
+          <%= link_to new_user_registration_path, class: "btn bg-[#f9a825] hover:bg-[#f57f17] border-none text-white px-10 rounded-md shadow-lg mt-10 transition-all hover:scale-105 active:scale-95 text-lg inline-flex items-center gap-2" do %>
+            <span>Support Us</span>
+            <i class="fas fa-arrow-right text-sm"></i>
+          <% end %>
+        </div>
       </div>
     </div>
   </section>

@@ -18,5 +18,14 @@ RSpec.describe "Public", type: :request do
       expect(response.body).to include('href="' + new_user_registration_path + '"')
       expect(response.body).to include('bg-[#f9a825]') # Check for the specific brand color
     end
+
+    it "renders the Who We Serve section with updated content and buttons" do
+      get root_path
+      expect(response.body).to include('Who We Serve')
+      expect(response.body).to include('adaptable across diverse educational and civic contexts')
+      expect(response.body).to include('Learn More')
+      expect(response.body).to include('Get in touch')
+      expect(response.body).to include('1000564435-2048x1365.jpg')
+    end
   end
 end

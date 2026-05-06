@@ -161,33 +161,23 @@
   <section class="py-24 bg-slate-900 text-white">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
       <div class="flex flex-col lg:flex-row items-center gap-16">
+        <div class="flex-1 relative">
+          <div class="rounded-2xl overflow-hidden shadow-2xl">
+            <img src="<%= asset_path('1000564435-2048x1365.jpg') %>" alt="Who we serve" class="w-full h-auto object-cover">
+          </div>
+        </div>
         <div class="flex-1">
           <h2 class="text-3xl font-bold mb-6">Who We Serve</h2>
           <p class="text-lg text-slate-400 mb-8 leading-relaxed">
-            We serve educators, students, community organizations, and members of the public who are committed to strengthening civic understanding and media literacy.
+            We serve educators, students, community organizations, and members of the public who are committed to strengthening civic understanding and media literacy. Our resources support classroom instruction, community-based learning, and individual engagement, and are designed to be accessible, nonpartisan, and adaptable across diverse educational and civic contexts.
           </p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div class="flex items-center gap-3">
-              <i class="fas fa-check-circle text-primary"></i>
-              <span>Educators</span>
-            </div>
-            <div class="flex items-center gap-3">
-              <i class="fas fa-check-circle text-primary"></i>
-              <span>Students</span>
-            </div>
-            <div class="flex items-center gap-3">
-              <i class="fas fa-check-circle text-primary"></i>
-              <span>Community Organizations</span>
-            </div>
-            <div class="flex items-center gap-3">
-              <i class="fas fa-check-circle text-primary"></i>
-              <span>General Public</span>
-            </div>
-          </div>
-        </div>
-        <div class="flex-1 relative">
-          <div class="rounded-2xl overflow-hidden shadow-2xl">
-            <img src="https://www.history-education.org/wp-content/uploads/2025/12/youngsters-studying-with-laptop-library-1024x683.jpg" alt="Who we serve" class="w-full h-auto object-cover">
+          <div class="flex flex-col sm:flex-row gap-4 mt-8">
+            <%= link_to "#", class: "btn bg-[#f9a825] hover:bg-[#f57f17] border-none text-white px-8 rounded-md shadow-lg transition-all" do %>
+              Learn More
+            <% end %>
+            <%= link_to "#contact", class: "btn btn-outline text-white border-2 border-white hover:bg-white hover:text-slate-900 px-8 rounded-md transition-all" do %>
+              Get in touch
+            <% end %>
           </div>
         </div>
       </div>

@@ -10,52 +10,33 @@
     <meta http-equiv="Expires" content="0">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-    <!-- For taking screenshots to feed to Leonardo AI -->
-    <%# <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script> %>
+    <!-- html2canvas for screenshot capture + Fabric.js for annotation -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 
-    <script>
-      // Force fresh data on every page load - cache busting with timestamp
-      window.page_loaded_at = <%= Time.current.to_f %>;
-      window.request_path = "<%= @request_path %>";
-      window.view_path = "<%= @view_path %>";
-      
-      // Function to update context variables
-      function updatePageContext() {
-        // These are set fresh on each page load from server-side variables
-        console.log('Page context updated:', {
-          request_path: window.request_path,
-          view_path: window.view_path,
-          loaded_at: window.page_loaded_at
-        });
-      }
-      
-      // Wait for entire page to load before calling this
-      document.addEventListener('DOMContentLoaded', function() {
-        window.full_html = document.documentElement.outerHTML;
-        updatePageContext();
-      });
-      
-      // Handle Turbo navigation to ensure fresh context on SPA-style navigation
-      document.addEventListener('turbo:load', function() {
-        // Force refresh of page context on Turbo navigation
-        window.full_html = document.documentElement.outerHTML;
-        updatePageContext();
-      });
-      
-      // Additional event for when Turbo renders new content
-      document.addEventListener('turbo:render', function() {
-        updatePageContext();
-      });
-    </script>
+    <%= render 'layouts/llamapress_page_context' %>
 
     <%= yield :head %>
 
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" type="image/png">
     <link rel="apple-touch-icon" href="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-    <!-- DaisyUI -->
+    <!-- Tailwind CSS v3 + DaisyUI v4 (compatible versions) -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'llama-purple': '#4C3F6D',
+              'llama-blue': '#489DF9',
+              'llama-dark': '#2D2442',
+            }
+          }
+        }
+      }
+    </script>
 
     <!-- Font Awesome (public CDN) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" data-llama-id="6" data-llama-editable="true">
@@ -72,119 +53,30 @@
   </head>
 
   <body class="h-full">
-    <div class="min-h-full" data-controller="menu">
-  <% unless defined?(@hide_navbar) && @hide_navbar %>
-      <nav class="bg-white shadow">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div class="flex h-16 justify-between">
-            <div class="flex">
-              <div class="flex flex-shrink-0 items-center">
-                <img class="h-8 w-auto" src="https://llamapress-ai-image-uploads.s3.us-west-2.amazonaws.com/wvtud3dcva3wgihn4a4majbmtsku" alt="Logo">
-              </div>
-                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-<% if user_signed_in? %>
-    <%= link_to "Chat with AI", "/chat", class: "inline-flex items-center border-b-2 #{active_link_class('/chat')} px-1 pt-1 text-sm font-medium ml-4" %>
-  <% end %>
-  <% if user_signed_in? %>
-    <% if current_user.student? || current_user.staff? %>
-      <%= link_to "My Lessons", library_books_path, class: "inline-flex items-center border-b-2 #{active_link_class(library_books_path)} px-1 pt-1 text-sm font-medium" %>
-    <% end %>
-
-    <%= link_to "Articles", books_path, class: "inline-flex items-center border-b-2 #{active_link_class(books_path)} px-1 pt-1 text-sm font-medium ml-4" %>
-  <% else %>
-    <%= link_to "Pricing", pricing_path, class: "inline-flex items-center border-b-2 #{active_link_class(pricing_path)} px-1 pt-1 text-sm font-medium" %>
-    <%= link_to "About", about_path, class: "inline-flex items-center border-b-2 #{active_link_class(about_path)} px-1 pt-1 text-sm font-medium" %>
-    <%= link_to "Sign In", new_user_session_path, class: "inline-flex items-center border-b-2 #{active_link_class(new_user_session_path)} px-1 pt-1 text-sm font-medium" %>
-  <% end %>
-</div>
-
-            </div>
-            <div class="hidden sm:ml-6 sm:flex sm:items-center">
-              <% if user_signed_in? %>
-                <%= button_to "Sign Out", destroy_user_session_path, method: :delete, class: "rounded-full px-4 py-2 bg-gray-100 text-gray-800 font-medium hover:bg-gray-200 hover:text-indigo-700 border border-gray-200 transition-colors duration-150 ml-2 shadow-sm" %>
-              <% else %>
-                <%= link_to "Sign In", new_user_session_path, class: "rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 font-medium ml-2" %>
-              <% end %>
-            </div>
-            <div class="-mr-2 flex items-center sm:hidden">
-              <!-- Mobile menu button -->
-              <button type="button" class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500" aria-controls="mobile-menu" aria-expanded="false" data-action="click->menu#toggle">
-                <span class="sr-only">Open main menu</span>
-                <svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Mobile menu, show/hide based on menu state. -->
-        <div class="sm:hidden" id="mobile-menu" data-menu-target="mobileMenu">
-          <div class="space-y-1 pb-3 pt-2">
-              <%= link_to "Home", root_path, class: "block border-l-4 #{active_mobile_link_class(root_path)} py-2 pl-3 pr-4 text-base font-medium" %>
-            <% if user_signed_in? %>
-              <%= link_to "Chat with AI", "/chat", class: "block border-l-4 #{active_mobile_link_class('/chat')} py-2 pl-3 pr-4 text-base font-medium" %>
-            <% end %>
-            <% if user_signed_in? %>
-              <% if current_user.student? || current_user.staff? %>
-                <%= link_to "My Library", library_books_path, class: "block border-l-4 #{active_mobile_link_class(library_books_path)} py-2 pl-3 pr-4 text-base font-medium" %>
-              <% end %>
-              <%= link_to "Books", books_path, class: "block border-l-4 #{active_mobile_link_class(books_path)} py-2 pl-3 pr-4 text-base font-medium" %>
-            <% else %>
-              <%= link_to "Pricing", pricing_path, class: "block border-l-4 #{active_mobile_link_class(pricing_path)} py-2 pl-3 pr-4 text-base font-medium" %>
-              <%= link_to "About", about_path, class: "block border-l-4 #{active_mobile_link_class(about_path)} py-2 pl-3 pr-4 text-base font-medium" %>
-              <%= link_to "Sign In", new_user_session_path, class: "block border-l-4 #{active_mobile_link_class(new_user_session_path)} py-2 pl-3 pr-4 text-base font-medium" %>
-            <% end %>
-          </div>
-        </div>
-      </nav>
-      <% end %>
-      <div class="py-10">
-        <% unless defined?(@hide_navbar) && @hide_navbar %>
+    <div class="<%= content_for?(:full_width) ? '' : 'py-10' %>">
+      <% unless content_for?(:hide_header) %>
         <header>
           <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h1 class="text-3xl font-bold leading-tight tracking-tight text-gray-900">
-              <%= content_for(:header) || "Welcome" %>
+              <%= content_for(:header) %>
             </h1>
+            <% flash.each do |key, value| %>
+              <div class="flash <%= key %>"><%= value %></div>
+            <% end %>
           </div>
         </header>
-        <% end %>
-        <main>
+      <% end %>
+      <main>
+        <% if content_for?(:full_width) %>
+          <%= yield %>
+        <% else %>
           <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="px-4 py-8 sm:px-0">
-              <% if notice %>
-                <script>
-                  (function() {
-                    const showNotification = function() {
-                      if (typeof showSaveToast === 'function') {
-                        showSaveToast('<%= j notice %>', 'fas fa-check-circle');
-                      } else {
-                        setTimeout(showNotification, 100);
-                      }
-                    };
-                    showNotification();
-                  })();
-                </script>
-              <% end %>
-              <% if alert %>
-                <script>
-                  (function() {
-                    const showNotification = function() {
-                      if (typeof showAlertToast === 'function') {
-                        showAlertToast('<%= j alert %>', 'fas fa-exclamation-circle');
-                      } else {
-                        setTimeout(showNotification, 100);
-                      }
-                    };
-                    showNotification();
-                  })();
-                </script>
-              <% end %>
               <%= yield %>
             </div>
           </div>
-        </main>
-      </div>
+        <% end %>
+      </main>
     </div>
   </body>
 </html>

@@ -1,3 +1,7 @@
+# NOTE: Saving this file because this appears to be working to run a separate capybara server, and it actually attempts to run. This is on RSB's remote server, and it's actually running.
+# d02678cbbab8   kody06/llamapress-simple:0.2.6a   "bash -c 'rm -f tmp/…"   2 hours ago   Up 2 hours            0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp   leonardo-llamapress-1
+# f31acef9dc1f   kody06/llamabot:0.3.0a            "bash -c 'python ini…"   2 hours ago   Up 2 hours            0.0.0.0:8080->8000/tcp, [::]:8080->8000/tcp   leonardo-llamabot-1
+
 require 'spec_helper'
 ENV['RAILS_ENV'] = 'test' # Force into test environment so we don't destroy dev or prod data
 require_relative '../config/environment'
@@ -49,6 +53,10 @@ RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
   config.include Devise::Test::IntegrationHelpers, type: :request
   config.include Devise::Test::IntegrationHelpers, type: :system
+  config.include Devise::Test::ControllerHelpers, type: :view
+  config.include ActionDispatch::TestProcess::FixtureFile
+  config.include Warden::Test::Helpers, type: :feature
+
 
   config.before(:suite) do
     # Allow DatabaseCleaner to work with DATABASE_URL (Docker environments)
@@ -61,6 +69,10 @@ RSpec.configure do |config|
   end
 
   config.before(:each, type: :system) do
+    DatabaseCleaner.strategy = :truncation
+  end
+
+  config.before(:each, type: :feature) do
     DatabaseCleaner.strategy = :truncation
   end
 

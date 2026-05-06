@@ -136,16 +136,22 @@
   <section class="py-24 bg-white">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
       <div class="flex flex-col lg:flex-row items-center gap-16">
-        <div class="flex-1 order-2 lg:order-1">
-          <div class="rounded-2xl overflow-hidden shadow-xl border border-slate-100">
-            <img src="https://www.history-education.org/wp-content/uploads/2025/12/medium-shot-smiley-people-holding-books-1024x683.jpg" alt="Media Literacy" class="w-full h-auto">
-          </div>
-        </div>
-        <div class="flex-1 order-1 lg:order-2">
-          <h2 class="text-3xl font-bold text-slate-900 mb-6">Media Literacy</h2>
+        <!-- Text on the Left (desktop) -->
+        <div class="flex-1">
+          <h2 class="text-3xl font-bold text-slate-900 mb-6">Why Civic & Media Literacy Matter</h2>
           <p class="text-lg text-slate-600 mb-8 leading-relaxed">
-            Media literacy enables individuals to evaluate information, recognize bias and misinformation, and engage with diverse perspectives. Explore our programs, educational resources, and research-informed approach to strengthening civic literacy and media education, supporting critical thinking, informed participation, and responsible engagement within today’s complex and evolving information environment.
+            The stability of a democracy depends on having citizens who know how to push for good policy and have the ability to sort through propaganda. Civic literacy helps people understand institutions, citizen rights and responsibilities, and how public decisions are made. Media literacy enables individuals to evaluate information, recognize bias and misinformation, and engage with diverse perspectives. Together, these skills are vital in an era of rapid information flow and complex civic life. Strengthening civic and media literacy promotes informed participation, respectful discourse, and trust in democratic processes. Individuals with historical background knowledge also have higher levels of civic and media literacy.
           </p>
+          <%= link_to "#", class: "btn bg-[#f9a825] hover:bg-[#f57f17] border-none text-white px-10 rounded-md shadow-lg transition-all hover:scale-105 active:scale-95 text-lg inline-flex items-center gap-2" do %>
+            <span>Learn More</span>
+            <i class="fas fa-arrow-right text-sm"></i>
+          <% end %>
+        </div>
+        <!-- Image on the Right (desktop) -->
+        <div class="flex-1">
+          <div class="rounded-2xl overflow-hidden shadow-xl border border-slate-100">
+            <img src="<%= asset_path('neve-fse-img10.jpg') %>" alt="Why Civic and Media Literacy Matter" class="w-full h-auto">
+          </div>
         </div>
       </div>
     </div>

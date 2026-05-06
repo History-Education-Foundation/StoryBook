@@ -1,0 +1,47 @@
+<div class="navbar bg-base-100 shadow-lg px-4 sm:px-8">
+  <div class="flex-1">
+    <%= link_to root_path, class: "flex items-center gap-2" do %>
+      <img src="https://www.history-education.org/wp-content/uploads/2025/12/Gemini_Generated_Image_f0itlof0i.png" alt="History & Media Education" class="h-12 w-auto">
+    <% end %>
+  </div>
+  <div class="flex-none gap-2">
+    <ul class="menu menu-horizontal px-1 font-medium">
+      <li>
+        <%= link_to books_path, class: "flex items-center gap-2" do %>
+          <i class="fas fa-list"></i>
+          <span>All Books</span>
+        <% end %>
+      </li>
+      <li>
+        <%= link_to library_books_path, class: "flex items-center gap-2" do %>
+          <i class="fas fa-bookmark"></i>
+          <span>My Library</span>
+        <% end %>
+      </li>
+    </ul>
+
+    <% if user_signed_in? %>
+      <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar placeholder">
+          <div class="bg-neutral text-neutral-content rounded-full w-10">
+            <span class="text-xs"><%= current_user.email.first.upcase %></span>
+          </div>
+        </div>
+        <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+          <li><span class="text-xs opacity-50"><%= current_user.email %></span></li>
+          <li>
+            <%= button_to destroy_user_session_path, method: :delete, class: "text-error flex items-center gap-2 w-full text-left" do %>
+              <i class="fas fa-sign-out-alt"></i>
+              <span>Sign Out</span>
+            <% end %>
+          </li>
+        </ul>
+      </div>
+    <% else %>
+      <%= link_to new_user_session_path, class: "btn btn-primary btn-sm" do %>
+        <i class="fas fa-sign-in-alt"></i>
+        Sign In
+      <% end %>
+    <% end %>
+  </div>
+</div>

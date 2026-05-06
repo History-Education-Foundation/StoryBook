@@ -52,17 +52,27 @@
     </script>
   </head>
 
-  <body class="h-full">
-    <div class="<%= content_for?(:full_width) ? '' : 'py-10' %>">
+  <body class="h-full bg-base-200 min-h-screen">
+    <%= render 'shared/navbar' %>
+
+    <div class="<%= content_for?(:full_width) ? '' : 'py-6' %>">
+      <% if flash.any? %>
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-4">
+          <% flash.each do |key, value| %>
+            <div class="alert <%= key == 'notice' ? 'alert-success' : 'alert-error' %> shadow-lg mb-2">
+              <i class="fas <%= key == 'notice' ? 'fa-check-circle' : 'fa-exclamation-circle' %>"></i>
+              <span><%= value %></span>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
       <% unless content_for?(:hide_header) %>
         <header>
           <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold leading-tight tracking-tight text-gray-900">
+            <h1 class="text-3xl font-bold leading-tight tracking-tight text-base-content">
               <%= content_for(:header) %>
             </h1>
-            <% flash.each do |key, value| %>
-              <div class="flash <%= key %>"><%= value %></div>
-            <% end %>
           </div>
         </header>
       <% end %>

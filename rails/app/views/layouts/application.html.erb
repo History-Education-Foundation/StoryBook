@@ -52,8 +52,10 @@
     </script>
   </head>
 
-  <body class="h-full bg-base-200 min-h-screen">
-    <%= render 'shared/navbar' %>
+  <body class="h-full bg-base-200 min-h-screen text-slate-900">
+    <% unless content_for?(:hide_navbar) %>
+      <%= render 'shared/navbar' %>
+    <% end %>
 
     <div class="<%= content_for?(:full_width) ? '' : 'py-6' %>">
       <% if flash.any? %>

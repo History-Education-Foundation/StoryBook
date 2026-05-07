@@ -17,14 +17,20 @@
       <% end %>
       
       <div class="flex flex-col md:flex-row items-center gap-8 md:items-start text-center md:text-left">
-        <div class="w-32 h-32 bg-[#f9a825] rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
-          <i class="fas fa-user-graduate text-5xl text-white"></i>
+        <div class="w-32 h-32 bg-[#f9a825] rounded-full flex items-center justify-center shadow-lg flex-shrink-0 overflow-hidden border-4 border-white/20">
+          <% if @scholar.image_data.present? %>
+            <img src="<%= @scholar.image_data %>" class="w-full h-full object-cover <%= @scholar.image_position || 'object-top' %>" alt="<%= @scholar.name %>">
+          <% elsif @scholar.image.attached? %>
+            <%= image_tag @scholar.image, class: "w-full h-full object-cover #{@scholar.image_position || 'object-top'}" %>
+          <% elsif @scholar.image_filename.present? %>
+            <%= image_tag @scholar.image_filename, class: "w-full h-full object-cover #{@scholar.image_position || 'object-top'}" %>
+          <% else %>
+            <i class="fas fa-user-graduate text-5xl text-white"></i>
+          <% end %>
         </div>
         <div>
           <h1 class="text-4xl md:text-6xl font-bold text-white mb-4"><%= @scholar.name %></h1>
-          <p class="text-xl text-slate-300 max-w-3xl leading-relaxed">
-            Leading researcher in the field of history education and civic literacy.
-          </p>
+          <%= simple_format(@scholar.tagline.presence || "Leading researcher in the field of history education and civic literacy.", { class: "text-lg md:text-xl text-white/90 max-w-3xl leading-relaxed font-medium" }, { wrapper_tag: "div" }) %>
         </div>
       </div>
     </div>
@@ -34,32 +40,164 @@
   <section class="py-24 bg-white">
     <div class="max-w-4xl mx-auto px-6 lg:px-8">
       <div class="prose prose-xl prose-slate max-w-none">
-        <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block">Biography & Contributions</h2>
-        <p class="text-slate-600 leading-relaxed text-lg">
-          <%= @scholar.bio.presence || "Biography information for #{@scholar.name} is currently being updated. This scholar has made significant contributions to the understanding of historical narratives and civic participation." %>
-        </p>
-        
-        <div class="mt-16 p-8 bg-slate-50 rounded-2xl border-l-4 border-[#f9a825] shadow-sm">
-          <h3 class="text-2xl font-bold text-slate-900 mb-4">Core Research Areas</h3>
-          <ul class="grid grid-cols-1 md:grid-cols-2 gap-4 list-none p-0">
-            <li class="flex items-center gap-3 text-slate-700">
-              <i class="fas fa-check-circle text-[#f9a825]"></i>
-              <span>Historical Pedagogy</span>
-            </li>
-            <li class="flex items-center gap-3 text-slate-700">
-              <i class="fas fa-check-circle text-[#f9a825]"></i>
-              <span>Civic Literacy</span>
-            </li>
-            <li class="flex items-center gap-3 text-slate-700">
-              <i class="fas fa-check-circle text-[#f9a825]"></i>
-              <span>Media Education</span>
-            </li>
-            <li class="flex items-center gap-3 text-slate-700">
-              <i class="fas fa-check-circle text-[#f9a825]"></i>
-              <span>Curriculum Reform</span>
-            </li>
-          </ul>
+        <div class="mb-16">
+          <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= @scholar.bio_heading.presence || "Biography" %></h2>
+          <div class="text-slate-600 leading-relaxed text-lg">
+            <%= simple_format @scholar.bio.presence || "Biography information for #{@scholar.name} is currently being updated." %>
+          </div>
         </div>
+        
+        <% if @scholar.contributions.present? %>
+          <div class="mb-16 p-8 bg-slate-50 rounded-2xl border-l-4 border-[#f9a825] shadow-sm">
+            <h3 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+              <i class="fas fa-trophy text-[#f9a825]"></i>
+              <%= @scholar.contributions_heading.presence || "Major Contributions" %>
+            </h3>
+            <ul class="space-y-4 list-none p-0">
+              <% @scholar.contributions.split("\n").each do |contribution| %>
+                <li class="flex items-start gap-3 text-slate-700">
+                  <i class="fas fa-check-circle text-[#f9a825] mt-1.5 flex-shrink-0"></i>
+                  <% if contribution.include?(":") %>
+                    <% parts = contribution.split(":", 2) %>
+                    <span class="text-lg">
+                      <strong class="text-slate-900"><%= parts[0] %>:</strong><%= parts[1] %>
+                    </span>
+                  <% else %>
+                    <span class="text-lg"><%= contribution %></span>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <% if @scholar.main_ideas.present? %>
+          <div class="mb-16">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block">
+              <%= @scholar.main_ideas_heading.presence || "Main Ideas" %>
+            </h2>
+            
+            <% if @scholar.main_ideas.include?("\n\n") || @scholar.main_ideas.length > 500 %>
+              <div class="prose prose-lg prose-slate max-w-none text-slate-600 leading-relaxed">
+                <%= simple_format @scholar.main_ideas %>
+              </div>
+            <% else %>
+              <div class="grid grid-cols-1 gap-6">
+                <% @scholar.main_ideas.split("\n").each do |idea| %>
+                  <div class="card bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="card-body p-6 flex-row gap-4 items-start">
+                      <div class="w-10 h-10 rounded-full bg-[#f9a825]/10 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-lightbulb text-[#f9a825]"></i>
+                      </div>
+                      <div class="text-slate-600 m-0">
+                        <% if idea.include?(":") %>
+                          <% parts = idea.split(":", 2) %>
+                          <h4 class="font-bold text-slate-900 text-lg mb-1"><%= parts[0] %></h4>
+                          <p class="m-0"><%= parts[1] %></p>
+                        <% else %>
+                          <%= idea %>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if @scholar.quote.present? %>
+          <div class="mb-16 bg-slate-900 p-12 rounded-3xl relative overflow-hidden text-center">
+            <div class="absolute top-0 left-0 w-24 h-24 opacity-10">
+              <i class="fas fa-quote-left text-9xl text-white"></i>
+            </div>
+            <blockquote class="relative z-10">
+              <p class="text-2xl md:text-3xl font-serif text-white italic leading-relaxed mb-6">
+                “<%= @scholar.quote %>”
+              </p>
+              <% if @scholar.quote_author.present? %>
+                <cite class="text-[#f9a825] text-xl font-bold not-italic">— <%= @scholar.quote_author %></cite>
+              <% end %>
+            </blockquote>
+          </div>
+        <% end %>
+
+        <% if @scholar.publications.present? %>
+          <div class="mb-16">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block">
+              <%= @scholar.publications_heading.presence || "Selected Publications & Projects" %>
+            </h2>
+            <div class="space-y-6">
+              <% @scholar.publications.split("\n").each do |publication| %>
+                <div class="flex gap-4 items-start">
+                  <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-file-alt text-slate-400"></i>
+                  </div>
+                  <div class="text-slate-600 text-lg m-0">
+                    <% if publication.include?(":") %>
+                      <% parts = publication.split(":", 2) %>
+                      <strong class="text-slate-900"><%= parts[0] %>:</strong><%= parts[1] %>
+                    <% else %>
+                      <%= publication %>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <% if @scholar.criticism.present? %>
+          <div class="mb-16">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-red-500 pb-4 inline-block">
+              <%= @scholar.criticism_heading.presence || "Controversy & Criticism" %>
+            </h2>
+            <div class="space-y-6">
+              <% @scholar.criticism.split("\n").each do |item| %>
+                <div class="flex gap-4 items-start p-6 bg-red-50/50 rounded-2xl border border-red-100">
+                  <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-red-500"></i>
+                  </div>
+                  <div class="text-slate-700 text-lg m-0">
+                    <% if item.include?(":") %>
+                      <% parts = item.split(":", 2) %>
+                      <strong class="text-slate-900 font-bold"><%= parts[0] %>:</strong><%= parts[1] %>
+                    <% else %>
+                      <%= item %>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <% if @scholar.legacy.present? %>
+          <div class="mb-16">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block">
+              <%= @scholar.legacy_heading.presence || "Legacy" %>
+            </h2>
+            <div class="text-slate-600 leading-relaxed text-lg bg-[#f9a825]/5 p-8 rounded-2xl italic">
+              <%= simple_format @scholar.legacy %>
+            </div>
+          </div>
+        <% end %>
+
+        <% if @scholar.suggested_reading.present? %>
+          <div class="mb-16">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block">
+              <%= @scholar.suggested_reading_heading.presence || "Suggested Reading" %>
+            </h2>
+            <div class="space-y-3">
+              <% @scholar.suggested_reading.split("\n").each do |reading| %>
+                <div class="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors group">
+                  <i class="fas fa-book text-slate-400 group-hover:text-[#f9a825] transition-colors"></i>
+                  <span class="text-lg text-slate-700 font-medium"><%= reading %></span>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
       </div>
     </div>
   </section>

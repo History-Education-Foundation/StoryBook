@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_07_163001) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_07_173759) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -372,6 +372,25 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_07_163001) do
     t.text "bio"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "tagline"
+    t.text "contributions"
+    t.text "main_ideas"
+    t.text "legacy"
+    t.text "suggested_reading"
+    t.string "main_ideas_heading"
+    t.string "bio_heading"
+    t.string "contributions_heading"
+    t.text "publications"
+    t.string "publications_heading"
+    t.string "suggested_reading_heading"
+    t.text "quote"
+    t.string "quote_author"
+    t.text "criticism"
+    t.string "criticism_heading"
+    t.string "legacy_heading"
+    t.string "image_filename"
+    t.text "image_data"
+    t.string "image_position"
   end
 
   create_table "users", force: :cascade do |t|

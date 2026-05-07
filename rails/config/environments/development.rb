@@ -126,4 +126,9 @@ Rails.application.configure do
   # exceptions before DebugExceptions renders its own page.
   require Rails.root.join("app/middleware/leonardo_error_page_middleware")
   config.middleware.insert_after ActionDispatch::DebugExceptions, LeonardoErrorPageMiddleware
+
+  # Disable Sprockets cache to bypass permission errors in tmp/cache
+  config.assets.configure do |env|
+    env.cache = Sprockets::Cache::NullStore.new
+  end
 end

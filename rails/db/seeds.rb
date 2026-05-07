@@ -137,3 +137,18 @@ chapters.each do |ch|
   end
 end
 puts "Early England Colonies book seeded."
+
+# Seed: Scholars
+[
+  { name: "Charles A. Beard", bio: "A pioneering American historian who focused on the economic and social factors influencing history, best known for 'An Economic Interpretation of the Constitution of the United States'." },
+  { name: "James Loewen", bio: "An American sociologist, historian, and author, most noted for his 1995 book, 'Lies My Teacher Told Me: Everything Your American History Textbook Got Wrong'." },
+  { name: "Ryan Knowles", bio: "A modern researcher in history education focusing on the intersection of social studies pedagogy and democratic civic engagement." },
+  { name: "Peter Kuznick", bio: "A Professor of History and Director of the Nuclear Studies Institute at American University, co-author of 'The Untold History of the United States' with Oliver Stone." },
+  { name: "Adam Przeworski", bio: "A prominent political scientist known for his work on democratic theory, political economy, and the relationship between economic development and democracy." },
+  { name: "Howard Zinn", bio: "A historian, playwright, and social activist, best known for his influential book 'A People's History of the United States', which presents American history from the perspective of marginalized groups." },
+  { name: "George Sylvester Counts", bio: "A leading educator and social theorist who advocated for schools to play a more active role in social reform and reconstruction during the Great Depression." }
+].each do |scholar_data|
+  scholar = Scholar.find_or_create_by!(name: scholar_data[:name])
+  scholar.update!(bio: scholar_data[:bio])
+end
+puts "Scholars seeded with bios."

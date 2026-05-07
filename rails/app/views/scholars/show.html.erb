@@ -1,0 +1,77 @@
+<% content_for :full_width, true %>
+<% content_for :hide_header, true %>
+<% content_for :hide_navbar, true %>
+
+<div class="min-h-screen bg-white font-sans text-slate-800">
+  <%= render 'layouts/navigation' %>
+
+  <!-- Hero/Header Section -->
+  <section class="bg-slate-900 py-24 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-20">
+      <div class="absolute inset-0 bg-[#f9a825]/10 mix-blend-overlay"></div>
+    </div>
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+      <%= link_to scholars_path, class: "inline-flex items-center gap-2 text-[#f9a825] hover:text-white transition-colors mb-8 font-medium" do %>
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Directory</span>
+      <% end %>
+      
+      <div class="flex flex-col md:flex-row items-center gap-8 md:items-start text-center md:text-left">
+        <div class="w-32 h-32 bg-[#f9a825] rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
+          <i class="fas fa-user-graduate text-5xl text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-4xl md:text-6xl font-bold text-white mb-4"><%= @scholar.name %></h1>
+          <p class="text-xl text-slate-300 max-w-3xl leading-relaxed">
+            Leading researcher in the field of history education and civic literacy.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content Section -->
+  <section class="py-24 bg-white">
+    <div class="max-w-4xl mx-auto px-6 lg:px-8">
+      <div class="prose prose-xl prose-slate max-w-none">
+        <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block">Biography & Contributions</h2>
+        <p class="text-slate-600 leading-relaxed text-lg">
+          <%= @scholar.bio.presence || "Biography information for #{@scholar.name} is currently being updated. This scholar has made significant contributions to the understanding of historical narratives and civic participation." %>
+        </p>
+        
+        <div class="mt-16 p-8 bg-slate-50 rounded-2xl border-l-4 border-[#f9a825] shadow-sm">
+          <h3 class="text-2xl font-bold text-slate-900 mb-4">Core Research Areas</h3>
+          <ul class="grid grid-cols-1 md:grid-cols-2 gap-4 list-none p-0">
+            <li class="flex items-center gap-3 text-slate-700">
+              <i class="fas fa-check-circle text-[#f9a825]"></i>
+              <span>Historical Pedagogy</span>
+            </li>
+            <li class="flex items-center gap-3 text-slate-700">
+              <i class="fas fa-check-circle text-[#f9a825]"></i>
+              <span>Civic Literacy</span>
+            </li>
+            <li class="flex items-center gap-3 text-slate-700">
+              <i class="fas fa-check-circle text-[#f9a825]"></i>
+              <span>Media Education</span>
+            </li>
+            <li class="flex items-center gap-3 text-slate-700">
+              <i class="fas fa-check-circle text-[#f9a825]"></i>
+              <span>Curriculum Reform</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Call to Action -->
+  <section class="py-16 bg-[#f9a825] text-white">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold mb-4">Support Our Research</h2>
+      <p class="text-xl mb-8 text-white/90">Help us continue providing high-quality resources for educators worldwide.</p>
+      <%= link_to "#contact", class: "btn btn-outline text-white border-2 border-white hover:bg-white hover:text-slate-900 px-10 rounded-md transition-all font-bold" do %>
+        Contact Us
+      <% end %>
+    </div>
+  </section>
+</div>

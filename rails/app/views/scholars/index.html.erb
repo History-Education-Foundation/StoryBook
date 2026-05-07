@@ -1,0 +1,51 @@
+<% content_for :full_width, true %>
+<% content_for :hide_header, true %>
+<% content_for :hide_navbar, true %>
+
+<div class="min-h-screen bg-white font-sans text-slate-800">
+  <%= render 'layouts/navigation' %>
+
+  <!-- Hero/Header Section -->
+  <section class="bg-slate-900 py-24 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-20">
+      <div class="absolute inset-0 bg-[#f9a825]/10 mix-blend-overlay"></div>
+    </div>
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 text-center">
+      <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">Scholars Directory</h1>
+      <p class="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+        Connecting educators with leading experts in historical research, pedagogy, and civic education to strengthen the foundation of history teaching.
+      </p>
+    </div>
+  </section>
+
+  <!-- Scholars Grid Section -->
+  <section class="py-24 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+        <% @scholars.each do |scholar| %>
+          <%= link_to scholar_path(scholar), class: "flex flex-col items-center group hover:no-underline" do %>
+            <div class="w-20 h-20 bg-[#f9a825] rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:shadow-lg">
+              <i class="fas fa-user-graduate text-3xl text-white"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-900 mb-4 group-hover:text-primary transition-colors"><%= scholar.name %></h3>
+            <span class="text-sm font-bold uppercase tracking-widest text-[#f9a825] opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+              View Profile
+              <i class="fas fa-arrow-right"></i>
+            </span>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials/Footer Call to Action (Optional, but fits aesthetic) -->
+  <section class="py-16 bg-[#f9a825] text-white">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold mb-4">Want to join our directory?</h2>
+      <p class="text-xl mb-8 text-white/90">We are always looking for scholars dedicated to improving history education.</p>
+      <%= link_to "#contact", class: "btn btn-outline text-white border-2 border-white hover:bg-white hover:text-slate-900 px-10 rounded-md transition-all font-bold" do %>
+        Contact Us
+      <% end %>
+    </div>
+  </section>
+</div>

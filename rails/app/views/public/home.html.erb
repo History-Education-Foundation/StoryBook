@@ -3,42 +3,8 @@
 <% content_for :hide_navbar, true %>
 
 <div class="min-h-screen bg-white font-sans text-slate-800">
-  <!-- Custom Header to match screenshot -->
-  <header class="bg-white py-6 px-6 lg:px-12">
-    <div class="max-w-[1600px] mx-auto flex flex-col lg:flex-row justify-between items-center gap-6">
-      <div class="flex-shrink-0">
-        <%= link_to root_path do %>
-          <img src="<%= asset_path('logo-transparent.png') %>" alt="THE HISTORY EDUCATION FOUNDATION" class="h-20 w-auto">
-        <% end %>
-      </div>
-      
-      <nav class="flex flex-col items-center lg:items-end gap-3">
-        <!-- Top Nav Row -->
-        <ul class="flex flex-wrap justify-center lg:justify-end gap-x-6 gap-y-2 text-[15px] font-medium text-slate-800">
-          <li><%= link_to "Home", root_path, class: "hover:text-primary transition-colors" %></li>
-          <li><%= link_to "About Us", "#", class: "hover:text-primary transition-colors" %></li>
-          <li><%= link_to "History Education Scholars", "#", class: "hover:text-primary transition-colors" %></li>
-          <li><%= link_to "Lesson Plans", "#", class: "hover:text-primary transition-colors" %></li>
-          <li><%= link_to "Blog posts", "#", class: "hover:text-primary transition-colors" %></li>
-          <li><%= link_to "Controversial History", "#", class: "hover:text-primary transition-colors" %></li>
-        </ul>
-        <!-- Bottom Nav Row -->
-        <div class="flex flex-wrap justify-center lg:justify-end items-center gap-x-6 gap-y-2 text-[15px] font-medium text-slate-800">
-          <ul class="flex flex-wrap justify-center lg:justify-end gap-x-6 gap-y-2">
-            <li><%= link_to "Concepts in History", "#", class: "hover:text-primary transition-colors" %></li>
-            <li><%= link_to "Civics Education", "#", class: "hover:text-primary transition-colors" %></li>
-            <li><%= link_to "Critiques of textbooks", "#", class: "hover:text-primary transition-colors" %></li>
-            <li><%= link_to "Contact Us", "#", class: "hover:text-primary transition-colors" %></li>
-          </ul>
-          <div class="flex gap-4 ml-2 text-slate-900">
-            <a href="#" class="hover:text-primary transition-colors"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="hover:text-primary transition-colors"><i class="fab fa-instagram"></i></a>
-            <a href="#" class="hover:text-primary transition-colors"><i class="fab fa-twitter"></i></a>
-          </div>
-        </div>
-      </nav>
-    </div>
-  </header>
+  <!-- Custom Header extracted to partial -->
+  <%= render 'layouts/navigation' %>
 
   <!-- Hero Section -->
   <section class="hero min-h-[75vh] relative overflow-hidden" style="background-image: url(<%= asset_path('1000564434.jpg') %>); background-position: center; background-size: cover;">

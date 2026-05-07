@@ -1,0 +1,11 @@
+<%= turbo_frame_tag dom_id(@category), tag: :tr do %>
+  <td colspan="2">
+    <%= form_with model: [:admin, @category], data: { turbo_stream: true }, class: "flex gap-2 items-center p-2 bg-base-200 rounded-lg" do |f| %>
+      <%= f.text_field :name, class: "input input-bordered input-sm flex-1" %>
+      <div class="flex gap-1">
+        <%= f.submit "Save", class: "btn btn-primary btn-sm" %>
+        <%= link_to "Cancel", admin_category_path(@category), class: "btn btn-ghost btn-sm" %>
+      </div>
+    <% end %>
+  </td>
+<% end %>

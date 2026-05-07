@@ -1,0 +1,26 @@
+<%= form_with model: [:admin, post], html: { id: post.new_record? ? "new_post_form" : dom_id(post, :form) }, data: { turbo_stream: true }, class: "contents" do |f| %>
+  <tr class="bg-slate-50 border-b border-slate-100">
+    <td class="space-y-3 py-6 px-8">
+      <%= f.text_field :title, placeholder: "Post Title", class: "input bg-white border-slate-200 focus:border-[#f9a825] focus:ring-[#f9a825] input-sm w-full font-bold text-slate-900 placeholder:text-slate-300", required: true %>
+      <%= f.text_area :body, placeholder: "Brief summary or opening lines...", class: "textarea bg-white border-slate-200 focus:border-[#f9a825] focus:ring-[#f9a825] textarea-sm w-full text-slate-600 placeholder:text-slate-300", rows: 1 %>
+    </td>
+    <td class="py-6">
+      <%= f.collection_select :author_id, Author.all, :id, :name, { prompt: "Select Author" }, { class: "select select-sm bg-white border-slate-200 focus:border-[#f9a825] w-full text-slate-600" } %>
+    </td>
+    <td class="py-6">
+      <%= f.collection_select :category_id, Category.all, :id, :name, { prompt: "Select Category" }, { class: "select select-sm bg-white border-slate-200 focus:border-[#f9a825] w-full text-slate-600" } %>
+    </td>
+    <td class="py-6 px-8 text-right">
+      <div class="flex justify-end gap-2">
+        <%= f.button type: :submit, class: "btn bg-[#f9a825] hover:bg-[#f57f17] border-none text-white btn-sm px-6 font-bold" do %>
+          <i class="fas fa-save mr-2"></i> <%= post.new_record? ? "Create" : "Update" %>
+        <% end %>
+        <% unless post.new_record? %>
+          <%= link_to admin_post_path(post), class: "btn btn-ghost btn-sm text-slate-400 hover:bg-slate-200" do %>
+            <i class="fas fa-times"></i>
+          <% end %>
+        <% end %>
+      </div>
+    </td>
+  </tr>
+<% end %>

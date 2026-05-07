@@ -13,8 +13,19 @@
         <li><%= link_to "About Us", "#", class: "hover:text-primary transition-colors" %></li>
         <li><%= link_to "History Education Scholars", scholars_path, class: "hover:text-primary transition-colors" %></li>
         <li><%= link_to "Lesson Plans", "#", class: "hover:text-primary transition-colors" %></li>
-        <li><%= link_to "Blog posts", "#", class: "hover:text-primary transition-colors" %></li>
+        <li><%= link_to "Blog posts", posts_path, class: "hover:text-primary transition-colors" %></li>
         <li><%= link_to "Controversial History", "#", class: "hover:text-primary transition-colors" %></li>
+        <% if user_signed_in? %>
+          <li class="pl-4 border-l border-slate-200">
+            <span class="text-xs text-slate-500 block leading-none">Logged in as</span>
+            <span class="text-primary font-bold"><%= current_user.email %></span>
+          </li>
+          <li>
+            <%= button_to "Sign Out", destroy_user_session_path, method: :delete, class: "text-error hover:underline text-xs" %>
+          </li>
+        <% else %>
+          <li><%= link_to "Sign In", new_user_session_path, class: "btn btn-sm btn-primary text-white" %></li>
+        <% end %>
       </ul>
       <!-- Bottom Nav Row -->
       <div class="flex flex-wrap justify-center lg:justify-end items-center gap-x-6 gap-y-2 text-[15px] font-medium text-slate-800">

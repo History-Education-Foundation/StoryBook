@@ -7,6 +7,24 @@ RSpec.describe Post, type: :model do
       post = create(:post, user: user)
       expect(post.user).to eq(user)
     end
+
+    it "optionally belongs to a category" do
+      post = build(:post, category: nil)
+      expect(post).to be_valid
+      
+      category = Category.create!(name: "Test Category")
+      post.category = category
+      expect(post.category).to eq(category)
+    end
+
+    it "optionally belongs to an author" do
+      post = build(:post, author: nil)
+      expect(post).to be_valid
+
+      author = Author.create!(name: "Test Author")
+      post.author = author
+      expect(post.author).to eq(author)
+    end
   end
 
   describe "validations" do

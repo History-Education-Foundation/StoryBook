@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  resources :posts
+  # resources :posts
   devise_for :users, controllers: { registrations: 'users/registrations' }
   resources :users
 
@@ -61,7 +61,13 @@ Rails.application.routes.draw do
         post :impersonate
       end
     end
+
+    resources :posts
+    resources :categories
+    resources :authors
   end
+
+  get '/posts', to: 'admin/posts#index'
   
   post "/stop_impersonating", to: "application#stop_impersonating"
 

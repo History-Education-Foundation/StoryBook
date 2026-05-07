@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_07_173759) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_07_200245) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -52,6 +52,13 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_07_173759) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "authors", force: :cascade do |t|
+    t.string "name"
+    t.text "bio"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "books", force: :cascade do |t|
     t.string "title"
     t.text "learning_outcome"
@@ -62,6 +69,12 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_07_173759) do
     t.string "status"
     t.string "audio"
     t.index ["user_id"], name: "index_books_on_user_id"
+  end
+
+  create_table "categories", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "chapters", force: :cascade do |t|
@@ -355,6 +368,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_07_173759) do
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "category_id"
+    t.bigint "author_id"
+    t.index ["author_id"], name: "index_posts_on_author_id"
+    t.index ["category_id"], name: "index_posts_on_category_id"
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
 
@@ -438,6 +455,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_07_173759) do
   add_foreign_key "llama_bot_rails_ticket_traces", "llama_bot_rails_tickets", column: "ticket_id"
   add_foreign_key "llama_bot_rails_tickets", "llama_bot_rails_projects", column: "project_id"
   add_foreign_key "pages", "chapters"
+  add_foreign_key "posts", "authors"
+  add_foreign_key "posts", "categories"
   add_foreign_key "posts", "users"
   add_foreign_key "saved_books", "books"
   add_foreign_key "saved_books", "users"

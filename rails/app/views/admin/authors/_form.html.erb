@@ -1,0 +1,22 @@
+<%= form_with model: [:admin, author], html: { id: author.new_record? ? "new_author_form" : dom_id(author, :form) }, data: { turbo_stream: true }, class: "contents" do |f| %>
+  <tr class="bg-slate-50 border-b border-slate-100">
+    <td class="py-6 px-8">
+      <%= f.text_field :name, placeholder: "Full Name", class: "input bg-white border-slate-200 focus:border-[#f9a825] focus:ring-[#f9a825] input-sm w-full font-bold text-slate-900 placeholder:text-slate-300", required: true %>
+    </td>
+    <td class="py-6">
+      <%= f.text_field :bio, placeholder: "Professional title or short bio...", class: "input bg-white border-slate-200 focus:border-[#f9a825] focus:ring-[#f9a825] input-sm w-full text-slate-600 placeholder:text-slate-300" %>
+    </td>
+    <td class="py-6 px-8 text-right">
+      <div class="flex justify-end gap-2">
+        <%= f.button type: :submit, class: "btn bg-[#f9a825] hover:bg-[#f57f17] border-none text-white btn-sm px-6 font-bold" do %>
+          <i class="fas fa-user-plus mr-2"></i> <%= author.new_record? ? "Create" : "Update" %>
+        <% end %>
+        <% unless author.new_record? %>
+          <%= link_to admin_author_path(author), class: "btn btn-ghost btn-sm text-slate-400 hover:bg-slate-200" do %>
+            <i class="fas fa-times"></i>
+          <% end %>
+        <% end %>
+      </div>
+    </td>
+  </tr>
+<% end %>

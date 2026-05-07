@@ -1,0 +1,2 @@
+<%= turbo_stream.prepend "authors", partial: "admin/authors/author", locals: { author: @author } %>
+<%= turbo_stream.replace "new_author_form", partial: "admin/authors/form", locals: { author: Author.new } %>

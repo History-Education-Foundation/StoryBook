@@ -1,0 +1,2 @@
+<%= turbo_stream.prepend "posts", partial: "admin/posts/post", locals: { post: @post } %>
+<%= turbo_stream.replace "new_post_form", partial: "admin/posts/form", locals: { post: Post.new } %>

@@ -1,0 +1,18 @@
+<%= turbo_frame_tag dom_id(category), tag: :tr, class: "hover:bg-slate-50/80 transition-colors group" do %>
+  <td class="py-6 px-8">
+    <div class="flex items-center gap-3">
+      <div class="w-2 h-2 rounded-full bg-[#f9a825]"></div>
+      <div class="font-bold text-slate-900 uppercase tracking-wider text-sm"><%= category.name %></div>
+    </div>
+  </td>
+  <td class="py-6 px-8 text-right">
+    <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <%= link_to edit_admin_category_path(category), class: "btn btn-ghost btn-sm text-[#f9a825] hover:bg-[#f9a825]/10", data: { turbo_frame: dom_id(category) } do %>
+        <i class="fas fa-tag"></i>
+      <% end %>
+      <%= button_to admin_category_path(category), method: :delete, data: { turbo_confirm: "Delete this category? Any posts using it will become uncategorized.", turbo_stream: true }, class: "btn btn-ghost btn-sm text-slate-300 hover:text-error hover:bg-error/10" do %>
+        <i class="fas fa-trash-alt"></i>
+      <% end %>
+    </div>
+  </td>
+<% end %>

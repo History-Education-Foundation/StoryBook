@@ -1,0 +1,23 @@
+<%= turbo_frame_tag dom_id(author), tag: :tr, class: "hover:bg-slate-50/80 transition-colors group" do %>
+  <td class="py-6 px-8">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-[#f9a825]/10 rounded-full flex items-center justify-center text-[#f9a825] font-bold border border-[#f9a825]/20">
+        <%= author.name.first.upcase %>
+      </div>
+      <div class="font-bold text-slate-900"><%= author.name %></div>
+    </div>
+  </td>
+  <td class="py-6 max-w-xs truncate text-slate-500 font-medium italic">
+    "<%= truncate(author.bio, length: 80) %>"
+  </td>
+  <td class="py-6 px-8 text-right">
+    <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <%= link_to edit_admin_author_path(author), class: "btn btn-ghost btn-sm text-[#f9a825] hover:bg-[#f9a825]/10", data: { turbo_frame: dom_id(author) } do %>
+        <i class="fas fa-user-pen"></i>
+      <% end %>
+      <%= button_to admin_author_path(author), method: :delete, data: { turbo_confirm: "Remove this author? Their posts will remain but will have no author attributed.", turbo_stream: true }, class: "btn btn-ghost btn-sm text-slate-300 hover:text-error hover:bg-error/10" do %>
+        <i class="fas fa-trash-alt"></i>
+      <% end %>
+    </div>
+  </td>
+<% end %>

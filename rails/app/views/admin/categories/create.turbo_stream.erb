@@ -1,2 +1,3 @@
 <%= turbo_stream.prepend "categories", partial: "admin/categories/category", locals: { category: @category } %>
+<%= turbo_stream.append "post_category_id", tag.option(@category.name, value: @category.id) %>
 <%= turbo_stream.replace "new_category_form", partial: "admin/categories/form", locals: { category: Category.new } %>

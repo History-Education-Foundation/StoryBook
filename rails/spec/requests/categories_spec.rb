@@ -31,6 +31,9 @@ RSpec.describe "Admin::Categories", type: :request do
         expect(response.body).to include("turbo-stream")
         expect(response.body).to include("prepend")
         expect(response.body).to include("categories")
+        expect(response.body).to include("append")
+        expect(response.body).to include("post_category_id")
+        expect(response.body).to include("New Category")
       end
     end
   end

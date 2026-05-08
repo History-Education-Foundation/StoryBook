@@ -16,6 +16,9 @@ RSpec.describe "Admin::Authors", type: :request do
         expect(response.body).to include("turbo-stream")
         expect(response.body).to include("prepend")
         expect(response.body).to include("authors")
+        expect(response.body).to include("append")
+        expect(response.body).to include("post_author_id")
+        expect(response.body).to include("New Author")
       end
     end
   end

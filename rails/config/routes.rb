@@ -52,6 +52,7 @@ Rails.application.routes.draw do
   get "pricing" => "static_pages#pricing"
   get "about" => "static_pages#about"
   resources :scholars, only: [:index, :show]
+  resources :posts, only: [:index, :show]
 
   namespace :admin do
     root to: "dashboard#index"
@@ -67,7 +68,6 @@ Rails.application.routes.draw do
     resources :authors
   end
 
-  get '/posts', to: 'admin/posts#index'
   
   post "/stop_impersonating", to: "application#stop_impersonating"
 

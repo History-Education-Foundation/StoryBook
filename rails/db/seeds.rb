@@ -1,24 +1,16 @@
 # This file should ensure the existence of records required to run the application in every environment (production,
 # development, test). The code here should be idempotent so that it can be executed at any point in every environment.
 # The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
 
 User.find_or_create_by!(email: 'kody@llamapress.ai') do |user|
   user.password = 'kody123'
   user.password_confirmation = 'kody123'
 end
 
-# Example:
-#
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
-
 staff_user = User.find_by(email: 'kody@llamapress.ai')
 
 # Remove any previous version of this specific test book for idempotency.
 if staff_user
-  # Remove any previous version of this specific test book for idempotency.
   [
     'History of Labour Day',
     'The Life and Art of Vincent van Gogh'
@@ -165,27 +157,43 @@ puts "Scholars seeded with bios."
   },
   {
     name: "Newt Gingrich",
-    tagline: "Former Speaker of the House and architect of the 'Contract with America'.",
-    bio: "Newt Gingrich served as the 50th Speaker of the United States House of Representatives from 1995 to 1999. He led the Republican Revolution in 1994, ending 40 years of Democratic majority in the House.",
-    contributions: "Contract with America: A legislative agenda that helped Republicans win the 1994 midterm elections.\nPlayed a key role in welfare reform and the first balanced federal budget in a generation.",
-    main_ideas: "Partisan polarization: Advocates for a more confrontational style of politics.\nTechnological optimism: Frequently discusses how technology can transform government and society.",
-    criticism: "Often blamed for the increased polarization and breakdown of civility in American politics.\nFaced ethics investigations during his time as Speaker."
+    tagline: "The architect of the 'Gingrich Revolution' and modern political polarization.",
+    bio_heading: "The Early Ambition",
+    bio: "As a politician, Newt Gingrich would say, “I grew up in kind of an idyllic children’s background.” But really, he grew up above a gas station in a life that was “narrow and harsh and unforgiving” (Packer 18). He got his first taste of leadership at ten, when he tried to convince the Parks Department to build a zoo for Harrisburg, making the front page. His ambition became more serious when he visited the scarred battlefields of Verdun and saw what bad leaders could do to a country. With Lincoln and Churchill as his models, he decided that “his future was in politics” (19).",
+    contributions_heading: "Political Strategy & Innovation",
+    contributions: "Politics as War: Transformed the House of Representatives from a deliberative body into a partisan battlefield.\nMedia Mastery: Baited Speakers of the House on C-SPAN until they were red in the face, using the new medium to reach voters directly.\nThe New South: Captured the emerging Republican majority by blending militarism, technology, and anti-tax sentiment.",
+    main_ideas_heading: "The Gingrich Rhetoric",
+    main_ideas: "The Corrupt Elite: A rhetorical weapon used to delegitimize any institution standing in his way.\nThe Welfare State Critique: Framed liberal policies not just as inefficient, but as morally corrupt.\nFamily Values Rhetoric: Used traditional morality as a political tool even while his personal life was in turmoil.",
+    legacy_heading: "Historical Impact",
+    legacy: "Gingrich's tactics in the late 70s and 80s laid the groundwork for the hyper-polarized American political landscape of the 21st century. By framing his opponents not just as wrong, but as a 'corrupt, left-wing machine,' he changed the rules of political engagement forever."
   },
   {
     name: "Peter Thiel",
-    tagline: "Billionaire entrepreneur, venture capitalist, and political donor.",
-    bio: "Peter Thiel is a co-founder of PayPal, Palantir Technologies, and Founders Fund. He was the first outside investor in Facebook. He is known for his contrarian views on technology, education, and politics.",
-    contributions: "The Thiel Fellowship: A program that pays students to drop out of college and start companies.\nZero to One: An influential book on startups and innovation.",
-    main_ideas: "Stagnation: Argues that technological progress has slowed down outside of bits and software.\nLibertarianism: Has expressed skepticism about the compatibility of freedom and democracy.",
-    criticism: "Criticized for his support of Donald Trump and other controversial political figures.\nControversy over his funding of the lawsuit that bankrupt Gawker Media."
+    tagline: "The venture capitalist who redefined the relationship between technology and politics.",
+    bio_heading: "The Logical Mindset",
+    bio: "Peter Thiel grew up playing chess and memorizing geography. As his family moved between countries, he attended seven different elementary schools and had nearly no friends until he approached his teens (Packer 120). He hated the strictness of his teachers, but got near-perfect scores. When his family moved to the San Francisco Bay Area, he was thrust into the underfunded California school system (121). He coped with the chaos of uncontrollable classrooms by obsessing over his grades (122).",
+    contributions_heading: "Technological & Financial Milestones",
+    contributions: "PayPal: Co-founded the payment system with the goal of freeing people from government finance policy.\nPalantir: Created a massive data-analysis company that became a key tool for U.S. intelligence agencies.\nEarly Facebook Investment: Provided the first outside funding for Mark Zuckerberg, later earning $1.5 billion.",
+    main_ideas_heading: "Economic & Philosophical Theories",
+    main_ideas: "Zero to One: The belief that true innovation comes from creating something entirely new, rather than incremental improvement.\nLibertarian Idealism: The hope that technology could bypass the restrictions of modern democratic governments.\nTechnological Stagnation: A critique that humanity has stopped making major breakthroughs in the 'world of atoms' (energy, transport).",
+    legacy_heading: "Influence & Legacy",
+    legacy: "Thiel remains one of the most influential and controversial figures in Silicon Valley, acting as a bridge between the tech world and the new right-wing political movements."
   },
   {
-    name: "Edward Snowden Controversy",
-    tagline: "The debate over surveillance, whistleblowing, and national security.",
-    bio: "In 2013, Edward Snowden, a former NSA contractor, leaked highly classified information about global surveillance programs. This sparked a worldwide debate on the balance between national security and individual privacy.",
-    contributions: "Exposed PRISM and other mass surveillance programs.\nCatalyzed changes in how tech companies handle user data encryption.",
-    main_ideas: "Right to Privacy: The belief that mass surveillance is a fundamental violation of human rights.\nTransparency: The argument that government activities should be open to public scrutiny.",
-    criticism: "Accused of treason and endangering national security by the U.S. government.\nCritics argue that his leaks damaged intelligence gathering capabilities."
+    name: "The Edward Snowden Controversy",
+    tagline: "A 7th Grade Guide to Understanding the Debate on Digital Privacy and Security",
+    bio_heading: "Who is Edward Snowden?",
+    bio: "Edward Snowden is a former contractor for the United States National Security Agency (NSA). In 2013, he leaked thousands of secret government documents to journalists, revealing how the U.S. government was collecting massive amounts of information from people’s phone calls, emails, and online activity.",
+    contributions_heading: "What Did Snowden Reveal?",
+    contributions: "The NSA was collecting information from millions of ordinary people—including people who were not suspected of any crime.\nThis collection included phone records, emails, chat messages, and even people’s internet searches.\nU.S. allies, like Germany and France, were also being spied on.",
+    main_ideas_heading: "Why is This Controversial?",
+    main_ideas: "Some People Call Him a Hero: They say Snowden revealed important information the public deserved to know. He started a conversation about privacy, freedom, and government power.\nOthers Call Him a Traitor: They argue he broke the law and endangered national security. They believe his actions made it harder for security agencies to protect the country.",
+    legacy_heading: "What Happened Afterward?",
+    legacy: "Snowden left the U.S. and now lives in Russia, because he fears being arrested.\nThe government changed some surveillance laws after the leaks to better protect privacy.\nThe world is still debating how to balance security and personal privacy.",
+    suggested_reading_heading: "Class Discussion",
+    suggested_reading: "Should the government be able to collect information to keep us safe? Why or why not?\nWas it right or wrong for Snowden to leak the information? Explain your opinion.\nHow much privacy should we expect when we use phones and the internet?",
+    publications: "Edward Snowden Discussing\nEdward Snowden Speaking in 2013\nEdward Snowden at Meeting 2013\nEdward Snowden on video link",
+    publications_heading: "Gallery Captions"
   },
   {
     name: "Pinochet",
@@ -197,6 +205,16 @@ puts "Scholars seeded with bios."
   }
 ].each do |data|
   controversy = Controversy.find_or_create_by!(name: data[:name])
+  # Ensure we clear out old fields that are no longer in the data
+  controversy.update!(
+    tagline: nil, bio_heading: nil, bio: nil, 
+    contributions_heading: nil, contributions: nil, 
+    main_ideas_heading: nil, main_ideas: nil, 
+    legacy_heading: nil, legacy: nil, 
+    suggested_reading_heading: nil, suggested_reading: nil,
+    publications_heading: nil, publications: nil,
+    criticism: nil, quote: nil, quote_author: nil
+  )
   controversy.update!(data)
 end
 puts "Controversies seeded."

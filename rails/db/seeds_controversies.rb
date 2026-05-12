@@ -1,0 +1,52 @@
+  {
+    name: "Newt Gingrich",
+    tagline: "The architect of the 'Gingrich Revolution' and modern political polarization.",
+    bio: "As a politician, Newt Gingrich would say, “I grew up in kind of an idyllic children’s background.” But really, he grew up above a gas station in a life that was “narrow and harsh and unforgiving” (Packer 18). He got his first taste of leadership at ten, when he tried to convince the Parks Department to build a zoo for Harrisburg, making the front page. His ambition became more serious when he visited the scarred battlefields of Verdun and saw what bad leaders could do to a country. With Lincoln and Churchill as his models, he decided that “his future was in politics” (19).",
+    bio_heading: "The Early Ambition",
+    contributions: "Politics as War: Transformed the House of Representatives from a deliberative body into a partisan battlefield.\nMedia Mastery: Baited Speakers of the House on C-SPAN until they were red in the face, using the new medium to reach voters directly.\nThe New South: Captured the emerging Republican majority by blending militarism, technology, and anti-tax sentiment.",
+    contributions_heading: "Political Strategy & Innovation",
+    main_ideas: "The Corrupt Elite: A rhetorical weapon used to delegitimize any institution standing in his way.\nThe Welfare State Critique: Framed liberal policies not just as inefficient, but as morally corrupt.\nFamily Values Rhetoric: Used traditional morality as a political tool even while his personal life was in turmoil.",
+    main_ideas_heading: "The Gingrich Rhetoric",
+    legacy: "Gingrich's tactics in the late 70s and 80s laid the groundwork for the hyper-polarized American political landscape of the 21st century. By framing his opponents not just as wrong, but as a 'corrupt, left-wing machine,' he changed the rules of political engagement forever.",
+    legacy_heading: "Historical Impact",
+    quote: "Politics is war at the level of ideas. You have to destroy the other side's ability to be heard.",
+    quote_author: "Newt Gingrich"
+  },
+  {
+    name: "Peter Thiel",
+    tagline: "The venture capitalist who redefined the relationship between technology and politics.",
+    bio: "Peter Thiel grew up playing chess and memorizing geography. As his family moved between countries, he attended seven different elementary schools and had nearly no friends until he approached his teens (Packer 120). He hated the strictness of his teachers, but got near-perfect scores. When his family moved to the San Francisco Bay Area, he was thrust into the underfunded California school system (121). He coped with the chaos of uncontrollable classrooms by obsessing over his grades (122).",
+    bio_heading: "The Logical Mindset",
+    contributions: "PayPal: Co-founded the payment system with the goal of freeing people from government finance policy.\nPalantir: Created a massive data-analysis company that became a key tool for U.S. intelligence agencies.\nEarly Facebook Investment: Provided the first outside funding for Mark Zuckerberg, later earning $1.5 billion.",
+    contributions_heading: "Technological & Financial Milestones",
+    main_ideas: "Zero to One: The belief that true innovation comes from creating something entirely new, rather than incremental improvement.\nLibertarian Idealism: The hope that technology could bypass the restrictions of modern democratic governments.\nTechnological Stagnation: A critique that humanity has stopped making major breakthroughs in the 'world of atoms' (energy, transport).",
+    main_ideas_heading: "Economic & Philosophical Theories",
+    legacy: "Thiel remains one of the most influential and controversial figures in Silicon Valley, acting as a bridge between the tech world and the new right-wing political movements.",
+    legacy_heading: "Influence & Legacy",
+    quote: "We wanted flying cars, instead we got 140 characters.",
+    quote_author: "Peter Thiel"
+  },
+  {
+    name: "The Edward Snowden Controversy",
+    tagline: "A 7th Grade Guide to Understanding the Debate on Digital Privacy and Security",
+    bio: "Edward Snowden is a former contractor for the United States National Security Agency (NSA). In 2013, he leaked thousands of secret government documents to journalists, revealing how the U.S. government was collecting massive amounts of information from people’s phone calls, emails, and online activity.",
+    bio_heading: "Overview",
+    contributions: "Mass Surveillance: The NSA was collecting information from millions of ordinary people—including people who were not suspected of any crime.\nDigital Footprint: This collection included phone records, emails, chat messages, and even people’s internet searches.\nGlobal Reach: U.S. allies, like Germany and France, were also being spied on.",
+    contributions_heading: "What Did Snowden Reveal?",
+    main_ideas: "The Hero Argument: Supporters say Snowden revealed important information the public deserved to know. He started a conversation about privacy, freedom, and government power.\nThe Traitor Argument: Critics argue he broke the law and endangered national security. They believe his actions made it harder for security agencies to protect the country.",
+    main_ideas_heading: "Why is This Controversial?",
+    legacy: "Snowden left the U.S. and now lives in Russia, because he fears being arrested. The government changed some surveillance laws after the leaks to better protect privacy. The world is still debating how to balance security and personal privacy.",
+    legacy_heading: "Historical Context & Aftermath",
+    suggested_reading: "Should the government be able to collect information to keep us safe? Why or why not?\nWas it right or wrong for Snowden to leak the information? Explain your opinion.\nHow much privacy should we expect when we use phones and the internet?",
+    suggested_reading_heading: "Classroom Inquiry: Essential Questions",
+    quote: "I don't want to live in a world where everything that I say, everything I do, every person I talk to, every expression of creativity or love or friendship is recorded.",
+    quote_author: "Edward Snowden"
+  },
+  {
+    name: "Pinochet",
+    tagline: "The military dictatorship and economic transformation of Chile.",
+    bio: "Augusto Pinochet was a general who led a military coup that overthrew the democratically elected government of Salvador Allende in Chile in 1973. He ruled as a dictator until 1990.",
+    contributions: "Economic Liberalization: Implemented 'shock therapy' policies recommended by the Chicago Boys.\nConstitution of 1980: Established a framework that governed Chile for decades.",
+    main_ideas: "Anti-communism: Justified his rule as necessary to prevent a Marxist takeover.\nFree Market Capitalism: Promoted deregulation, privatization, and foreign investment.",
+    criticism: "Responsible for widespread human rights abuses, including thousands of executions, disappearances, and torture.\nCondemned globally for the suppression of democratic institutions and civil liberties."
+  }

@@ -1,7 +1,14 @@
 require 'rails_helper'
 
 RSpec.describe "Controversies", type: :request do
-  let!(:controversy) { Controversy.create!(name: "Sample Controversy", bio: "This is a sample bio") }
+  let!(:controversy) { 
+    Controversy.create!(
+      name: "Sample Controversy", 
+      bio: "This is a sample bio",
+      legacy: "This is a historical legacy",
+      suggested_reading: "Source: George Packer"
+    ) 
+  }
 
   describe "GET /controversies" do
     it "returns a 200 OK status" do
@@ -25,6 +32,8 @@ RSpec.describe "Controversies", type: :request do
       get controversy_path(controversy)
       expect(response.body).to include("Sample Controversy")
       expect(response.body).to include("This is a sample bio")
+      expect(response.body).to include("This is a historical legacy")
+      expect(response.body).to include("Source: George Packer")
     end
   end
 end

@@ -28,7 +28,9 @@
         </div>
         <div>
           <h1 class="text-4xl md:text-6xl font-bold text-white mb-4"><%= @controversy.name %></h1>
-          <%= simple_format(@controversy.tagline.presence || "Exploring the historical impact and modern relevance of #{@controversy.name}.", { class: "text-lg md:text-xl text-white/90 max-w-3xl leading-relaxed font-medium" }, { wrapper_tag: "div" }) %>
+          <% if @controversy.tagline.present? %>
+            <%= simple_format(@controversy.tagline, { class: "text-lg md:text-xl text-white/90 max-w-3xl leading-relaxed font-medium" }, { wrapper_tag: "div" }) %>
+          <% end %>
         </div>
       </div>
     </div>
@@ -38,30 +40,65 @@
   <section class="py-24 bg-white">
     <div class="max-w-4xl mx-auto px-6 lg:px-8">
       <div class="prose prose-xl prose-slate max-w-none">
-        <div class="mb-16">
-          <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= @controversy.bio_heading.presence || "Overview" %></h2>
-          <div class="text-slate-600 leading-relaxed text-lg">
-            <%= simple_format @controversy.bio.presence || "Details for #{@controversy.name} are currently being updated." %>
-          </div>
-        </div>
         
+        <!-- Biography / Overview (Scholar Style) -->
+        <% if @controversy.bio.present? %>
+          <div class="mb-20">
+            <% if @controversy.bio_heading.present? %>
+              <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= @controversy.bio_heading %></h2>
+            <% end %>
+            <div class="text-slate-600 leading-relaxed text-lg 
+                        [&>p]:mb-6
+                        [&>p:first-of-type]:first-letter:text-8xl 
+                        [&>p:first-of-type]:first-letter:font-bold 
+                        [&>p:first-of-type]:first-letter:text-[#f9a825] 
+                        [&>p:first-of-type]:first-letter:mr-4 
+                        [&>p:first-of-type]:first-letter:float-left
+                        [&>p:first-of-type]:first-letter:leading-[0.7]">
+              <%= simple_format @controversy.bio %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Image Captions / Gallery (Scholar Publications Style) -->
+        <% if @controversy.publications.present? %>
+          <div class="mb-20">
+            <% if @controversy.publications_heading.present? %>
+              <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= @controversy.publications_heading %></h2>
+            <% end %>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-8 rounded-3xl border border-slate-100">
+              <% @controversy.publications.split("\n").each do |caption| %>
+                <div class="flex flex-col gap-3">
+                  <div class="aspect-video bg-slate-200 rounded-2xl flex items-center justify-center text-slate-400 overflow-hidden">
+                    <i class="fas fa-image text-4xl"></i>
+                  </div>
+                  <p class="text-sm font-medium text-slate-500 italic px-2 text-center m-0"><%= caption %></p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+        
+        <!-- Contributions / Key Findings (Scholar Style Box) -->
         <% if @controversy.contributions.present? %>
-          <div class="mb-16 p-8 bg-slate-50 rounded-2xl border-l-4 border-[#f9a825] shadow-sm">
-            <h3 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-              <i class="fas fa-bullseye text-[#f9a825]"></i>
-              <%= @controversy.contributions_heading.presence || "Key Points" %>
-            </h3>
-            <ul class="space-y-4 list-none p-0">
+          <div class="mb-20 p-10 bg-slate-50 rounded-3xl border-l-8 border-[#f9a825] shadow-sm">
+            <% if @controversy.contributions_heading.present? %>
+              <h3 class="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-4">
+                <i class="fas fa-search-plus text-[#f9a825]"></i>
+                <%= @controversy.contributions_heading %>
+              </h3>
+            <% end %>
+            <ul class="space-y-6 list-none p-0 m-0">
               <% @controversy.contributions.split("\n").each do |contribution| %>
-                <li class="flex items-start gap-3 text-slate-700">
+                <li class="flex items-start gap-4 text-slate-700 text-lg m-0">
                   <i class="fas fa-check-circle text-[#f9a825] mt-1.5 flex-shrink-0"></i>
                   <% if contribution.include?(":") %>
                     <% parts = contribution.split(":", 2) %>
-                    <span class="text-lg">
-                      <strong class="text-slate-900"><%= parts[0] %>:</strong><%= parts[1] %>
+                    <span>
+                      <strong class="text-slate-900 font-bold"><%= parts[0] %>:</strong><%= parts[1] %>
                     </span>
                   <% else %>
-                    <span class="text-lg"><%= contribution %></span>
+                    <span><%= contribution %></span>
                   <% end %>
                 </li>
               <% end %>
@@ -69,75 +106,52 @@
           </div>
         <% end %>
 
-        <% if @controversy.main_ideas.present? %>
-          <div class="mb-16">
-            <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block">
-              <%= @controversy.main_ideas_heading.presence || "Main Perspectives" %>
-            </h2>
-            
-            <% if @controversy.main_ideas.include?("\n\n") || @controversy.main_ideas.length > 500 %>
-              <div class="prose prose-lg prose-slate max-w-none text-slate-600 leading-relaxed">
-                <%= simple_format @controversy.main_ideas %>
-              </div>
-            <% else %>
-              <div class="grid grid-cols-1 gap-6">
-                <% @controversy.main_ideas.split("\n").each do |idea| %>
-                  <div class="card bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                    <div class="card-body p-6 flex-row gap-4 items-start">
-                      <div class="w-10 h-10 rounded-full bg-[#f9a825]/10 flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-lightbulb text-[#f9a825]"></i>
-                      </div>
-                      <div class="text-slate-600 m-0">
-                        <% if idea.include?(":") %>
-                          <% parts = idea.split(":", 2) %>
-                          <h4 class="font-bold text-slate-900 text-lg mb-1"><%= parts[0] %></h4>
-                          <p class="m-0"><%= parts[1] %></p>
-                        <% else %>
-                          <%= idea %>
-                        <% end %>
-                      </div>
-                    </div>
-                  </div>
-                <% end %>
-              </div>
-            <% end %>
-          </div>
-        <% end %>
-
+        <!-- Quote Block (Scholar Style) -->
         <% if @controversy.quote.present? %>
-          <div class="mb-16 bg-slate-900 p-12 rounded-3xl relative overflow-hidden text-center">
-            <div class="absolute top-0 left-0 w-24 h-24 opacity-10">
+          <div class="mb-20 bg-slate-900 p-12 rounded-[3rem] relative overflow-hidden text-center">
+            <div class="absolute top-0 left-0 w-32 h-32 opacity-10 -ml-10 -mt-10">
               <i class="fas fa-quote-left text-9xl text-white"></i>
             </div>
-            <blockquote class="relative z-10">
-              <p class="text-2xl md:text-3xl font-serif text-white italic leading-relaxed mb-6">
+            <blockquote class="relative z-10 m-0">
+              <p class="text-2xl md:text-3xl font-serif text-white italic leading-relaxed mb-8">
                 “<%= @controversy.quote %>”
               </p>
               <% if @controversy.quote_author.present? %>
-                <cite class="text-[#f9a825] text-xl font-bold not-italic">— <%= @controversy.quote_author %></cite>
+                <cite class="text-[#f9a825] text-xl font-bold not-italic flex items-center justify-center gap-3">
+                  <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
+                  <%= @controversy.quote_author %>
+                  <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
+                </cite>
               <% end %>
             </blockquote>
           </div>
         <% end %>
 
-        <% if @controversy.publications.present? %>
-          <div class="mb-16">
-            <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block">
-              <%= @controversy.publications_heading.presence || "Related Works & Media" %>
-            </h2>
-            <div class="space-y-6">
-              <% @controversy.publications.split("\n").each do |publication| %>
-                <div class="flex gap-4 items-start">
-                  <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-file-alt text-slate-400"></i>
-                  </div>
-                  <div class="text-slate-600 text-lg m-0">
-                    <% if publication.include?(":") %>
-                      <% parts = publication.split(":", 2) %>
-                      <strong class="text-slate-900"><%= parts[0] %>:</strong><%= parts[1] %>
-                    <% else %>
-                      <%= publication %>
-                    <% end %>
+        <!-- Main Ideas / Perspectives (Scholar Style Cards) -->
+        <% if @controversy.main_ideas.present? %>
+          <div class="mb-20">
+            <% if @controversy.main_ideas_heading.present? %>
+              <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
+                <%= @controversy.main_ideas_heading %>
+              </h2>
+            <% end %>
+            
+            <div class="grid grid-cols-1 gap-8">
+              <% @controversy.main_ideas.split("\n").each do |idea| %>
+                <div class="card bg-white border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-3xl overflow-hidden group">
+                  <div class="card-body p-8 flex-row gap-6 items-start">
+                    <div class="w-14 h-14 rounded-2xl bg-[#f9a825]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#f9a825] group-hover:text-white transition-colors duration-300">
+                      <i class="fas fa-lightbulb text-[#f9a825] text-xl group-hover:text-white"></i>
+                    </div>
+                    <div class="text-slate-600 m-0">
+                      <% if idea.include?(":") %>
+                        <% parts = idea.split(":", 2) %>
+                        <h4 class="font-bold text-slate-900 text-xl mb-2"><%= parts[0] %></h4>
+                        <p class="text-lg leading-relaxed m-0"><%= parts[1] %></p>
+                      <% else %>
+                        <p class="text-lg leading-relaxed m-0"><%= idea %></p>
+                      <% end %>
+                    </div>
                   </div>
                 </div>
               <% end %>
@@ -145,18 +159,21 @@
           </div>
         <% end %>
 
+        <!-- Criticism / Risks (Scholar Style Red Box) -->
         <% if @controversy.criticism.present? %>
-          <div class="mb-16">
-            <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-red-500 pb-4 inline-block">
-              <%= @controversy.criticism_heading.presence || "Criticism & Public Debate" %>
-            </h2>
+          <div class="mb-20">
+            <% if @controversy.criticism_heading.present? %>
+              <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-red-500 pb-4 inline-block">
+                <%= @controversy.criticism_heading %>
+              </h2>
+            <% end %>
             <div class="space-y-6">
               <% @controversy.criticism.split("\n").each do |item| %>
-                <div class="flex gap-4 items-start p-6 bg-red-50/50 rounded-2xl border border-red-100">
-                  <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <div class="flex gap-6 items-start p-8 bg-red-50/50 rounded-3xl border border-red-100 shadow-sm">
+                  <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-exclamation-triangle text-red-500"></i>
                   </div>
-                  <div class="text-slate-700 text-lg m-0">
+                  <div class="text-slate-700 text-lg m-0 leading-relaxed">
                     <% if item.include?(":") %>
                       <% parts = item.split(":", 2) %>
                       <strong class="text-slate-900 font-bold"><%= parts[0] %>:</strong><%= parts[1] %>
@@ -170,32 +187,48 @@
           </div>
         <% end %>
 
+        <!-- Legacy / Context (Scholar Style Italic Box) -->
         <% if @controversy.legacy.present? %>
-          <div class="mb-16">
-            <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block">
-              <%= @controversy.legacy_heading.presence || "Historical Legacy" %>
-            </h2>
-            <div class="text-slate-600 leading-relaxed text-lg bg-[#f9a825]/5 p-8 rounded-2xl italic">
+          <div class="mb-20">
+            <% if @controversy.legacy_heading.present? %>
+              <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
+                <%= @controversy.legacy_heading %>
+              </h2>
+            <% end %>
+            <div class="text-slate-700 leading-relaxed text-xl bg-[#f9a825]/5 p-10 rounded-3xl italic relative border-t-4 border-[#f9a825] [&>p]:mb-4">
+              <div class="absolute -top-4 right-10 w-8 h-8 bg-[#f9a825] rounded-full flex items-center justify-center text-white text-xs shadow-lg">
+                <i class="fas fa-clock"></i>
+              </div>
               <%= simple_format @controversy.legacy %>
             </div>
           </div>
         <% end %>
 
+        <!-- Suggested Reading / Inquiry (Scholar Style List) -->
         <% if @controversy.suggested_reading.present? %>
-          <div class="mb-16">
-            <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block">
-              <%= @controversy.suggested_reading_heading.presence || "Suggested Resources" %>
-            </h2>
-            <div class="space-y-3">
+          <div class="mb-20">
+            <% if @controversy.suggested_reading_heading.present? %>
+              <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
+                <%= @controversy.suggested_reading_heading %>
+              </h2>
+            <% end %>
+            <div class="grid grid-cols-1 gap-4">
               <% @controversy.suggested_reading.split("\n").each do |reading| %>
-                <div class="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors group">
-                  <i class="fas fa-book text-slate-400 group-hover:text-[#f9a825] transition-colors"></i>
-                  <span class="text-lg text-slate-700 font-medium"><%= reading %></span>
+                <div class="flex items-center gap-4 p-6 bg-white border border-slate-100 rounded-2xl hover:bg-slate-50 hover:border-[#f9a825]/30 transition-all group shadow-sm">
+                  <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-[#f9a825]/10">
+                    <i class="fas fa-question-circle text-slate-400 group-hover:text-[#f9a825] transition-colors"></i>
+                  </div>
+                  <span class="text-lg text-slate-700 font-medium leading-snug"><%= reading %></span>
                 </div>
               <% end %>
             </div>
           </div>
         <% end %>
+
+        <!-- Footer -->
+        <div class="mt-24 pt-12 border-t border-slate-100 text-slate-400 text-sm text-center italic">
+          <p>© 2024 7th Grade Digital Literacy Class | Images from Wikimedia Commons</p>
+        </div>
       </div>
     </div>
   </section>

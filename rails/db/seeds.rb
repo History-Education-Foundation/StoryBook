@@ -213,3 +213,46 @@ puts "Scholars seeded with bios."
   controversy.update!(data)
 end
 puts "Controversies seeded."
+
+# Seed: Concepts
+[
+  {
+    name: "Progressivism",
+    tagline: "A political and social philosophy that advocates for reform and improvement in society through government action and scientific progress.",
+    bio: "Detailed content coming soon...",
+    main_ideas: "Detailed content coming soon...",
+    legacy: "Detailed content coming soon..."
+  },
+  {
+    name: "Fascism",
+    tagline: "A far-right, authoritarian ultranationalist political ideology characterized by dictatorial power and forcible suppression of opposition.",
+    bio: "Detailed content coming soon...",
+    main_ideas: "Detailed content coming soon...",
+    legacy: "Detailed content coming soon..."
+  },
+  {
+    name: "Theocracy",
+    tagline: "A form of government in which a deity is recognized as the supreme ruling authority, giving guidance to human intermediaries.",
+    bio: "Detailed content coming soon...",
+    main_ideas: "Detailed content coming soon...",
+    legacy: "Detailed content coming soon..."
+  },
+  {
+    name: "Communism",
+    tagline: "A socio-economic ideology and movement whose ultimate goal is the establishment of a communist society with common ownership of the means of production.",
+    bio: "Detailed content coming soon...",
+    main_ideas: "Detailed content coming soon...",
+    legacy: "Detailed content coming soon..."
+  },
+  {
+    name: "Homo Deus",
+    tagline: "A concept exploring the future of humanity, focusing on how humans might use technology to achieve god-like abilities.",
+    bio: "Detailed content coming soon...",
+    main_ideas: "Detailed content coming soon...",
+    legacy: "Detailed content coming soon..."
+  }
+].each do |data|
+  concept = Concept.find_or_create_by!(name: data[:name])
+  concept.update!(data)
+end
+puts "Concepts seeded."

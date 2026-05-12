@@ -1,0 +1,276 @@
+<% content_for :full_width, true %>
+<% content_for :hide_header, true %>
+<% content_for :hide_navbar, true %>
+
+<div class="min-h-screen bg-white font-sans text-slate-800">
+  <%= render 'layouts/navigation' %>
+
+  <!-- Hero/Header Section -->
+  <section class="bg-slate-900 py-24 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-20">
+      <div class="absolute inset-0 bg-[#f9a825]/10 mix-blend-overlay"></div>
+    </div>
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+      <%= link_to concepts_path, class: "inline-flex items-center gap-2 text-[#f9a825] hover:text-white transition-colors mb-8 font-medium" do %>
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Directory</span>
+      <% end %>
+      
+      <div class="flex flex-col md:flex-row items-center gap-8 md:items-start text-center md:text-left">
+        <div class="w-32 h-32 bg-[#f9a825] rounded-full flex items-center justify-center shadow-lg flex-shrink-0 overflow-hidden border-4 border-white/20">
+          <% if @concept.image_data.present? %>
+            <img src="<%= @concept.image_data %>" class="w-full h-full object-cover <%= @concept.image_position || 'object-top' %>" alt="<%= @concept.name %>">
+          <% elsif @concept.image_filename.present? %>
+            <%= image_tag @concept.image_filename, class: "w-full h-full object-cover #{@concept.image_position || 'object-top'}" %>
+          <% else %>
+            <i class="fas fa-book text-5xl text-white"></i>
+          <% end %>
+        </div>
+        <div>
+          <h1 class="text-4xl md:text-6xl font-bold text-white mb-4"><%= @concept.name %></h1>
+          <% if @concept.tagline.present? %>
+            <%= simple_format(@concept.tagline, { class: "text-lg md:text-xl text-white/90 max-w-3xl leading-relaxed font-medium" }, { wrapper_tag: "div" }) %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content Section -->
+  <section class="py-24 bg-white">
+    <div class="max-w-4xl mx-auto px-6 lg:px-8">
+      <div class="prose prose-xl prose-slate max-w-none">
+        
+        <!-- Biography / Overview (Scholar Style) -->
+        <% if @concept.bio.present? %>
+          <% 
+            bio_text = @concept.bio
+            citation = nil
+            if bio_text.include?("Work Cited:")
+              parts = bio_text.split("Work Cited:", 2)
+              bio_text = parts[0]
+              citation = parts[1]
+            end
+          %>
+          <div class="mb-20">
+            <% if @concept.bio_heading.present? %>
+              <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= @concept.bio_heading %></h2>
+            <% end %>
+            <div class="text-slate-600 leading-relaxed text-lg 
+                        [&>p]:mb-6
+                        [&>p:first-of-type]:first-letter:text-8xl 
+                        [&>p:first-of-type]:first-letter:font-bold 
+                        [&>p:first-of-type]:first-letter:text-[#f9a825] 
+                        [&>p:first-of-type]:first-letter:mr-4 
+                        [&>p:first-of-type]:first-letter:float-left
+                        [&>p:first-of-type]:first-letter:leading-[0.7]">
+              <%= simple_format bio_text %>
+            </div>
+
+            <% if citation.present? %>
+              <div class="mt-12 pt-8 border-t border-slate-100">
+                <div class="flex items-start gap-4 p-8 bg-slate-50 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
+                  <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <i class="fas fa-quote-right text-6xl text-slate-900"></i>
+                  </div>
+                  <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <i class="fas fa-bookmark text-[#f9a825]"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 flex items-center gap-2">
+                      Work Cited
+                    </h4>
+                    <p class="text-slate-500 italic font-serif text-lg leading-relaxed m-0">
+                      <%= citation.strip %>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <!-- Image Captions / Gallery (Scholar Publications Style) -->
+        <% if @concept.publications.present? %>
+          <div class="mb-20">
+            <% if @concept.publications_heading.present? %>
+              <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= @concept.publications_heading %></h2>
+            <% end %>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-8 rounded-3xl border border-slate-100">
+              <% @concept.publications.split("\n").each do |caption| %>
+                <div class="flex flex-col gap-3">
+                  <div class="aspect-video bg-slate-200 rounded-2xl flex items-center justify-center text-slate-400 overflow-hidden">
+                    <i class="fas fa-image text-4xl"></i>
+                  </div>
+                  <p class="text-sm font-medium text-slate-500 italic px-2 text-center m-0"><%= caption %></p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+        
+        <!-- Contributions / Key Findings (Scholar Style Box) -->
+        <% if @concept.contributions.present? %>
+          <div class="mb-20 p-10 bg-slate-50 rounded-3xl border-l-8 border-[#f9a825] shadow-sm">
+            <% if @concept.contributions_heading.present? %>
+              <h3 class="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-4">
+                <i class="fas fa-search-plus text-[#f9a825]"></i>
+                <%= @concept.contributions_heading %>
+              </h3>
+            <% end %>
+            <ul class="space-y-6 list-none p-0 m-0">
+              <% @concept.contributions.split("\n").each do |contribution| %>
+                <li class="flex items-start gap-4 text-slate-700 text-lg m-0">
+                  <i class="fas fa-check-circle text-[#f9a825] mt-1.5 flex-shrink-0"></i>
+                  <% if contribution.include?(":") %>
+                    <% parts = contribution.split(":", 2) %>
+                    <span>
+                      <strong class="text-slate-900 font-bold"><%= parts[0] %>:</strong><%= parts[1] %>
+                    </span>
+                  <% else %>
+                    <span><%= contribution %></span>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <!-- Quote Block (Scholar Style) -->
+        <% if @concept.quote.present? %>
+          <div class="mb-20 bg-slate-900 p-12 rounded-[3rem] relative overflow-hidden text-center">
+            <div class="absolute top-0 left-0 w-32 h-32 opacity-10 -ml-10 -mt-10">
+              <i class="fas fa-quote-left text-9xl text-white"></i>
+            </div>
+            <blockquote class="relative z-10 m-0">
+              <p class="text-2xl md:text-3xl font-serif text-white italic leading-relaxed mb-8">
+                “<%= @concept.quote %>”
+              </p>
+              <% if @concept.quote_author.present? %>
+                <cite class="text-[#f9a825] text-xl font-bold not-italic flex items-center justify-center gap-3">
+                  <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
+                  <%= @concept.quote_author %>
+                  <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
+                </cite>
+              <% end %>
+            </blockquote>
+          </div>
+        <% end %>
+
+        <!-- Main Ideas / Perspectives (Scholar Style Cards) -->
+        <% if @concept.main_ideas.present? %>
+          <div class="mb-20">
+            <% if @concept.main_ideas_heading.present? %>
+              <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
+                <%= @concept.main_ideas_heading %>
+              </h2>
+            <% end %>
+            
+            <div class="grid grid-cols-1 gap-8">
+              <% @concept.main_ideas.split("\n").each do |idea| %>
+                <div class="card bg-white border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-3xl overflow-hidden group">
+                  <div class="card-body p-8 flex-row gap-6 items-start">
+                    <div class="w-14 h-14 rounded-2xl bg-[#f9a825]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#f9a825] group-hover:text-white transition-colors duration-300">
+                      <i class="fas fa-lightbulb text-[#f9a825] text-xl group-hover:text-white"></i>
+                    </div>
+                    <div class="text-slate-600 m-0">
+                      <% if idea.include?(":") %>
+                        <% parts = idea.split(":", 2) %>
+                        <h4 class="font-bold text-slate-900 text-xl mb-2"><%= parts[0] %></h4>
+                        <p class="text-lg leading-relaxed m-0"><%= parts[1] %></p>
+                      <% else %>
+                        <p class="text-lg leading-relaxed m-0"><%= idea %></p>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Criticism / Risks (Scholar Style Red Box) -->
+        <% if @concept.criticism.present? %>
+          <div class="mb-20">
+            <% if @concept.criticism_heading.present? %>
+              <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-red-500 pb-4 inline-block">
+                <%= @concept.criticism_heading %>
+              </h2>
+            <% end %>
+            <div class="space-y-6">
+              <% @concept.criticism.split("\n").each do |item| %>
+                <div class="flex gap-6 items-start p-8 bg-red-50/50 rounded-3xl border border-red-100 shadow-sm">
+                  <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-red-500"></i>
+                  </div>
+                  <div class="text-slate-700 text-lg m-0 leading-relaxed">
+                    <% if item.include?(":") %>
+                      <% parts = item.split(":", 2) %>
+                      <strong class="text-slate-900 font-bold"><%= parts[0] %>:</strong><%= parts[1] %>
+                    <% else %>
+                      <%= item %>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Legacy / Context (Scholar Style Italic Box) -->
+        <% if @concept.legacy.present? %>
+          <div class="mb-20">
+            <% if @concept.legacy_heading.present? %>
+              <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
+                <%= @concept.legacy_heading %>
+              </h2>
+            <% end %>
+            <div class="text-slate-700 leading-relaxed text-xl bg-[#f9a825]/5 p-10 rounded-3xl italic relative border-t-4 border-[#f9a825] [&>p]:mb-4">
+              <div class="absolute -top-4 right-10 w-8 h-8 bg-[#f9a825] rounded-full flex items-center justify-center text-white text-xs shadow-lg">
+                <i class="fas fa-clock"></i>
+              </div>
+              <%= simple_format @concept.legacy %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Suggested Reading / Inquiry (Scholar Style List) -->
+        <% if @concept.suggested_reading.present? %>
+          <div class="mb-20">
+            <% if @concept.suggested_reading_heading.present? %>
+              <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
+                <%= @concept.suggested_reading_heading %>
+              </h2>
+            <% end %>
+            <div class="grid grid-cols-1 gap-4">
+              <% @concept.suggested_reading.split("\n").each do |reading| %>
+                <div class="flex items-center gap-4 p-6 bg-white border border-slate-100 rounded-2xl hover:bg-slate-50 hover:border-[#f9a825]/30 transition-all group shadow-sm">
+                  <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-[#f9a825]/10">
+                    <i class="fas fa-question-circle text-slate-400 group-hover:text-[#f9a825] transition-colors"></i>
+                  </div>
+                  <span class="text-lg text-slate-700 font-medium leading-snug"><%= reading %></span>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Footer -->
+        <div class="mt-24 pt-12 border-t border-slate-100 text-slate-400 text-sm text-center italic">
+          <p>© 2024 7th Grade Digital Literacy Class | Images from Wikimedia Commons</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Call to Action -->
+  <section class="py-16 bg-[#f9a825] text-white">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold mb-4">Support Our Historical Research</h2>
+      <p class="text-xl mb-8 text-white/90">Help us continue providing high-quality resources for understanding complex historical narratives.</p>
+      <%= link_to "#contact", class: "btn btn-outline text-white border-2 border-white hover:bg-white hover:text-slate-900 px-10 rounded-md transition-all font-bold" do %>
+        Contact Us
+      <% end %>
+    </div>
+  </section>
+</div>

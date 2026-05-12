@@ -44,13 +44,11 @@ Rails.application.routes.draw do
 
   root "public#home"
   get "home" => "public#home"
-  # root "public#home"
-  # root "public#home"
-  # root "prototypes#show", page: "home"
-  get "home" => "public#home"
   get "chat" => "public#chat"
   get "pricing" => "static_pages#pricing"
   get "about" => "static_pages#about"
+  
+  resources :concepts, only: [:index, :show]
   resources :scholars, only: [:index, :show]
   resources :controversies, only: [:index, :show]
   resources :posts, only: [:index, :show]
@@ -69,13 +67,10 @@ Rails.application.routes.draw do
     resources :authors
   end
 
-  
   post "/stop_impersonating", to: "application#stop_impersonating"
 
   # Recall.ai webhook
   post "/webhooks/recall", to: "webhooks#recall"
 
   get "/prototypes/*page", to: "prototypes#show"
-  # Defines the root path route ("/")
-  # root "posts#index"
 end

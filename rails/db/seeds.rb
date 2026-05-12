@@ -152,3 +152,51 @@ puts "Early England Colonies book seeded."
   scholar.update!(bio: scholar_data[:bio])
 end
 puts "Scholars seeded with bios."
+
+# Seed: Controversies
+[
+  {
+    name: "Curtis Yarvin",
+    tagline: "Influential neoreactionary thinker and software engineer.",
+    bio: "Curtis Yarvin, also known by the pen name Mencius Moldbug, is an American political theorist and software engineer. He is a primary figure in the Neoreactionary movement (NRx), which critiques liberal democracy and advocates for a return to monarchical or corporate governance.",
+    contributions: "Founded the Urbit project: A decentralized personal server platform.\nDeveloped the 'Moldbuggian' critique of modern democratic institutions.",
+    main_ideas: "The Cathedral: A decentralized network of academics and journalists who enforce social norms.\nFormalism: The idea that political power should be clearly defined and formalized like property rights.",
+    criticism: "Accused of promoting authoritarianism and elitism.\nCriticized for views on race and history that many find deeply problematic."
+  },
+  {
+    name: "Newt Gingrich",
+    tagline: "Former Speaker of the House and architect of the 'Contract with America'.",
+    bio: "Newt Gingrich served as the 50th Speaker of the United States House of Representatives from 1995 to 1999. He led the Republican Revolution in 1994, ending 40 years of Democratic majority in the House.",
+    contributions: "Contract with America: A legislative agenda that helped Republicans win the 1994 midterm elections.\nPlayed a key role in welfare reform and the first balanced federal budget in a generation.",
+    main_ideas: "Partisan polarization: Advocates for a more confrontational style of politics.\nTechnological optimism: Frequently discusses how technology can transform government and society.",
+    criticism: "Often blamed for the increased polarization and breakdown of civility in American politics.\nFaced ethics investigations during his time as Speaker."
+  },
+  {
+    name: "Peter Thiel",
+    tagline: "Billionaire entrepreneur, venture capitalist, and political donor.",
+    bio: "Peter Thiel is a co-founder of PayPal, Palantir Technologies, and Founders Fund. He was the first outside investor in Facebook. He is known for his contrarian views on technology, education, and politics.",
+    contributions: "The Thiel Fellowship: A program that pays students to drop out of college and start companies.\nZero to One: An influential book on startups and innovation.",
+    main_ideas: "Stagnation: Argues that technological progress has slowed down outside of bits and software.\nLibertarianism: Has expressed skepticism about the compatibility of freedom and democracy.",
+    criticism: "Criticized for his support of Donald Trump and other controversial political figures.\nControversy over his funding of the lawsuit that bankrupt Gawker Media."
+  },
+  {
+    name: "Edward Snowden Controversy",
+    tagline: "The debate over surveillance, whistleblowing, and national security.",
+    bio: "In 2013, Edward Snowden, a former NSA contractor, leaked highly classified information about global surveillance programs. This sparked a worldwide debate on the balance between national security and individual privacy.",
+    contributions: "Exposed PRISM and other mass surveillance programs.\nCatalyzed changes in how tech companies handle user data encryption.",
+    main_ideas: "Right to Privacy: The belief that mass surveillance is a fundamental violation of human rights.\nTransparency: The argument that government activities should be open to public scrutiny.",
+    criticism: "Accused of treason and endangering national security by the U.S. government.\nCritics argue that his leaks damaged intelligence gathering capabilities."
+  },
+  {
+    name: "Pinochet",
+    tagline: "The military dictatorship and economic transformation of Chile.",
+    bio: "Augusto Pinochet was a general who led a military coup that overthrew the democratically elected government of Salvador Allende in Chile in 1973. He ruled as a dictator until 1990.",
+    contributions: "Economic Liberalization: Implemented 'shock therapy' policies recommended by the Chicago Boys.\nConstitution of 1980: Established a framework that governed Chile for decades.",
+    main_ideas: "Anti-communism: Justified his rule as necessary to prevent a Marxist takeover.\nFree Market Capitalism: Promoted deregulation, privatization, and foreign investment.",
+    criticism: "Responsible for widespread human rights abuses, including thousands of executions, disappearances, and torture.\nCondemned globally for the suppression of democratic institutions and civil liberties."
+  }
+].each do |data|
+  controversy = Controversy.find_or_create_by!(name: data[:name])
+  controversy.update!(data)
+end
+puts "Controversies seeded."

@@ -43,6 +43,15 @@
         
         <!-- Biography / Overview (Scholar Style) -->
         <% if @controversy.bio.present? %>
+          <% 
+            bio_text = @controversy.bio
+            citation = nil
+            if bio_text.include?("Work Cited:")
+              parts = bio_text.split("Work Cited:", 2)
+              bio_text = parts[0]
+              citation = parts[1]
+            end
+          %>
           <div class="mb-20">
             <% if @controversy.bio_heading.present? %>
               <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= @controversy.bio_heading %></h2>
@@ -55,8 +64,29 @@
                         [&>p:first-of-type]:first-letter:mr-4 
                         [&>p:first-of-type]:first-letter:float-left
                         [&>p:first-of-type]:first-letter:leading-[0.7]">
-              <%= simple_format @controversy.bio %>
+              <%= simple_format bio_text %>
             </div>
+
+            <% if citation.present? %>
+              <div class="mt-12 pt-8 border-t border-slate-100">
+                <div class="flex items-start gap-4 p-8 bg-slate-50 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
+                  <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <i class="fas fa-quote-right text-6xl text-slate-900"></i>
+                  </div>
+                  <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <i class="fas fa-bookmark text-[#f9a825]"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 flex items-center gap-2">
+                      Work Cited
+                    </h4>
+                    <p class="text-slate-500 italic font-serif text-lg leading-relaxed m-0">
+                      <%= citation.strip %>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            <% end %>
           </div>
         <% end %>
 

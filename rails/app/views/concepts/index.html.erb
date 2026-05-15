@@ -13,7 +13,7 @@
     <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 text-center">
       <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">Concepts in History Directory</h1>
       <p class="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-        Exploring the foundational ideas and ideologies that have shaped historical developments and human civilization.
+        Exploring the fundamental ideas, philosophies, and frameworks that have shaped the course of human history.
       </p>
     </div>
   </section>
@@ -30,7 +30,7 @@
               <% elsif concept.image_filename.present? %>
                 <%= image_tag concept.image_filename, class: "w-full h-full object-cover #{concept.image_position || 'object-top'}" %>
               <% else %>
-                <i class="fas fa-book text-4xl text-white"></i>
+                <i class="fas fa-lightbulb text-4xl text-white"></i>
               <% end %>
             </div>
             <h3 class="text-2xl font-bold text-slate-900 mb-4 group-hover:text-primary transition-colors"><%= concept.name %></h3>
@@ -48,7 +48,7 @@
   <section class="py-16 bg-[#f9a825] text-white">
     <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center">
       <h2 class="text-3xl font-bold mb-4">Interested in historical concepts?</h2>
-      <p class="text-xl mb-8 text-white/90">We are documenting the most impactful ideas in history education.</p>
+      <p class="text-xl mb-8 text-white/90">We are documenting the key intellectual frameworks that drive historical change.</p>
       <%= link_to "#contact", class: "btn btn-outline text-white border-2 border-white hover:bg-white hover:text-slate-900 px-10 rounded-md transition-all font-bold" do %>
         Contact Us
       <% end %>

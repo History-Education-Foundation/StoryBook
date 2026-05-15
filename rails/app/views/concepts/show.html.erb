@@ -204,10 +204,10 @@
         <!-- Criticism / Risks (Scholar Style Red Box) -->
         <% if @concept.criticism.present? %>
           <% 
-            # Only Fascism uses the custom gold 'Deep Dive' box
-            use_analysis_box = @concept.name == 'Fascism'
+            # Use the custom gold 'Deep Dive' box for Fascism or Structured Academic Controversy
+            use_analysis_box = @concept.name == 'Fascism' || @concept.criticism_heading == 'Structured Academic Controversy'
             
-            # Theme colors for the Analysis Box (Fascism only for now)
+            # Theme colors for the Analysis Box
             accent_color_class = '[#f9a825]'
             box_bg = 'bg-slate-50'
             box_border = 'border-slate-100'

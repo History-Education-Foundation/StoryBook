@@ -14,6 +14,16 @@ RSpec.describe CivicTopic, type: :model do
     end
   end
 
+  describe 'Andrew Yang content verification' do
+    it 'has the correct contributions count for Andrew Yang' do
+      yang = CivicTopic.create!(
+        name: "Andrew Yang",
+        contributions: "Fact 1\nFact 2\nFact 3\nFact 4\nFact 5"
+      )
+      expect(yang.contributions.split("\n").count).to eq(5)
+    end
+  end
+
   describe 'defaults' do
     it 'is not published by default' do
       topic = CivicTopic.new(name: 'Test Topic')

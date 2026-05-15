@@ -1,0 +1,50 @@
+  /usr/local/bundle/ruby/3.3.0/gems/actionpack-7.2.3/lib/abstract_controller/callbacks.rb:261:in `block in process_action'
+  /usr/local/bundle/ruby/3.3.0/gems/activesupport-7.2.3/lib/active_support/callbacks.rb:121:in `block in run_callbacks'
+  /usr/local/bundle/ruby/3.3.0/gems/turbo-rails-2.0.23/lib/turbo-rails.rb:24:in `with_request_id'
+  /usr/local/bundle/ruby/3.3.0/gems/turbo-rails-2.0.23/app/controllers/concerns/turbo/request_id_tracking.rb:10:in `turbo_tracking_request_id'
+  /usr/local/bundle/ruby/3.3.0/gems/activesupport-7.2.3/lib/active_support/callbacks.rb:130:in `block in run_callbacks'
+  /usr/local/bundle/ruby/3.3.0/gems/actiontext-7.2.3/lib/action_text/rendering.rb:25:in `with_renderer'
+  /usr/local/bundle/ruby/3.3.0/gems/actiontext-7.2.3/lib/action_text/engine.rb:71:in `block (4 levels) in <class:Engine>'
+  /usr/local/bundle/ruby/3.3.0/gems/activesupport-7.2.3/lib/active_support/callbacks.rb:130:in `instance_exec'
+  /usr/local/bundle/ruby/3.3.0/gems/activesupport-7.2.3/lib/active_support/callbacks.rb:130:in `block in run_callbacks'
+  /usr/local/bundle/ruby/3.3.0/gems/activesupport-7.2.3/lib/active_support/callbacks.rb:141:in `run_callbacks'
+  /usr/local/bundle/ruby/3.3.0/gems/actionpack-7.2.3/lib/abstract_controller/callbacks.rb:260:in `process_action'
+  /usr/local/bundle/ruby/3.3.0/gems/actionpack-7.2.3/lib/action_controller/metal/rescue.rb:27:in `process_action'
+  /usr/local/bundle/ruby/3.3.0/gems/actionpack-7.2.3/lib/action_controller/metal/instrumentation.rb:77:in `block in process_action'
+  /usr/local/bundle/ruby/3.3.0/gems/activesupport-7.2.3/lib/active_support/notifications.rb:210:in `block in instrument'
+  /usr/local/bundle/ruby/3.3.0/gems/activesupport-7.2.3/lib/active_support/notifications/instrumenter.rb:58:in `instrument'
+  /usr/local/bundle/ruby/3.3.0/gems/activesupport-7.2.3/lib/active_support/notifications.rb:210:in `instrument'
+  /usr/local/bundle/ruby/3.3.0/gems/actionpack-7.2.3/lib/action_controller/metal/instrumentation.rb:76:in `process_action'
+  /usr/local/bundle/ruby/3.3.0/gems/actionpack-7.2.3/lib/action_controller/metal/params_wrapper.rb:259:in `process_action'
+  /usr/local/bundle/ruby/3.3.0/gems/activerecord-7.2.3/lib/active_record/railties/controller_runtime.rb:39:in `process_action'
+  /usr/local/bundle/ruby/3.3.0/gems/actionpack-7.2.3/lib/abstract_controller/base.rb:152:in `process'
+  /usr/local/bundle/ruby/3.3.0/gems/actionview-7.2.3/lib/action_view/rendering.rb:40:in `process'
+  /usr/local/bundle/ruby/3.3.0/gems/actionpack-7.2.3/lib/action_controller/metal/live.rb:294:in `block (2 levels) in process'
+  /usr/local/bundle/ruby/3.3.0/gems/activesupport-7.2.3/lib/active_support/concurrency/share_lock.rb:162:in `sharing'
+  /usr/local/bundle/ruby/3.3.0/gems/activesupport-7.2.3/lib/active_support/dependencies/interlock.rb:37:in `running'
+  /usr/local/bundle/ruby/3.3.0/gems/actionpack-7.2.3/lib/action_controller/metal/live.rb:285:in `block in process'
+  /usr/local/bundle/ruby/3.3.0/gems/actionpack-7.2.3/lib/action_controller/metal/live.rb:377:in `block in new_controller_thread'
+
+
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"0dc1dad2-a30f-4319-a320-e551c1df5550","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"7faf999a-e6ea-4c33-b1f1-1cdace42fbcf","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"85642905-8e0e-49ae-b14e-b2f9c2d35aec","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"929d5b84-b7a5-4885-bc17-f89e492d2b3f","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"658c211b-7adb-4e12-b18d-a81a484ea9dc","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"c27f093d-0769-47f4-a8d2-5689c6378b05","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"a8b374d1-a0eb-406c-8f3b-785430e61a44","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"486eda2d-d346-48e4-a565-f42485212903","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"66dc3e5b-5be2-47dd-b6fa-aad13c879c74","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"fcdf7c20-a44d-41cc-95bc-7c5fde3c5b8e","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"fab62f75-cf38-4e06-8d68-c34649369338","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"bb9b42f1-5699-40be-ba1b-3dbd0561382e","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"bb0d9609-6d7f-4dc9-92fe-e556b981391c","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"567803c8-53b5-4a1e-895d-2dafa2536f83","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"38523385-200c-4289-b345-1b88774c8b37","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"0b3a5934-d3fc-40af-a5ec-5f6fda22f634","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"563519c1-7158-4f11-972e-64368611e34b","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"b1878b03-5f8d-4431-97f6-8bcf74355a09","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"7af62c88-90ca-4008-a0ae-cf55c3fa05c6","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"602188e0-5a3e-4719-a034-fffacb388876","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"49d2e4e2-3117-4907-87b2-4c9e35d5d471","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}
+[LlamaBot] Sent keep-alive ping: {"type":"ping","connection_id":"875eaf3a-bcb0-4d98-972b-899e0810c596","connection_state":"connected","connection_class":"Async::WebSocket::Client::ClientCloseDecorator"}

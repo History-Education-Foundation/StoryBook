@@ -54,9 +54,9 @@
               citation = parts[1]
             end
           %>
-          <div class="mb-20">
+          <div class="mb-16">
             <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= @civic_topic.bio_heading.presence || 'Overview' %></h2>
-            <div class="text-slate-600 leading-relaxed text-lg 
+            <div class="text-slate-600 leading-relaxed text-lg
                         [&>p]:mb-6
                         [&>p:first-of-type]:first-letter:text-8xl 
                         [&>p:first-of-type]:first-letter:font-bold 
@@ -90,33 +90,9 @@
           </div>
         <% end %>
 
-        <!-- Image Captions / Gallery -->
-        <% if @civic_topic.publications.present? %>
-          <div class="mb-20">
-            <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= @civic_topic.publications_heading.presence || 'Gallery' %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-50 p-8 rounded-3xl border border-slate-100">
-              <% @civic_topic.publications.split("\n").reject(&:blank?).each do |item| %>
-                <div class="flex flex-col gap-4">
-                  <% 
-                    filename, caption = item.include?('|') ? item.split('|', 2) : [nil, item]
-                  %>
-                  <div class="aspect-video bg-slate-200 rounded-2xl flex items-center justify-center text-slate-400 overflow-hidden shadow-sm border border-slate-200">
-                    <% if filename.present? %>
-                      <%= image_tag filename, class: "w-full h-full object-cover" %>
-                    <% else %>
-                      <i class="fas fa-image text-4xl"></i>
-                    <% end %>
-                  </div>
-                  <p class="text-base font-medium text-slate-500 italic px-4 text-center m-0 leading-relaxed"><%= caption %></p>
-                </div>
-              <% end %>
-            </div>
-          </div>
-        <% end %>
-        
         <!-- Contributions / Key Details -->
         <% if @civic_topic.contributions.present? %>
-          <div class="mb-20 p-10 bg-slate-50 rounded-3xl border-l-8 border-[#f9a825] shadow-sm relative overflow-hidden">
+          <div class="mb-16 p-10 bg-slate-50 rounded-3xl border-l-8 border-[#f9a825] shadow-sm relative overflow-hidden">
             <div class="absolute top-0 right-0 p-8 opacity-5">
               <i class="fas fa-landmark text-8xl text-slate-900"></i>
             </div>
@@ -197,55 +173,161 @@
 
         <!-- Criticism / Risks -->
         <% if @civic_topic.criticism.present? %>
+          <% 
+            use_analysis_box = @civic_topic.criticism_heading == 'Structured Academic Controversy'
+            heading_border = use_analysis_box ? 'border-[#f9a825]' : 'border-red-500'
+          %>
           <div class="mb-20">
-            <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-red-500 pb-4 inline-block">
-              <%= @civic_topic.criticism_heading.presence || 'Criticism & Analysis' %>
-            </h2>
+            <% if @civic_topic.criticism_heading.present? %>
+              <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 <%= heading_border %> pb-4 inline-block">
+                <%= @civic_topic.criticism_heading %>
+              </h2>
+            <% end %>
             
-            <div class="space-y-6">
-              <% @civic_topic.criticism.split("\n").reject(&:blank?).each do |item| %>
-                <% is_quote = item.strip.start_with?("“") && item.include?("”") %>
-                
-                <% if is_quote %>
-                  <div class="mb-12 bg-slate-900 p-12 rounded-[3rem] relative overflow-hidden text-center shadow-xl">
-                    <div class="absolute top-0 left-0 w-32 h-32 opacity-10 -ml-10 -mt-10">
-                      <i class="fas fa-quote-left text-9xl text-white"></i>
-                    </div>
-                    <blockquote class="relative z-10 m-0 border-none p-0">
-                      <% if item.include?(" – ") %>
-                        <% quote_parts = item.split(" – ", 2) %>
-                        <p class="text-2xl md:text-3xl font-serif text-white italic leading-relaxed mb-8">
-                          <%= quote_parts[0] %>
-                        </p>
-                        <cite class="text-[#f9a825] text-xl font-bold not-italic flex items-center justify-center gap-3">
-                          <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
-                          <%= quote_parts[1] %>
-                          <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
-                        </cite>
-                      <% else %>
-                        <p class="text-2xl md:text-3xl font-serif text-white italic leading-relaxed m-0">
-                          <%= item %>
-                        </p>
+            <% if use_analysis_box %>
+              <% 
+                # Primary Handout Source
+                handout_url = "https://www.learner.org/wp-content/uploads/2019/07/RWD.HSSU8_.SACHandouts.pdf"
+                show_pdf = @civic_topic.id == 9 || @civic_topic.handout_pdf.attached?
+                pdf_src = @civic_topic.handout_pdf.attached? ? url_for(@civic_topic.handout_pdf) : handout_url
+              %>
+
+              <% if @civic_topic.criticism.present? %>
+                <% if @civic_topic.id == 9 %>
+                  <%# Custom Layout for Lobbying Lesson Plan %>
+                  <div class="space-y-16">
+                    <% 
+                      # Split content into sections based on known headings
+                      raw_parts = @civic_topic.criticism.split(/(Hook|Lobbying Mini-Lesson|Textual Analysis|Structured Academic Controversy|Synthesis|Exit)/)
+                      # raw_parts[0] is everything before the first heading (should be empty)
+                      # Then pairs of (heading, content) follow
+                      parts_to_render = []
+                      (1..raw_parts.length-1).step(2).each do |i|
+                        parts_to_render << { heading: raw_parts[i], content: raw_parts[i+1] }
+                      end
+                    %>
+                    
+                    <% parts_to_render.each do |section| %>
+                      <% 
+                        heading = section[:heading]
+                        content = section[:content] || ""
+                      %>
+
+                      <% if heading == "Synthesis" && show_pdf %>
+                        <%# Insert PDF above Synthesis %>
+                        <div class="bg-slate-900 rounded-[2.5rem] p-4 md:p-8 shadow-2xl overflow-hidden border border-white/10">
+                          <div class="flex items-center justify-between mb-6 px-4">
+                            <div class="flex items-center gap-3">
+                              <div class="w-10 h-10 rounded-xl bg-[#f9a825]/20 flex items-center justify-center text-[#f9a825]">
+                                <i class="fas fa-file-pdf text-xl"></i>
+                              </div>
+                              <div>
+                                <h4 class="text-white font-bold text-lg leading-tight">Interactive Handout</h4>
+                                <p class="text-white/40 text-xs uppercase tracking-widest font-black">Official Teaching Guide</p>
+                              </div>
+                            </div>
+                            <%= link_to pdf_src, target: "_blank", class: "btn btn-sm btn-ghost text-white/60 hover:text-[#f9a825] hover:bg-white/5 gap-2" do %>
+                              <i class="fas fa-external-link-alt"></i>
+                              Open in New Tab
+                            <% end %>
+                          </div>
+                          <div class="rounded-2xl overflow-hidden bg-slate-800 shadow-inner h-[800px]">
+                            <iframe 
+                              src="<%= pdf_src %>" 
+                              width="100%" 
+                              height="100%" 
+                              style="border: none;"
+                              title="Educational Handout PDF">
+                            </iframe>
+                          </div>
+                        </div>
                       <% end %>
-                    </blockquote>
+
+                      <div class="relative group">
+                        <div class="flex flex-col md:flex-row gap-8 md:gap-16">
+                          <div class="md:w-1/4">
+                            <h3 class="text-3xl font-black text-slate-900 uppercase tracking-tighter leading-none sticky top-10">
+                              <span class="block text-[#f9a825] text-sm tracking-[0.3em] mb-2">Section</span>
+                              <%= heading %>
+                            </h3>
+                          </div>
+                          <div class="md:w-3/4 border-l-8 border-[#f9a825] pl-8 md:pl-12 py-2">
+                            <div class="prose prose-slate prose-xl max-w-none text-slate-600 leading-relaxed 
+                                      [&>p:first-of-type]:first-letter:text-8xl [&>p:first-of-type]:first-letter:font-black 
+                                      [&>p:first-of-type]:first-letter:text-[#f9a825] [&>p:first-of-type]:first-letter:mr-3 
+                                      [&>p:first-of-type]:first-letter:float-left [&>p:first-of-type]:first-letter:leading-[0.8]">
+                              <%= simple_format content.strip %>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    <% end %>
                   </div>
                 <% else %>
-                  <div class="flex gap-6 items-start p-8 bg-red-50/50 rounded-3xl border border-red-100 shadow-sm">
-                    <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                      <i class="fas fa-exclamation-triangle text-red-500"></i>
+                  <%# Standard Analysis Box for other topics %>
+                  <div class="bg-slate-50 rounded-[2.5rem] p-10 md:p-16 border border-slate-100 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none">
+                      <i class="fas fa-balance-scale text-[12rem] text-slate-900"></i>
                     </div>
-                    <div class="text-slate-700 text-lg m-0 leading-relaxed">
-                      <% if item.include?(":") %>
-                        <% parts = item.split(":", 2) %>
-                        <strong class="text-slate-900 font-bold"><%= parts[0] %>:</strong><%= parts[1] %>
-                      <% else %>
-                        <%= item %>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 relative z-10">
+                      <% @civic_topic.criticism.split("\n").reject(&:blank?).each do |item| %>
+                        <div>
+                          <% if item.include?(":") %>
+                            <% parts = item.split(":", 2) %>
+                            <h4 class="font-bold text-slate-900 text-xl mb-4 flex items-center gap-3">
+                              <span class="w-8 h-[2px] bg-[#f9a825]"></span>
+                              <%= parts[0] %>
+                            </h4>
+                            <p class="text-lg text-slate-600 leading-relaxed m-0"><%= parts[1] %></p>
+                          <% else %>
+                            <p class="text-lg text-slate-600 leading-relaxed m-0"><%= item %></p>
+                          <% end %>
+                        </div>
                       <% end %>
                     </div>
                   </div>
                 <% end %>
               <% end %>
-            </div>
+            <% else %>
+              <div class="space-y-6">
+                <% @civic_topic.criticism.split("\n").reject(&:blank?).each do |item| %>
+                  <% if item.strip.start_with?("“") && item.include?("”") %>
+                    <div class="mb-12 bg-slate-900 p-12 rounded-[3rem] relative overflow-hidden text-center shadow-xl">
+                      <div class="absolute top-0 left-0 w-32 h-32 opacity-10 -ml-10 -mt-10">
+                        <i class="fas fa-quote-left text-9xl text-white"></i>
+                      </div>
+                      <blockquote class="relative z-10 m-0 border-none p-0">
+                        <% if item.include?(" – ") %>
+                          <% quote_parts = item.split(" – ", 2) %>
+                          <p class="text-2xl md:text-3xl font-serif text-white italic leading-relaxed mb-8"><%= quote_parts[0] %></p>
+                          <cite class="text-[#f9a825] text-xl font-bold not-italic flex items-center justify-center gap-3">
+                            <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
+                            <%= quote_parts[1] %>
+                            <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
+                          </cite>
+                        <% else %>
+                          <p class="text-2xl md:text-3xl font-serif text-white italic leading-relaxed m-0"><%= item %></p>
+                        <% end %>
+                      </blockquote>
+                    </div>
+                  <% else %>
+                    <div class="flex gap-6 items-start p-8 bg-red-50/50 rounded-3xl border border-red-100 shadow-sm">
+                      <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-red-500"></i>
+                      </div>
+                      <div class="text-slate-700 text-lg m-0 leading-relaxed">
+                        <% if item.include?(":") %>
+                          <% parts = item.split(":", 2) %>
+                          <strong class="text-slate-900 font-bold"><%= parts[0] %>:</strong><%= parts[1] %>
+                        <% else %>
+                          <%= item %>
+                        <% end %>
+                      </div>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+            <% end %>
           </div>
         <% end %>
 
@@ -287,7 +369,7 @@
         <% end %>
 
         <!-- Suggested Reading -->
-        <% if @civic_topic.suggested_reading.present? %>
+        <% if @civic_topic.suggested_reading.present? && @civic_topic.id != 9 %>
           <div class="mb-20">
             <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
               <%= @civic_topic.suggested_reading_heading.presence || 'Suggested Reading' %>
@@ -299,6 +381,33 @@
                     <i class="fas fa-question-circle text-slate-400 group-hover:text-[#f9a825] transition-colors"></i>
                   </div>
                   <span class="text-lg text-slate-700 font-medium leading-snug"><%= reading %></span>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Featured Books -->
+        <% if @civic_topic.publications.present? %>
+          <div class="mb-20">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= @civic_topic.publications_heading.presence || 'Featured Book' %></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-8 rounded-3xl border border-slate-100">
+              <% @civic_topic.publications.split("\n").reject(&:blank?).each do |publication| %>
+                <div class="flex flex-col gap-3">
+                  <div class="aspect-video bg-slate-200 rounded-2xl flex items-center justify-center text-slate-400 overflow-hidden">
+                    <i class="fas fa-image text-4xl"></i>
+                  </div>
+                  <div class="text-sm font-medium text-slate-500 italic px-2 text-center m-0">
+                    <% if publication.include?("|") %>
+                      <% filename, caption = publication.split("|", 2) %>
+                      <%= caption %>
+                    <% elsif publication.include?(":") %>
+                      <% parts = publication.split(":", 2) %>
+                      <strong class="text-slate-900 font-bold"><%= parts[0] %>:</strong><%= parts[1] %>
+                    <% else %>
+                      <%= publication %>
+                    <% end %>
+                  </div>
                 </div>
               <% end %>
             </div>

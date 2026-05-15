@@ -66,6 +66,6 @@ class CivicsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def civic_topic_params
-      params.require(:civic_topic).permit(:name, :bio, :tagline, :contributions, :main_ideas, :legacy, :suggested_reading, :main_ideas_heading, :bio_heading, :contributions_heading, :publications, :publications_heading, :suggested_reading_heading, :quote, :quote_author, :criticism, :criticism_heading, :legacy_heading, :image_filename, :image_data, :image_position, :published, :image)
+      params.require(:civic_topic).permit(:name, :bio, :tagline, :contributions, :main_ideas, :legacy, :suggested_reading, :main_ideas_heading, :bio_heading, :contributions_heading, :publications, :publications_heading, :suggested_reading_heading, :quote, :quote_author, :criticism, :criticism_heading, :legacy_heading, :image_filename, :image_data, :image_position, :published, :image, :handout_pdf)
     end
 end

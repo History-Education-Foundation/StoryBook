@@ -1,0 +1,326 @@
+<% content_for :full_width, true %>
+<% content_for :hide_header, true %>
+<% content_for :hide_navbar, true %>
+
+<div class="min-h-screen bg-white font-sans text-slate-800">
+  <%= render 'layouts/navigation' %>
+
+  <!-- Hero/Header Section -->
+  <section class="bg-slate-900 py-24 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-20">
+      <div class="absolute inset-0 bg-[#f9a825]/10 mix-blend-overlay"></div>
+    </div>
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+      <%= link_to civics_path, class: "inline-flex items-center gap-2 text-[#f9a825] hover:text-white transition-colors mb-8 font-medium" do %>
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Directory</span>
+      <% end %>
+      
+      <div class="flex flex-col md:flex-row items-center gap-8 md:items-start text-center md:text-left">
+        <div class="w-32 h-32 bg-[#f9a825] rounded-full flex items-center justify-center shadow-lg flex-shrink-0 overflow-hidden border-4 border-white/20">
+          <% if @civic_topic.image.attached? %>
+            <%= image_tag @civic_topic.image, class: "w-full h-full object-cover #{@civic_topic.image_position || 'object-top'}" %>
+          <% elsif @civic_topic.image_data.present? %>
+            <img src="<%= @civic_topic.image_data %>" class="w-full h-full object-cover <%= @civic_topic.image_position || 'object-top' %>" alt="<%= @civic_topic.name %>">
+          <% elsif @civic_topic.image_filename.present? %>
+            <%= image_tag @civic_topic.image_filename, class: "w-full h-full object-cover #{@civic_topic.image_position || 'object-top'}" %>
+          <% else %>
+            <i class="fas fa-landmark text-5xl text-white"></i>
+          <% end %>
+        </div>
+        <div>
+          <h1 class="text-4xl md:text-6xl font-bold text-white mb-4"><%= @civic_topic.name %></h1>
+          <% if @civic_topic.tagline.present? %>
+            <%= simple_format(@civic_topic.tagline, { class: "text-lg md:text-xl text-white/90 max-w-3xl leading-relaxed font-medium" }, { wrapper_tag: "div" }) %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content Section -->
+  <section class="py-24 bg-white">
+    <div class="max-w-4xl mx-auto px-6 lg:px-8">
+      <div class="prose prose-xl prose-slate max-w-none">
+        
+        <!-- Biography / Overview -->
+        <% if @civic_topic.bio.present? %>
+          <% 
+            bio_text = @civic_topic.bio
+            citation = nil
+            if bio_text.include?("Work Cited:")
+              parts = bio_text.split("Work Cited:", 2)
+              bio_text = parts[0]
+              citation = parts[1]
+            end
+          %>
+          <div class="mb-20">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= @civic_topic.bio_heading.presence || 'Overview' %></h2>
+            <div class="text-slate-600 leading-relaxed text-lg 
+                        [&>p]:mb-6
+                        [&>p:first-of-type]:first-letter:text-8xl 
+                        [&>p:first-of-type]:first-letter:font-bold 
+                        [&>p:first-of-type]:first-letter:text-[#f9a825] 
+                        [&>p:first-of-type]:first-letter:mr-4 
+                        [&>p:first-of-type]:first-letter:float-left
+                        [&>p:first-of-type]:first-letter:leading-[0.7]">
+              <%= simple_format bio_text %>
+            </div>
+
+            <% if citation.present? %>
+              <div class="mt-12 pt-8 border-t border-slate-100">
+                <div class="flex items-start gap-4 p-8 bg-slate-50 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
+                  <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <i class="fas fa-quote-right text-6xl text-slate-900"></i>
+                  </div>
+                  <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <i class="fas fa-bookmark text-[#f9a825]"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 flex items-center gap-2">
+                      Work Cited
+                    </h4>
+                    <p class="text-slate-500 italic font-serif text-lg leading-relaxed m-0">
+                      <%= citation.strip %>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <!-- Image Captions / Gallery -->
+        <% if @civic_topic.publications.present? %>
+          <div class="mb-20">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= @civic_topic.publications_heading.presence || 'Gallery' %></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-50 p-8 rounded-3xl border border-slate-100">
+              <% @civic_topic.publications.split("\n").reject(&:blank?).each do |item| %>
+                <div class="flex flex-col gap-4">
+                  <% 
+                    filename, caption = item.include?('|') ? item.split('|', 2) : [nil, item]
+                  %>
+                  <div class="aspect-video bg-slate-200 rounded-2xl flex items-center justify-center text-slate-400 overflow-hidden shadow-sm border border-slate-200">
+                    <% if filename.present? %>
+                      <%= image_tag filename, class: "w-full h-full object-cover" %>
+                    <% else %>
+                      <i class="fas fa-image text-4xl"></i>
+                    <% end %>
+                  </div>
+                  <p class="text-base font-medium text-slate-500 italic px-4 text-center m-0 leading-relaxed"><%= caption %></p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+        
+        <!-- Contributions / Key Details -->
+        <% if @civic_topic.contributions.present? %>
+          <div class="mb-20 p-10 bg-slate-50 rounded-3xl border-l-8 border-[#f9a825] shadow-sm relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-8 opacity-5">
+              <i class="fas fa-landmark text-8xl text-slate-900"></i>
+            </div>
+            <div class="relative z-10">
+              <h3 class="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-4">
+                <i class="fas fa-history text-[#f9a825]"></i>
+                <%= @civic_topic.contributions_heading.presence || 'Key Details' %>
+              </h3>
+              <ul class="space-y-6 list-none p-0 m-0">
+                <% @civic_topic.contributions.split("\n").reject(&:blank?).each do |contribution| %>
+                  <li class="flex items-start gap-4 text-slate-700 text-lg m-0">
+                    <i class="fas fa-check-circle text-[#f9a825] mt-1.5 flex-shrink-0"></i>
+                    <% if contribution.include?(":") %>
+                      <% parts = contribution.split(":", 2) %>
+                      <span>
+                        <strong class="text-slate-900 font-bold"><%= parts[0] %>:</strong><%= parts[1] %>
+                      </span>
+                    <% else %>
+                      <span><%= contribution %></span>
+                    <% end %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Quote Block -->
+        <% if @civic_topic.quote.present? %>
+          <div class="mb-20 bg-slate-900 p-12 rounded-[3rem] relative overflow-hidden text-center">
+            <div class="absolute top-0 left-0 w-32 h-32 opacity-10 -ml-10 -mt-10">
+              <i class="fas fa-quote-left text-9xl text-white"></i>
+            </div>
+            <blockquote class="relative z-10 m-0">
+              <p class="text-2xl md:text-3xl font-serif text-white italic leading-relaxed mb-8">
+                “<%= @civic_topic.quote %>”
+              </p>
+              <% if @civic_topic.quote_author.present? %>
+                <cite class="text-[#f9a825] text-xl font-bold not-italic flex items-center justify-center gap-3">
+                  <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
+                  <%= @civic_topic.quote_author %>
+                  <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
+                </cite>
+              <% end %>
+            </blockquote>
+          </div>
+        <% end %>
+
+        <!-- Main Ideas / Perspectives -->
+        <% if @civic_topic.main_ideas.present? %>
+          <div class="mb-20">
+            <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
+              <%= @civic_topic.main_ideas_heading.presence || 'Main Ideas' %>
+            </h2>
+            
+            <div class="grid grid-cols-1 gap-8">
+              <% @civic_topic.main_ideas.split("\n").reject(&:blank?).each do |idea| %>
+                <div class="card bg-white border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-3xl overflow-hidden group">
+                  <div class="card-body p-8 flex-row gap-6 items-start">
+                    <div class="w-14 h-14 rounded-2xl bg-[#f9a825]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#f9a825] group-hover:text-white transition-colors duration-300">
+                      <i class="fas fa-lightbulb text-[#f9a825] text-xl group-hover:text-white"></i>
+                    </div>
+                    <div class="text-slate-600 m-0">
+                      <% if idea.include?(":") %>
+                        <% parts = idea.split(":", 2) %>
+                        <h4 class="font-bold text-slate-900 text-xl mb-2"><%= parts[0] %></h4>
+                        <p class="text-lg leading-relaxed m-0"><%= parts[1] %></p>
+                      <% else %>
+                        <p class="text-lg leading-relaxed m-0"><%= idea %></p>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Criticism / Risks -->
+        <% if @civic_topic.criticism.present? %>
+          <div class="mb-20">
+            <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-red-500 pb-4 inline-block">
+              <%= @civic_topic.criticism_heading.presence || 'Criticism & Analysis' %>
+            </h2>
+            
+            <div class="space-y-6">
+              <% @civic_topic.criticism.split("\n").reject(&:blank?).each do |item| %>
+                <% is_quote = item.strip.start_with?("“") && item.include?("”") %>
+                
+                <% if is_quote %>
+                  <div class="mb-12 bg-slate-900 p-12 rounded-[3rem] relative overflow-hidden text-center shadow-xl">
+                    <div class="absolute top-0 left-0 w-32 h-32 opacity-10 -ml-10 -mt-10">
+                      <i class="fas fa-quote-left text-9xl text-white"></i>
+                    </div>
+                    <blockquote class="relative z-10 m-0 border-none p-0">
+                      <% if item.include?(" – ") %>
+                        <% quote_parts = item.split(" – ", 2) %>
+                        <p class="text-2xl md:text-3xl font-serif text-white italic leading-relaxed mb-8">
+                          <%= quote_parts[0] %>
+                        </p>
+                        <cite class="text-[#f9a825] text-xl font-bold not-italic flex items-center justify-center gap-3">
+                          <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
+                          <%= quote_parts[1] %>
+                          <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
+                        </cite>
+                      <% else %>
+                        <p class="text-2xl md:text-3xl font-serif text-white italic leading-relaxed m-0">
+                          <%= item %>
+                        </p>
+                      <% end %>
+                    </blockquote>
+                  </div>
+                <% else %>
+                  <div class="flex gap-6 items-start p-8 bg-red-50/50 rounded-3xl border border-red-100 shadow-sm">
+                    <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                      <i class="fas fa-exclamation-triangle text-red-500"></i>
+                    </div>
+                    <div class="text-slate-700 text-lg m-0 leading-relaxed">
+                      <% if item.include?(":") %>
+                        <% parts = item.split(":", 2) %>
+                        <strong class="text-slate-900 font-bold"><%= parts[0] %>:</strong><%= parts[1] %>
+                      <% else %>
+                        <%= item %>
+                      <% end %>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Legacy / Context -->
+        <% if @civic_topic.legacy.present? %>
+          <% 
+            legacy_text = @civic_topic.legacy
+            conclusion_text = nil
+            if legacy_text.include?("\n\nConclusion")
+              parts = legacy_text.split("\n\nConclusion", 2)
+              legacy_text = parts[0]
+              conclusion_text = parts[1]
+            elsif legacy_text.include?("\nConclusion")
+              parts = legacy_text.split("\nConclusion", 2)
+              legacy_text = parts[0]
+              conclusion_text = parts[1]
+            end
+          %>
+          <div class="mb-20">
+            <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
+              <%= @civic_topic.legacy_heading.presence || 'Legacy & Context' %>
+            </h2>
+            <div class="text-slate-700 leading-relaxed text-xl bg-[#f9a825]/5 p-10 rounded-3xl italic relative border-t-4 border-[#f9a825] [&>p]:mb-4">
+              <div class="absolute -top-4 right-10 w-8 h-8 bg-[#f9a825] rounded-full flex items-center justify-center text-white text-xs shadow-lg">
+                <i class="fas fa-clock"></i>
+              </div>
+              <%= simple_format legacy_text %>
+            </div>
+
+            <% if conclusion_text.present? %>
+              <div class="mt-20">
+                <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block">Conclusion</h2>
+                <div class="text-slate-600 leading-relaxed text-lg">
+                  <%= simple_format conclusion_text.strip %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <!-- Suggested Reading -->
+        <% if @civic_topic.suggested_reading.present? %>
+          <div class="mb-20">
+            <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
+              <%= @civic_topic.suggested_reading_heading.presence || 'Suggested Reading' %>
+            </h2>
+            <div class="grid grid-cols-1 gap-4">
+              <% @civic_topic.suggested_reading.split("\n").reject(&:blank?).each do |reading| %>
+                <div class="flex items-center gap-4 p-6 bg-white border border-slate-100 rounded-2xl hover:bg-slate-50 hover:border-[#f9a825]/30 transition-all group shadow-sm">
+                  <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-[#f9a825]/10">
+                    <i class="fas fa-question-circle text-slate-400 group-hover:text-[#f9a825] transition-colors"></i>
+                  </div>
+                  <span class="text-lg text-slate-700 font-medium leading-snug"><%= reading %></span>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Footer -->
+        <div class="mt-24 pt-12 border-t border-slate-100 text-slate-400 text-sm text-center italic">
+          <p>© 2024 The History Education Foundation | Images from Wikimedia Commons</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Call to Action -->
+  <section class="py-16 bg-[#f9a825] text-white">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold mb-4">Support Our Historical Research</h2>
+      <p class="text-xl mb-8 text-white/90">Help us continue providing high-quality resources for understanding key historical concepts.</p>
+      <%= link_to "#contact", class: "btn btn-outline text-white border-2 border-white hover:bg-white hover:text-slate-900 px-10 rounded-md transition-all font-bold" do %>
+        Contact Us
+      <% end %>
+    </div>
+  </section>
+</div>

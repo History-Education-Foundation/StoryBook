@@ -271,3 +271,26 @@ puts "Controversies seeded."
   concept.update!(data)
 end
 puts "Concepts seeded."
+
+# Seed: Civic Topics
+[
+  "Andrew Yang",
+  "Bernie Sanders",
+  "New Deal",
+  "U.S. Intervention abroad",
+  "Israel and 9/11",
+  "James Lindsay",
+  "Intimidation during the Iraq War",
+  "American Civics Renewal Act",
+  "Lobbying",
+  "Potential context for Utah’s 1st Congressional District (CD1) Race"
+].each do |name|
+  topic = CivicTopic.find_or_create_by!(name: name)
+  topic.update!(
+    tagline: "Exploring the impact and legacy of #{name} in American civics.",
+    bio: "Placeholder biography for #{name}. Content coming soon.",
+    bio_heading: "Overview",
+    published: true
+  )
+end
+puts "Civic Topics seeded."

@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  # LlamaBot was here
+  resources :historical_figures
   # resources :posts
   devise_for :users, controllers: { registrations: 'users/registrations' }
   resources :users
@@ -52,6 +54,7 @@ Rails.application.routes.draw do
   resources :scholars, only: [:index, :show]
   resources :controversies, only: [:index, :show]
   resources :posts, only: [:index, :show]
+  resources :civics, only: [:index, :show]
 
   namespace :admin do
     root to: "dashboard#index"

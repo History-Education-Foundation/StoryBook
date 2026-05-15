@@ -1,0 +1,75 @@
+<% content_for :full_width, true %>
+<% content_for :hide_header, true %>
+<% content_for :hide_navbar, true %>
+
+<div class="min-h-screen bg-white font-sans text-slate-800">
+  <%= render 'layouts/navigation' %>
+
+  <!-- Hero/Header Section -->
+  <section class="bg-slate-900 py-24 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-20">
+      <div class="absolute inset-0 bg-[#f9a825]/10 mix-blend-overlay"></div>
+    </div>
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 text-center">
+      <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">Civics Education Directory</h1>
+      <p class="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+        Exploring political figures, historical policies, and the fundamental structures of American governance.
+      </p>
+    </div>
+  </section>
+
+  <!-- Civics Grid Section -->
+  <section class="py-24 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+        <% @civic_topics.each do |topic| %>
+          <% is_ready = topic.published? %>
+          
+          <div class="flex flex-col items-center group">
+            <% if is_ready %>
+              <%= link_to civic_path(topic), class: "flex flex-col items-center group hover:no-underline w-full" do %>
+                <div class="w-32 h-32 bg-[#f9a825] rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:shadow-lg overflow-hidden border-4 border-white">
+                  <% if topic.image.attached? %>
+                    <%= image_tag topic.image, class: "w-full h-full object-cover #{topic.image_position || 'object-top'}" %>
+                  <% elsif topic.image_data.present? %>
+                    <img src="<%= topic.image_data %>" class="w-full h-full object-cover <%= topic.image_position || 'object-top' %>" alt="<%= topic.name %>">
+                  <% elsif topic.image_filename.present? %>
+                    <%= image_tag topic.image_filename, class: "w-full h-full object-cover #{topic.image_position || 'object-top'}" %>
+                  <% else %>
+                    <i class="fas fa-landmark text-4xl text-white"></i>
+                  <% end %>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-900 mb-4 group-hover:text-primary transition-colors"><%= topic.name %></h3>
+                <span class="text-sm font-bold uppercase tracking-widest text-[#f9a825] opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+                  View Details
+                  <i class="fas fa-arrow-right"></i>
+                </span>
+              <% end %>
+            <% else %>
+              <div class="flex flex-col items-center opacity-60">
+                <div class="w-32 h-32 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner overflow-hidden border-4 border-white grayscale">
+                  <i class="fas fa-clock text-4xl text-slate-400"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-400 mb-4"><%= topic.name %></h3>
+                <span class="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 bg-slate-100 px-4 py-1.5 rounded-full border border-slate-200">
+                  Coming Soon
+                </span>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials/Footer Call to Action -->
+  <section class="py-16 bg-[#f9a825] text-white">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold mb-4">Interested in civics?</h2>
+      <p class="text-xl mb-8 text-white/90">We are documenting the figures and policies that shape our democracy.</p>
+      <%= link_to "#contact", class: "btn btn-outline text-white border-2 border-white hover:bg-white hover:text-slate-900 px-10 rounded-md transition-all font-bold" do %>
+        Contact Us
+      <% end %>
+    </div>
+  </section>
+</div>

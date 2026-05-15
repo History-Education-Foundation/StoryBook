@@ -1,0 +1,127 @@
+<%= form_with(model: civic_topic, class: "contents") do |form| %>
+  <% if civic_topic.errors.any? %>
+    <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-md mt-3">
+      <h2><%= pluralize(civic_topic.errors.count, "error") %> prohibited this civic_topic from being saved:</h2>
+
+      <ul class="list-disc ml-6">
+        <% civic_topic.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="my-5">
+    <%= form.label :name %>
+    <%= form.text_field :name, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:name].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:name].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :bio %>
+    <%= form.text_area :bio, rows: 4, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:bio].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:bio].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :tagline %>
+    <%= form.text_field :tagline, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:tagline].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:tagline].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :contributions %>
+    <%= form.text_area :contributions, rows: 4, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:contributions].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:contributions].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :main_ideas %>
+    <%= form.text_area :main_ideas, rows: 4, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:main_ideas].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:main_ideas].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :legacy %>
+    <%= form.text_area :legacy, rows: 4, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:legacy].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:legacy].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :suggested_reading %>
+    <%= form.text_area :suggested_reading, rows: 4, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:suggested_reading].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:suggested_reading].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :main_ideas_heading %>
+    <%= form.text_field :main_ideas_heading, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:main_ideas_heading].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:main_ideas_heading].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :bio_heading %>
+    <%= form.text_field :bio_heading, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:bio_heading].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:bio_heading].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :contributions_heading %>
+    <%= form.text_field :contributions_heading, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:contributions_heading].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:contributions_heading].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :publications %>
+    <%= form.text_area :publications, rows: 4, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:publications].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:publications].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :publications_heading %>
+    <%= form.text_field :publications_heading, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:publications_heading].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:publications_heading].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :suggested_reading_heading %>
+    <%= form.text_field :suggested_reading_heading, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:suggested_reading_heading].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:suggested_reading_heading].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :quote %>
+    <%= form.text_area :quote, rows: 4, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:quote].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:quote].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :quote_author %>
+    <%= form.text_field :quote_author, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:quote_author].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:quote_author].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :criticism %>
+    <%= form.text_area :criticism, rows: 4, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:criticism].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:criticism].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :criticism_heading %>
+    <%= form.text_field :criticism_heading, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:criticism_heading].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:criticism_heading].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :legacy_heading %>
+    <%= form.text_field :legacy_heading, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:legacy_heading].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:legacy_heading].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :image_filename %>
+    <%= form.text_field :image_filename, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:image_filename].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:image_filename].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :image_data %>
+    <%= form.text_area :image_data, rows: 4, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:image_data].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:image_data].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :image_position %>
+    <%= form.text_field :image_position, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:image_position].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:image_position].any?}] %>
+  </div>
+
+  <div class="my-5 flex items-center gap-2">
+    <%= form.label :published %>
+    <%= form.check_box :published, class: ["block shadow-sm rounded-md border order-first h-5 w-5", {"border-gray-400 focus:outline-blue-600": civic_topic.errors[:published].none?, "border-red-400 focus:outline-red-600": civic_topic.errors[:published].any?}] %>
+  </div>
+
+  <div class="inline">
+    <%= form.submit class: "w-full sm:w-auto rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
+  </div>
+<% end %>

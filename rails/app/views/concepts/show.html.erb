@@ -116,35 +116,62 @@
           </div>
         <% end %>
         
-        <!-- Contributions / Key Findings (Scholar Style Box) -->
+        <!-- Contributions / Key Figures (Scholar Style Box) -->
         <% if @concept.contributions.present? %>
-          <div class="mb-20 p-10 bg-slate-50 rounded-3xl border-l-8 border-[#f9a825] shadow-sm relative overflow-hidden">
-            <div class="absolute top-0 right-0 p-8 opacity-5">
-              <i class="fas fa-landmark text-8xl text-slate-900"></i>
-            </div>
-            <div class="relative z-10">
-              <% if @concept.contributions_heading.present? %>
-                <h3 class="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-4">
-                  <i class="fas fa-history text-[#f9a825]"></i>
-                  <%= @concept.contributions_heading %>
-                </h3>
-              <% end %>
-              <ul class="space-y-6 list-none p-0 m-0">
+          <% 
+            heading_lower = @concept.contributions_heading&.downcase || ""
+            is_grid_layout = heading_lower.include?("figures") || heading_lower.include?("examples") 
+          %>
+          <div class="mb-20">
+            <% if @concept.contributions_heading.present? %>
+              <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= @concept.contributions_heading %></h2>
+            <% end %>
+
+            <% if is_grid_layout %>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <% @concept.contributions.split("\n").reject(&:blank?).each do |contribution| %>
-                  <li class="flex items-start gap-4 text-slate-700 text-lg m-0">
-                    <i class="fas fa-check-circle text-[#f9a825] mt-1.5 flex-shrink-0"></i>
-                    <% if contribution.include?(":") %>
-                      <% parts = contribution.split(":", 2) %>
-                      <span>
-                        <strong class="text-slate-900 font-bold"><%= parts[0] %>:</strong><%= parts[1] %>
-                      </span>
-                    <% else %>
-                      <span><%= contribution %></span>
-                    <% end %>
-                  </li>
+                  <div class="card bg-slate-50 border border-slate-100 shadow-sm hover:shadow-lg transition-all rounded-3xl overflow-hidden">
+                    <div class="card-body p-8">
+                      <% if contribution.include?(":") %>
+                        <% parts = contribution.split(":", 2) %>
+                        <div class="flex items-center gap-4 mb-4">
+                          <div class="w-12 h-12 rounded-full bg-[#f9a825] flex items-center justify-center text-white shadow-md">
+                            <i class="fas <%= heading_lower.include?('examples') ? 'fa-monument' : 'fa-user-tie' %>"></i>
+                          </div>
+                          <h4 class="text-2xl font-bold text-slate-900 m-0"><%= parts[0] %></h4>
+                        </div>
+                        <p class="text-lg text-slate-600 leading-relaxed m-0"><%= parts[1] %></p>
+                      <% else %>
+                        <p class="text-lg text-slate-700 font-medium m-0"><%= contribution %></p>
+                      <% end %>
+                    </div>
+                  </div>
                 <% end %>
-              </ul>
-            </div>
+              </div>
+            <% else %>
+              <div class="p-10 bg-slate-50 rounded-3xl border-l-8 border-[#f9a825] shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-8 opacity-5">
+                  <i class="fas fa-landmark text-8xl text-slate-900"></i>
+                </div>
+                <div class="relative z-10">
+                  <ul class="space-y-6 list-none p-0 m-0">
+                    <% @concept.contributions.split("\n").reject(&:blank?).each do |contribution| %>
+                      <li class="flex items-start gap-4 text-slate-700 text-lg m-0">
+                        <i class="fas fa-check-circle text-[#f9a825] mt-1.5 flex-shrink-0"></i>
+                        <% if contribution.include?(":") %>
+                          <% parts = contribution.split(":", 2) %>
+                          <span>
+                            <strong class="text-slate-900 font-bold"><%= parts[0] %>:</strong><%= parts[1] %>
+                          </span>
+                        <% else %>
+                          <span><%= contribution %></span>
+                        <% end %>
+                      </li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            <% end %>
           </div>
         <% end %>
 
@@ -180,10 +207,61 @@
             
             <div class="grid grid-cols-1 gap-8">
               <% @concept.main_ideas.split("\n").reject(&:blank?).each do |idea| %>
+                <% 
+                  icon = "lightbulb"
+                  case idea.downcase
+                  when /justice|equality|discrimination/
+                    icon = "balance-scale"
+                  when /health|medical/
+                    icon = "hand-holding-heart"
+                  when /education|college|school/
+                    icon = "graduation-cap"
+                  when /workers|unions|wage/
+                    icon = "users"
+                  when /environment|climate|sustainable/
+                    icon = "leaf"
+                  when /regulation|corporat|trust/
+                    icon = "gavel"
+                  when /leadership|dictator|centralized/
+                    icon = "user-shield"
+                  when /nationalism|rebirth|unity/
+                    icon = "flag"
+                  when /opposition|suppression|censorship/
+                    icon = "ban"
+                  when /militarism|military|aggressive/
+                    icon = "person-military-pointing"
+                  when /economy|controlled/
+                    icon = "chart-line"
+                  when /propaganda|media/
+                    icon = "broadcast-tower"
+                  when /scapegoating|persecuting|enemies/
+                    icon = "skull-crossbones"
+                  when /religious|doctrine|sacred|faith/
+                    icon = "church"
+                  when /authority|political power|dictatorial/
+                    icon = "crown"
+                  when /separation|church and state|fusion/
+                    icon = "link-slash"
+                  when /resistance|pluralism|diversity/
+                    icon = "users-slash"
+                  when /authoritarianism|repression|repression/
+                    icon = "user-lock"
+                  when /efficiency|scarcity|planning/
+                    icon = "clipboard-list"
+                  when /violence|purges|famine/
+                    icon = "skull"
+                  when /theory|practice|vision/
+                    icon = "flask"
+                  when /achievement|literacy|health|industrialization/
+                    icon = "chart-line"
+                  when /capitalism|exploitation|inequality/
+                    icon = "handcuffs"
+                  end
+                %>
                 <div class="card bg-white border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-3xl overflow-hidden group">
                   <div class="card-body p-8 flex-row gap-6 items-start">
                     <div class="w-14 h-14 rounded-2xl bg-[#f9a825]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#f9a825] group-hover:text-white transition-colors duration-300">
-                      <i class="fas fa-lightbulb text-[#f9a825] text-xl group-hover:text-white"></i>
+                      <i class="fas fa-<%= icon %> text-[#f9a825] text-xl group-hover:text-white"></i>
                     </div>
                     <div class="text-slate-600 m-0">
                       <% if idea.include?(":") %>
@@ -204,8 +282,9 @@
         <!-- Criticism / Risks (Scholar Style Red Box) -->
         <% if @concept.criticism.present? %>
           <% 
-            # Use the custom gold 'Deep Dive' box for Fascism or Structured Academic Controversy
-            use_analysis_box = @concept.name == 'Fascism' || @concept.criticism_heading == 'Structured Academic Controversy'
+            # Use the custom gold 'Deep Dive' box for specific topics
+            analysis_topics = ['Fascism', 'Theocracy', 'Communism']
+            use_analysis_box = analysis_topics.include?(@concept.name) || @concept.criticism_heading == 'Structured Academic Controversy'
             
             # Theme colors for the Analysis Box
             accent_color_class = '[#f9a825]'
@@ -228,9 +307,10 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 relative z-10">
                   <% 
-                    points = @concept.criticism.split("\n").reject(&:blank?)
-                    note = points.find { |p| p.start_with?("Note:") }
-                    points = points - [note]
+                    all_points = @concept.criticism.split("\n").reject(&:blank?)
+                    note = all_points.find { |p| p.start_with?("Note:") }
+                    quotes = all_points.select { |p| p.strip.start_with?("“") && p.include?("”") }
+                    points = all_points - [note] - quotes
                   %>
                   <% points.each do |item| %>
                     <div>
@@ -266,51 +346,78 @@
               </div>
             <% else %>
               <div class="space-y-6">
-                <% @concept.criticism.split("\n").reject(&:blank?).each do |item| %>
-                  <% is_quote = item.strip.start_with?("“") && item.include?("”") %>
-                  
-                  <% if is_quote %>
-                    <div class="mb-12 bg-slate-900 p-12 rounded-[3rem] relative overflow-hidden text-center shadow-xl">
-                      <div class="absolute top-0 left-0 w-32 h-32 opacity-10 -ml-10 -mt-10">
-                        <i class="fas fa-quote-left text-9xl text-white"></i>
-                      </div>
-                      <blockquote class="relative z-10 m-0 border-none p-0">
-                        <% if item.include?(" – ") %>
-                          <% quote_parts = item.split(" – ", 2) %>
-                          <p class="text-2xl md:text-3xl font-serif text-white italic leading-relaxed mb-8">
-                            <%= quote_parts[0] %>
-                          </p>
-                          <cite class="text-[#f9a825] text-xl font-bold not-italic flex items-center justify-center gap-3">
-                            <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
-                            <%= quote_parts[1] %>
-                            <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
-                          </cite>
-                        <% else %>
-                          <p class="text-2xl md:text-3xl font-serif text-white italic leading-relaxed m-0">
-                            <%= item %>
-                          </p>
-                        <% end %>
-                      </blockquote>
+                <% 
+                  all_points = @concept.criticism.split("\n").reject(&:blank?)
+                  quotes = all_points.select { |p| p.strip.start_with?("“") && p.include?("”") }
+                  points = all_points - quotes
+                %>
+                <% points.each do |item| %>
+                  <div class="flex gap-6 items-start p-8 bg-red-50/50 rounded-3xl border border-red-100 shadow-sm">
+                    <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                      <i class="fas fa-exclamation-triangle text-red-500"></i>
                     </div>
-                  <% else %>
-                    <div class="flex gap-6 items-start p-8 bg-red-50/50 rounded-3xl border border-red-100 shadow-sm">
-                      <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-exclamation-triangle text-red-500"></i>
-                      </div>
-                      <div class="text-slate-700 text-lg m-0 leading-relaxed">
-                        <% if item.include?(":") %>
-                          <% parts = item.split(":", 2) %>
-                          <strong class="text-slate-900 font-bold"><%= parts[0] %>:</strong><%= parts[1] %>
-                        <% else %>
-                          <%= item %>
-                        <% end %>
-                      </div>
+                    <div class="text-slate-700 text-lg m-0 leading-relaxed">
+                      <% if item.include?(":") %>
+                        <% parts = item.split(":", 2) %>
+                        <strong class="text-slate-900 font-bold"><%= parts[0] %>:</strong><%= parts[1] %>
+                      <% else %>
+                        <%= item %>
+                      <% end %>
                     </div>
-                  <% end %>
+                  </div>
                 <% end %>
               </div>
             <% end %>
           </div>
+
+          <!-- Extra Quotes Section (Pulled from Criticism) -->
+          <% 
+            all_points = @concept.criticism.split("\n").reject(&:blank?)
+            extracted_quotes = all_points.select { |p| p.strip.start_with?("“") && p.include?("”") }
+          %>
+          <% if extracted_quotes.any? %>
+            <div class="mb-20">
+              <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
+                Historical Perspectives
+              </h2>
+              <div class="space-y-8">
+                <% extracted_quotes.each do |item| %>
+                  <div class="bg-slate-900 p-12 rounded-[3rem] relative overflow-hidden text-center shadow-xl">
+                    <div class="absolute top-0 left-0 w-32 h-32 opacity-10 -ml-10 -mt-10">
+                      <i class="fas fa-quote-left text-9xl text-white"></i>
+                    </div>
+                    <blockquote class="relative z-10 m-0 border-none p-0">
+                      <% if item.include?(" – ") %>
+                        <% quote_parts = item.split(" – ", 2) %>
+                        <p class="text-2xl md:text-3xl font-serif text-white italic leading-relaxed mb-8">
+                          <%= quote_parts[0] %>
+                        </p>
+                        <cite class="text-[#f9a825] text-xl font-bold not-italic flex items-center justify-center gap-3">
+                          <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
+                          <%= quote_parts[1] %>
+                          <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
+                        </cite>
+                      <% elsif item.include?(" - ") %>
+                        <% quote_parts = item.split(" - ", 2) %>
+                        <p class="text-2xl md:text-3xl font-serif text-white italic leading-relaxed mb-8">
+                          <%= quote_parts[0] %>
+                        </p>
+                        <cite class="text-[#f9a825] text-xl font-bold not-italic flex items-center justify-center gap-3">
+                          <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
+                          <%= quote_parts[1] %>
+                          <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
+                        </cite>
+                      <% else %>
+                        <p class="text-2xl md:text-3xl font-serif text-white italic leading-relaxed m-0">
+                          <%= item %>
+                        </p>
+                      <% end %>
+                    </blockquote>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
         <% end %>
 
         <!-- Legacy / Context (Scholar Style Italic Box) -->
@@ -327,6 +434,8 @@
               legacy_text = parts[0]
               conclusion_text = parts[1]
             end
+
+            is_responses = @concept.legacy_heading == 'Responses to Criticisms'
           %>
           <div class="mb-20">
             <% if @concept.legacy_heading.present? %>
@@ -334,12 +443,32 @@
                 <%= @concept.legacy_heading %>
               </h2>
             <% end %>
-            <div class="text-slate-700 leading-relaxed text-xl bg-[#f9a825]/5 p-10 rounded-3xl italic relative border-t-4 border-[#f9a825] [&>p]:mb-4">
-              <div class="absolute -top-4 right-10 w-8 h-8 bg-[#f9a825] rounded-full flex items-center justify-center text-white text-xs shadow-lg">
-                <i class="fas fa-clock"></i>
+
+            <% if is_responses %>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <% legacy_text.split("\n").reject(&:blank?).each do |item| %>
+                  <div class="p-8 bg-emerald-50 rounded-3xl border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
+                    <% if item.include?(":") %>
+                      <% parts = item.split(":", 2) %>
+                      <h4 class="font-bold text-emerald-900 text-xl mb-3 flex items-center gap-3">
+                        <i class="fas fa-shield-alt text-emerald-500"></i>
+                        <%= parts[0] %>
+                      </h4>
+                      <p class="text-lg text-slate-700 leading-relaxed m-0"><%= parts[1] %></p>
+                    <% else %>
+                      <p class="text-lg text-slate-700 leading-relaxed m-0"><%= item %></p>
+                    <% end %>
+                  </div>
+                <% end %>
               </div>
-              <%= simple_format legacy_text %>
-            </div>
+            <% else %>
+              <div class="text-slate-700 leading-relaxed text-xl bg-[#f9a825]/5 p-10 rounded-3xl italic relative border-t-4 border-[#f9a825] [&>p]:mb-4">
+                <div class="absolute -top-4 right-10 w-8 h-8 bg-[#f9a825] rounded-full flex items-center justify-center text-white text-xs shadow-lg">
+                  <i class="fas fa-clock"></i>
+                </div>
+                <%= simple_format legacy_text %>
+              </div>
+            <% end %>
 
             <% if conclusion_text.present? %>
               <div class="mt-20">
@@ -362,12 +491,37 @@
             <% end %>
             <div class="grid grid-cols-1 gap-4">
               <% @concept.suggested_reading.split("\n").reject(&:blank?).each do |reading| %>
-                <div class="flex items-center gap-4 p-6 bg-white border border-slate-100 rounded-2xl hover:bg-slate-50 hover:border-[#f9a825]/30 transition-all group shadow-sm">
-                  <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-[#f9a825]/10">
-                    <i class="fas fa-question-circle text-slate-400 group-hover:text-[#f9a825] transition-colors"></i>
+                <% 
+                  text = reading
+                  url = nil
+                  if reading.include?("(") && reading.include?(")")
+                    parts = reading.match(/(.*)\((.*)\)/)
+                    if parts
+                      text = parts[1].strip
+                      url = parts[2].strip
+                    end
+                  elsif reading.include?("http")
+                    # simple heuristic
+                    parts = reading.split("http", 2)
+                    text = parts[0].strip
+                    url = "http" + parts[1].strip
+                  end
+                %>
+                <% if url.present? %>
+                  <%= link_to url, target: "_blank", class: "flex items-center gap-4 p-6 bg-white border border-slate-100 rounded-2xl hover:bg-slate-50 hover:border-[#f9a825]/30 transition-all group shadow-sm" do %>
+                    <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-[#f9a825]/10">
+                      <i class="fas fa-external-link-alt text-slate-400 group-hover:text-[#f9a825] transition-colors"></i>
+                    </div>
+                    <span class="text-lg text-slate-700 font-medium leading-snug"><%= text %></span>
+                  <% end %>
+                <% else %>
+                  <div class="flex items-center gap-4 p-6 bg-white border border-slate-100 rounded-2xl hover:bg-slate-50 hover:border-[#f9a825]/30 transition-all group shadow-sm">
+                    <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-[#f9a825]/10">
+                      <i class="fas fa-question-circle text-slate-400 group-hover:text-[#f9a825] transition-colors"></i>
+                    </div>
+                    <span class="text-lg text-slate-700 font-medium leading-snug"><%= reading %></span>
                   </div>
-                  <span class="text-lg text-slate-700 font-medium leading-snug"><%= reading %></span>
-                </div>
+                <% end %>
               <% end %>
             </div>
           </div>

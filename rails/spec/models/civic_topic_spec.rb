@@ -46,4 +46,64 @@ RSpec.describe CivicTopic, type: :model do
       expect(topic.image).to be_attached
     end
   end
+
+  describe 'American Civics Renewal Act consolidation' do
+    let(:topic) do
+      CivicTopic.find_or_create_by!(name: "American Civics Renewal Act")
+    end
+
+    it 'has consolidated the narrative into the bio field' do
+      topic.update!(
+        bio: "As the United States approaches its 250th anniversary, civics education has experienced a surge of legislation and funding... Work Cited:",
+        bio_heading: "American Civics Renewal Act",
+        contributions: nil,
+        main_ideas: nil,
+        legacy: nil,
+        criticism: nil
+      )
+
+      expect(topic.bio).to include("As the United States approaches its 250th anniversary")
+      expect(topic.bio).to include("Work Cited:")
+      expect(topic.bio_heading).to eq("American Civics Renewal Act")
+    end
+
+    it 'has cleared the fragmented metadata fields' do
+      topic.update!(contributions: nil, main_ideas: nil, legacy: nil, criticism: nil)
+      
+      expect(topic.contributions).to be_nil
+      expect(topic.main_ideas).to be_nil
+      expect(topic.legacy).to be_nil
+      expect(topic.criticism).to be_nil
+    end
+  end
+
+  describe 'Context for CD1 in Utah consolidation' do
+    let(:topic) do
+      CivicTopic.find_or_create_by!(name: "Potential context for Utah’s 1st Congressional District (CD1) Race")
+    end
+
+    it 'has consolidated the narrative into the bio field' do
+      topic.update!(
+        bio: "As a tax-exempt non-profit, The History Education Foundation does not endorse political candidates... A functioning democracy requires evaluating both individual accountability and systemic influence.",
+        bio_heading: "Context for CD1 in Utah",
+        contributions: nil,
+        main_ideas: nil,
+        legacy: nil,
+        criticism: nil
+      )
+
+      expect(topic.bio).to include("As a tax-exempt non-profit, The History Education Foundation does not endorse political candidates.")
+      expect(topic.bio).to include("A functioning democracy requires evaluating both individual accountability and systemic influence.")
+      expect(topic.bio_heading).to eq("Context for CD1 in Utah")
+    end
+
+    it 'has cleared the fragmented metadata fields' do
+      topic.update!(contributions: nil, main_ideas: nil, legacy: nil, criticism: nil)
+      
+      expect(topic.contributions).to be_nil
+      expect(topic.main_ideas).to be_nil
+      expect(topic.legacy).to be_nil
+      expect(topic.criticism).to be_nil
+    end
+  end
 end

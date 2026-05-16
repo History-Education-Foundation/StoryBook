@@ -1,7 +1,9 @@
 <% content_for :full_width, true %>
 <% content_for :hide_header, true %>
+<% content_for :hide_navbar, true %>
 
 <div class="min-h-screen bg-white font-sans text-slate-800">
+  <%= render 'layouts/navigation' %>
   <!-- Custom Header -->
   <section class="bg-slate-900 py-20">
     <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center">

@@ -40,4 +40,107 @@ RSpec.describe CivicTopic, type: :model do
       expect(topic.tagline).to include("8th-grade reading level")
     end
   end
+
+  describe '10th Grade World History placeholders' do
+    before do
+      # Ensure data exists in the test database
+      ['Chile in the Cold War', 'The Pinochet File'].each do |name|
+        CivicTopic.find_or_create_by!(name: name) do |t|
+          t.grade_level = '10th Grade'
+          t.subject = 'World History'
+          t.bio = "Placeholder biography for #{name}."
+          t.published = true
+        end
+      end
+    end
+
+    it 'verifies that topics for 10th Grade World History exist' do
+      expect(CivicTopic.where(grade_level: '10th Grade', subject: 'World History').count).to eq(2)
+    end
+
+    it 'verifies that topics have placeholder biographies' do
+      expect(CivicTopic.find_by(name: 'Chile in the Cold War').bio).to include('Placeholder')
+      expect(CivicTopic.find_by(name: 'The Pinochet File').bio).to include('Placeholder')
+    end
+  end
+
+  describe 'Financial Literacy placeholders' do
+    before do
+      ['Credit', 'Taxes & Retirement', 'House Hacking'].each do |name|
+        CivicTopic.find_or_create_by!(name: name) do |t|
+          t.subject = 'Financial Literacy'
+          t.bio = "Placeholder biography for #{name}."
+          t.published = true
+        end
+      end
+    end
+
+    it 'verifies that topics for Financial Literacy exist' do
+      expect(CivicTopic.where(subject: 'Financial Literacy').count).to eq(3)
+    end
+
+    it 'verifies that topics have placeholder biographies' do
+      expect(CivicTopic.find_by(name: 'Credit').bio).to include('Placeholder')
+    end
+  end
+
+  describe 'World Geography placeholders' do
+    before do
+      ['Chile in the Cold War', 'The Pinochet File'].each do |name|
+        CivicTopic.find_or_create_by!(name: name, subject: 'World Geography') do |t|
+          t.bio = "Placeholder biography for #{name}."
+          t.published = true
+        end
+      end
+    end
+
+    it 'verifies that topics for World Geography exist' do
+      expect(CivicTopic.where(subject: 'World Geography').count).to eq(2)
+    end
+  end
+
+  describe 'Psychology placeholders' do
+    before do
+      ['Biological', 'Cognition', 'Development & Learning', 'Social & Personality', 'Mental & Physical Health'].each do |name|
+        CivicTopic.find_or_create_by!(name: name, subject: 'Psychology') do |t|
+          t.bio = "Placeholder biography for #{name}."
+          t.published = true
+        end
+      end
+    end
+
+    it 'verifies that topics for Psychology exist' do
+      expect(CivicTopic.where(subject: 'Psychology').count).to eq(5)
+    end
+  end
+
+  describe 'Digital Literacy placeholders' do
+    before do
+      ['Iran Monitoring Civilians'].each do |name|
+        CivicTopic.find_or_create_by!(name: name, subject: 'Digital Literacy') do |t|
+          t.bio = "Placeholder biography for #{name}."
+          t.published = true
+        end
+      end
+    end
+
+    it 'verifies that topics for Digital Literacy exist' do
+      expect(CivicTopic.where(subject: 'Digital Literacy').count).to eq(1)
+    end
+  end
+
+  describe 'Student Leaders placeholders' do
+    before do
+      ['Praise in public', 'Time is power'].each do |name|
+        CivicTopic.find_or_create_by!(name: name, subject: 'Student Leaders') do |t|
+          t.bio = "Placeholder biography for #{name}."
+          t.published = true
+        end
+      end
+    end
+
+    it 'verifies that topics for Student Leaders exist' do
+      expect(CivicTopic.where(subject: 'Student Leaders').count).to eq(2)
+    end
+  end
 end

@@ -272,39 +272,13 @@ puts "Controversies seeded."
 end
 puts "Concepts seeded."
 
-# Seed: Civic Topics
-[
-  "Andrew Yang",
-  "Bernie Sanders",
-  "New Deal",
-  "U.S. Intervention abroad",
-  "Israel and 9/11",
-  "James Lindsay",
-  "Intimidation during the Iraq War",
-  "American Civics Renewal Act",
-  "Lobbying",
-  "Potential context for Utah’s 1st Congressional District (CD1) Race"
-].each do |name|
-  topic = CivicTopic.find_or_create_by!(name: name)
-  topic.update!(
-    tagline: "Exploring the impact and legacy of #{name} in American civics.",
-    bio: "Placeholder biography for #{name}. Content coming soon.",
-    bio_heading: "Overview",
-    published: true,
-    grade_level: "High School", # Default for existing ones
-    subject: "U.S Government"
-  )
-end
-
 # 8th Grade U.S. History Seeds
 [
-  "Separation of Powers",
-  "1st Amendment and the flag",
   "Analyzing Columbus",
   "Industrialization",
   "Financial Scams"
 ].each do |name|
-  topic = CivicTopic.find_or_create_by!(name: name)
+  topic = CivicTopic.find_or_create_by!(name: name, subject: "U.S. History", grade_level: "8th Grade")
   topic.update!(
     tagline: "Exploring #{name} in 8th Grade U.S. History.",
     bio: "Placeholder biography for #{name}. Content coming soon.",
@@ -314,5 +288,151 @@ end
     subject: "U.S. History"
   )
 end
+
+# Separation of Powers (ID 11)
+sop = CivicTopic.find_or_initialize_by(id: 11)
+sop.update!(
+  name: "Separation of Powers",
+  tagline: "(8th-grade reading level)\n\nHow the U.S. Government Prevents Any One Group From Becoming Too Powerful",
+  bio: "The Founders of the United States were very careful when they created the government. They wanted to make sure that no single person or group could get too much power. To do this, they used an idea called Separation of Powers.",
+  bio_heading: "Overview",
+  main_ideas: "Step 1: Congress passes a law (Legislative).\nStep 2: The President vetoes it (Executive check on Legislative).\nStep 3: Congress overrides the veto (Legislative check on Executive).\nStep 4: The Supreme Court declares the law unconstitutional (Judicial check on Legislative/Executive).",
+  main_ideas_heading: "How it works",
+  criticism: "Members of Congress may hesitate to challenge a President of their own party to avoid political backlash.",
+  criticism_heading: "The Challenge",
+  published: true,
+  grade_level: "8th Grade",
+  subject: "U.S. History"
+)
+
+# 1st Amendment and the Flag (ID 12)
+flag = CivicTopic.find_or_initialize_by(id: 12)
+flag.update!(
+  name: "1st Amendment and the Flag",
+  tagline: "(8th-grade reading level)\n\nProtecting the freedoms of speech and expression",
+  bio: "The First Amendment protects some of the most important rights in America, like freedom of speech and the press. But did you know it also protects how we use symbols, like the American flag?",
+  bio_heading: "Overview",
+  main_ideas: "Texas v. Johnson (1989): Flag burning is protected 'symbolic speech'.\nUnited States v. Eichman (1990): Struck down the Flag Protection Act.",
+  main_ideas_heading: "Key Supreme Court Cases",
+  criticism: "Flag burning is a powerful and controversial form of expression that continues to spark debate.",
+  criticism_heading: "Flag Burning and the First Amendment",
+  legacy: "Learning about cases like Texas v. Johnson helps us understand why freedom of speech is so important in a democracy.",
+  legacy_heading: "Student Activity: The Debate",
+  suggested_reading: "Should freedom of speech protect actions that offend many people?",
+  suggested_reading_heading: "Reflection & Discussion Questions",
+  quote: "In a democracy, civic reasoning means balancing rights with responsibilities.",
+  quote_author: "First Amendment Principles",
+  published: true,
+  grade_level: "8th Grade",
+  subject: "U.S. History",
+  video_url: "https://www.youtube.com/embed/ZVZt613Jnqs?si=ijvyB6kF9A_Fz5pX"
+)
+
 puts "8th Grade U.S. History lesson plans seeded."
+
+# 10th Grade World History Seeds
+[
+  "Chile in the Cold War",
+  "The Pinochet File"
+].each do |name|
+  topic = CivicTopic.find_or_create_by!(name: name)
+  topic.update!(
+    tagline: "Exploring #{name} in 10th Grade World History.",
+    bio: "Placeholder biography for #{name}. Content coming soon.",
+    bio_heading: "Overview",
+    published: true,
+    grade_level: "10th Grade",
+    subject: "World History"
+  )
+end
+puts "10th Grade World History lesson plans seeded."
+
+# Financial Literacy Seeds
+[
+  "Credit",
+  "Taxes & Retirement",
+  "House Hacking"
+].each do |name|
+  topic = CivicTopic.find_or_create_by!(name: name)
+  topic.update!(
+    tagline: "Exploring #{name} in Financial Literacy.",
+    bio: "Placeholder biography for #{name}. Content coming soon.",
+    bio_heading: "Overview",
+    published: true,
+    grade_level: nil,
+    subject: "Financial Literacy"
+  )
+end
+puts "Financial Literacy lesson plans seeded."
+
+# World Geography Seeds
+[
+  "Chile in the Cold War",
+  "The Pinochet File"
+].each do |name|
+  topic = CivicTopic.find_or_create_by!(name: name, subject: "World Geography")
+  topic.update!(
+    tagline: "Exploring #{name} in World Geography.",
+    bio: "Placeholder biography for #{name}. Content coming soon.",
+    bio_heading: "Overview",
+    published: true,
+    grade_level: nil,
+    subject: "World Geography"
+  )
+end
+puts "World Geography lesson plans seeded."
+
+# Psychology Seeds
+[
+  "Biological",
+  "Cognition",
+  "Development & Learning",
+  "Social & Personality",
+  "Mental & Physical Health"
+].each do |name|
+  topic = CivicTopic.find_or_create_by!(name: name, subject: "Psychology")
+  topic.update!(
+    tagline: "Exploring #{name} in Psychology.",
+    bio: "Placeholder biography for #{name}. Content coming soon.",
+    bio_heading: "Overview",
+    published: true,
+    grade_level: nil,
+    subject: "Psychology"
+  )
+end
+puts "Psychology lesson plans seeded."
+
+# Digital Literacy Seeds
+[
+  "Iran Monitoring Civilians"
+].each do |name|
+  topic = CivicTopic.find_or_create_by!(name: name, subject: "Digital Literacy")
+  topic.update!(
+    tagline: "Exploring #{name} in Digital Literacy.",
+    bio: "Placeholder biography for #{name}. Content coming soon.",
+    bio_heading: "Overview",
+    published: true,
+    grade_level: nil,
+    subject: "Digital Literacy"
+  )
+end
+puts "Digital Literacy lesson plans seeded."
+
+# Student Leaders Seeds
+[
+  "Praise in public",
+  "Time is power"
+].each do |name|
+  topic = CivicTopic.find_or_create_by!(name: name, subject: "Student Leaders")
+  topic.update!(
+    tagline: "Exploring #{name} in Student Leaders.",
+    bio: "Placeholder biography for #{name}. Content coming soon.",
+    bio_heading: "Overview",
+    published: true,
+    grade_level: nil,
+    subject: "Student Leaders"
+  )
+end
+puts "Student Leaders lesson plans seeded."
+
 puts "Civic Topics seeded."

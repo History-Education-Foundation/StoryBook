@@ -12,7 +12,7 @@
         <li><%= link_to "Home", root_path, class: "hover:text-primary transition-colors" %></li>
         <li><%= link_to "About Us", "#", class: "hover:text-primary transition-colors" %></li>
         <li><%= link_to "History Education Scholars", scholars_path, class: "hover:text-primary transition-colors" %></li>
-        <li><%= link_to "Lesson Plans", "#", class: "hover:text-primary transition-colors" %></li>
+        <li><%= link_to "Lesson Plans", lesson_plans_path, class: "hover:text-primary transition-colors" %></li>
         <li><%= link_to "Blog posts", posts_path, class: "hover:text-primary transition-colors" %></li>
         <li><%= link_to "Controversial History", controversies_path, class: "hover:text-primary transition-colors" %></li>
         <% if user_signed_in? %>

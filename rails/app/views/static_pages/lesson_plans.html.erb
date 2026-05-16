@@ -1,0 +1,62 @@
+<% content_for :full_width, true %>
+<% content_for :hide_header, true %>
+<% content_for :hide_navbar, true %>
+
+<div class="min-h-screen bg-white font-sans text-slate-800">
+  <%= render 'layouts/navigation' %>
+
+  <!-- Hero Section -->
+  <section class="bg-slate-900 py-24 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-20">
+      <div class="absolute inset-0 bg-[#f9a825]/10 mix-blend-overlay"></div>
+    </div>
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 text-center">
+      <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">Lesson Plans</h1>
+      <p class="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+        Access dedicated educational resources for specific grade levels and subjects to enhance learning and teaching.
+      </p>
+    </div>
+  </section>
+
+  <!-- Lesson Plans Grid Section -->
+  <section class="py-24 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <% [
+          "8th Grade U.S. History",
+          "10th Grade World History",
+          "11th Grade U.S. History",
+          "Financial Literacy",
+          "World Geography",
+          "U.S Government",
+          "Psychology",
+          "NBCT Study Standards",
+          "NBCT Standards Ages 7-10",
+          "Digital Literacy",
+          "Student Leaders"
+        ].each do |subject| %>
+          <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center text-center group hover:shadow-md transition-all duration-300">
+            <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-[#f9a825]/10 transition-colors">
+              <i class="fas fa-book-open text-3xl text-slate-400 group-hover:text-[#f9a825] transition-colors"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-4"><%= subject %></h3>
+            <span class="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 bg-slate-50 px-4 py-1.5 rounded-full border border-slate-200">
+              Coming Soon
+            </span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Call to Action -->
+  <section class="py-16 bg-[#f9a825] text-white">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold mb-4">Need specific resources?</h2>
+      <p class="text-xl mb-8 text-white/90">We are constantly updating our lesson plans and educational materials.</p>
+      <%= link_to "/contact", class: "btn btn-outline text-white border-2 border-white hover:bg-white hover:text-slate-900 px-10 rounded-md transition-all font-bold" do %>
+        Contact Us
+      <% end %>
+    </div>
+  </section>
+</div>

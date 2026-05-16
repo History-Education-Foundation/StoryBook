@@ -49,6 +49,7 @@ Rails.application.routes.draw do
   get "chat" => "public#chat"
   get "pricing", to: "static_pages#pricing"
   get "about", to: "static_pages#about"
+  get "lesson_plans", to: "static_pages#lesson_plans", as: :lesson_plans
   get "contact", to: "static_pages#contact"
   
   resources :concepts, only: [:index, :show]

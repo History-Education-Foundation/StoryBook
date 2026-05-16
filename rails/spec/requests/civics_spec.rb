@@ -30,4 +30,25 @@ RSpec.describe "Civics", type: :request do
       expect(response.body).not_to include("first-letter:float-left")
     end
   end
+
+  describe "Separation of Powers (ID 11) page" do
+    before do
+      # Ensure record 11 exists in the test database with the correct content
+      CivicTopic.find_or_create_by!(id: 11) do |t|
+        t.name = "Separation of Powers"
+        t.tagline = "(8th-grade reading level)\n\nHow the U.S. Government Prevents Any One Group From Becoming Too Powerful"
+        t.bio = "The Founders..."
+        t.criticism_heading = "Where Politics Complicate the System"
+        t.published = true
+      end
+    end
+
+    it "renders the new heading and tagline" do
+      get "/civics/11"
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("Separation of Powers")
+      expect(response.body).to include("8th-grade reading level")
+      expect(response.body).to include("Where Politics Complicate the System")
+    end
+  end
 end

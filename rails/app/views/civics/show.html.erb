@@ -22,8 +22,6 @@
             <%= image_tag @civic_topic.image, class: "w-full h-full object-cover #{@civic_topic.image_position || 'object-top'}" %>
           <% elsif @civic_topic.image_data.present? %>
             <img src="<%= @civic_topic.image_data %>" class="w-full h-full object-cover <%= @civic_topic.image_position || 'object-top' %>" alt="<%= @civic_topic.name %>">
-          <% elsif @civic_topic.image_filename.present? %>
-            <%= image_tag @civic_topic.image_filename, class: "w-full h-full object-cover #{@civic_topic.image_position || 'object-top'}" %>
           <% else %>
             <i class="fas fa-landmark text-5xl text-white"></i>
           <% end %>
@@ -43,6 +41,12 @@
     <div class="max-w-4xl mx-auto px-6 lg:px-8">
       <div class="prose prose-xl prose-slate max-w-none">
         
+        <% if @civic_topic.image_filename.present? %>
+          <div class="mb-16 max-w-2xl mx-auto rounded-3xl overflow-hidden shadow-xl border border-slate-100 transition-transform hover:scale-[1.01] duration-300 bg-white">
+            <%= image_tag @civic_topic.image_filename, class: "w-full h-auto object-contain m-0", alt: @civic_topic.name %>
+          </div>
+        <% end %>
+
         <!-- Biography / Overview -->
         <% if @civic_topic.bio.present? %>
           <% 
@@ -391,13 +395,20 @@
         <% if @civic_topic.publications.present? %>
           <div class="mb-20">
             <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= @civic_topic.publications_heading.presence || 'Featured Book' %></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-8 rounded-3xl border border-slate-100">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-50 p-8 rounded-3xl border border-slate-100">
               <% @civic_topic.publications.split("\n").reject(&:blank?).each do |publication| %>
-                <div class="flex flex-col gap-3">
-                  <div class="aspect-video bg-slate-200 rounded-2xl flex items-center justify-center text-slate-400 overflow-hidden">
-                    <i class="fas fa-image text-4xl"></i>
+                <div class="flex flex-col gap-4">
+                  <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 aspect-[4/3] flex items-center justify-center overflow-hidden group/img transition-all hover:shadow-md">
+                    <% if publication.include?("|") %>
+                      <% filename, caption = publication.split("|", 2) %>
+                      <%= image_tag filename, class: "max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-110", alt: caption %>
+                    <% else %>
+                      <div class="flex flex-col items-center gap-2 text-slate-300">
+                        <i class="fas fa-image text-4xl"></i>
+                      </div>
+                    <% end %>
                   </div>
-                  <div class="text-sm font-medium text-slate-500 italic px-2 text-center m-0">
+                  <div class="text-base font-medium text-slate-600 italic px-2 text-center leading-snug">
                     <% if publication.include?("|") %>
                       <% filename, caption = publication.split("|", 2) %>
                       <%= caption %>
@@ -410,6 +421,30 @@
                   </div>
                 </div>
               <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <% if @civic_topic.video_url.present? %>
+          <div class="mb-20">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block">Lesson Video</h2>
+            <div class="aspect-video bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100">
+              <% 
+                video_src = @civic_topic.video_url
+                if video_src.include?("youtube.com/watch?v=")
+                  video_src = video_src.gsub("youtube.com/watch?v=", "youtube.com/embed/")
+                elsif video_src.include?("youtu.be/")
+                  video_src = video_src.gsub("youtu.be/", "youtube.com/embed/")
+                end
+              %>
+              <iframe 
+                src="<%= video_src %>" 
+                class="w-full h-full"
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerpolicy="strict-origin-when-cross-origin" 
+                allowfullscreen>
+              </iframe>
             </div>
           </div>
         <% end %>

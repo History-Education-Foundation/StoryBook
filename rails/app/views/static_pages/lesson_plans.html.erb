@@ -58,14 +58,29 @@
               <% if topics.any? %>
                 <div class="w-full mt-6 space-y-2">
                   <% topics.each do |topic| %>
-                    <%= link_to civic_path(topic), class: "flex items-center p-3 rounded-xl hover:bg-slate-50 transition-all group/link border border-transparent hover:border-slate-100" do %>
-                      <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center mr-3 group-hover/link:bg-white transition-colors">
-                        <i class="fas fa-file-alt text-xs text-slate-400 group-hover/link:text-[#f9a825]"></i>
+                    <% is_placeholder = topic.bio.to_s.include?("Placeholder") %>
+                    <% if is_placeholder %>
+                      <div class="flex items-center p-3 rounded-xl bg-slate-50/50 border border-slate-100 opacity-60 cursor-not-allowed">
+                        <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center mr-3">
+                          <i class="fas fa-clock text-xs text-slate-400"></i>
+                        </div>
+                        <span class="text-sm font-semibold text-slate-400 flex-grow text-left">
+                          <%= topic.name %>
+                        </span>
+                        <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 border border-slate-200 px-2 py-1 rounded">
+                          Soon
+                        </span>
                       </div>
-                      <span class="text-sm font-semibold text-slate-600 group-hover/link:text-slate-900 transition-colors flex-grow text-left">
-                        <%= topic.name %>
-                      </span>
-                      <i class="fas fa-arrow-right text-[10px] text-slate-300 group-hover/link:text-[#f9a825] group-hover/link:translate-x-1 transition-all"></i>
+                    <% else %>
+                      <%= link_to civic_path(topic), class: "flex items-center p-3 rounded-xl hover:bg-slate-50 transition-all group/link border border-transparent hover:border-slate-100" do %>
+                        <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center mr-3 group-hover/link:bg-white transition-colors">
+                          <i class="fas fa-file-alt text-xs text-slate-400 group-hover/link:text-[#f9a825]"></i>
+                        </div>
+                        <span class="text-sm font-semibold text-slate-600 group-hover/link:text-slate-900 transition-colors flex-grow text-left">
+                          <%= topic.name %>
+                        </span>
+                        <i class="fas fa-arrow-right text-[10px] text-slate-300 group-hover/link:text-[#f9a825] group-hover/link:translate-x-1 transition-all"></i>
+                      <% end %>
                     <% end %>
                   <% end %>
                 </div>

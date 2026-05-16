@@ -19,4 +19,25 @@ RSpec.describe CivicTopic, type: :model do
       expect(CivicTopic.us_history).not_to include(high_school_gov)
     end
   end
+
+  describe 'Separation of Powers (ID 11) content' do
+    before do
+      CivicTopic.find_or_create_by!(id: 11) do |t|
+        t.name = "Separation of Powers"
+        t.tagline = "(8th-grade reading level)\n\nHow the U.S. Government Prevents Any One Group From Becoming Too Powerful"
+        t.bio = "The Founders..."
+        t.main_ideas = "Step 1: Congress passes a law (Legislative).\nStep 2: The President vetoes it..."
+        t.criticism = "Members of Congress may hesitate to challenge a President of their own party to avoid political backlash."
+        t.published = true
+      end
+    end
+
+    let(:topic) { CivicTopic.find_by(id: 11) }
+
+    it 'contains specific keywords from the new content' do
+      expect(topic.criticism).to include("political backlash")
+      expect(topic.main_ideas).to include("vetoes it")
+      expect(topic.tagline).to include("8th-grade reading level")
+    end
+  end
 end

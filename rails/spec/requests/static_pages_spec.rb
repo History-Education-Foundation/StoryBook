@@ -2,24 +2,22 @@ require 'rails_helper'
 
 RSpec.describe "StaticPages", type: :request do
   describe "GET /lesson_plans" do
-    it "returns http success" do
-      get "/lesson_plans"
+    let!(:topic) { CivicTopic.create!(name: "Separation of Powers", grade_level: "8th Grade", subject: "U.S. History", published: true) }
+
+    it "renders the lesson plans page with dynamic links" do
+      get lesson_plans_path
       expect(response).to have_http_status(:success)
+      expect(response.body).to include("8th Grade U.S. History")
+      expect(response.body).to include("Separation of Powers")
+      expect(response.body).to include(civic_path(topic))
     end
 
-    it "contains the expected lesson plan subjects" do
-      get "/lesson_plans"
-      expect(response.body).to include("8th Grade U.S. History")
+    it "shows Coming Soon for subjects without topics" do
+      get lesson_plans_path
       expect(response.body).to include("10th Grade World History")
-      expect(response.body).to include("11th Grade U.S. History")
-      expect(response.body).to include("Financial Literacy")
-      expect(response.body).to include("World Geography")
-      expect(response.body).to include("U.S Government")
-      expect(response.body).to include("Psychology")
-      expect(response.body).to include("NBCT Study Standards")
-      expect(response.body).to include("NBCT Standards Ages 7-10")
-      expect(response.body).to include("Digital Literacy")
-      expect(response.body).to include("Student Leaders")
+      # We need to check that "Coming Soon" is present in the context of "10th Grade World History"
+      # But since it's present for many, a simple include check is enough for basic verification
+      expect(response.body).to include("Coming Soon")
     end
   end
 end

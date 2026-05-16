@@ -23,26 +23,62 @@
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <% [
-          "8th Grade U.S. History",
-          "10th Grade World History",
-          "11th Grade U.S. History",
-          "Financial Literacy",
-          "World Geography",
-          "U.S Government",
-          "Psychology",
-          "NBCT Study Standards",
-          "NBCT Standards Ages 7-10",
-          "Digital Literacy",
-          "Student Leaders"
-        ].each do |subject| %>
-          <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center text-center group hover:shadow-md transition-all duration-300">
-            <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-[#f9a825]/10 transition-colors">
-              <i class="fas fa-book-open text-3xl text-slate-400 group-hover:text-[#f9a825] transition-colors"></i>
+          { display: "8th Grade U.S. History", grade: "8th Grade", subject: "U.S. History" },
+          { display: "10th Grade World History", grade: "10th Grade", subject: "World History" },
+          { display: "11th Grade U.S. History", grade: "11th Grade", subject: "U.S. History" },
+          { display: "Financial Literacy", grade: nil, subject: "Financial Literacy" },
+          { display: "World Geography", grade: nil, subject: "World Geography" },
+          { display: "U.S Government", grade: nil, subject: "U.S Government" },
+          { display: "Psychology", grade: nil, subject: "Psychology" },
+          { display: "NBCT Study Standards", grade: nil, subject: "NBCT Study Standards" },
+          { display: "NBCT Standards Ages 7-10", grade: nil, subject: "NBCT Standards Ages 7-10" },
+          { display: "Digital Literacy", grade: nil, subject: "Digital Literacy" },
+          { display: "Student Leaders", grade: nil, subject: "Student Leaders" }
+        ].each do |config| %>
+          <% 
+            topics = CivicTopic.published
+            topics = topics.where(grade_level: config[:grade]) if config[:grade]
+            topics = topics.where(subject: config[:subject]) if config[:subject]
+          %>
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <div class="p-8 flex flex-col items-center text-center flex-grow">
+              <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[#f9a825]/10 group-hover:rotate-3 transition-all duration-300">
+                <i class="fas fa-book-open text-2xl text-slate-400 group-hover:text-[#f9a825] transition-colors"></i>
+              </div>
+              
+              <div class="mb-4">
+                <h3 class="text-xl font-bold text-slate-900 mb-1"><%= config[:display] %></h3>
+                <% if topics.any? %>
+                  <span class="badge badge-sm bg-[#f9a825]/10 text-[#f9a825] border-none font-bold uppercase tracking-wider">
+                    <%= pluralize(topics.count, "Plan") %>
+                  </span>
+                <% end %>
+              </div>
+
+              <% if topics.any? %>
+                <div class="w-full mt-6 space-y-2">
+                  <% topics.each do |topic| %>
+                    <%= link_to civic_path(topic), class: "flex items-center p-3 rounded-xl hover:bg-slate-50 transition-all group/link border border-transparent hover:border-slate-100" do %>
+                      <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center mr-3 group-hover/link:bg-white transition-colors">
+                        <i class="fas fa-file-alt text-xs text-slate-400 group-hover/link:text-[#f9a825]"></i>
+                      </div>
+                      <span class="text-sm font-semibold text-slate-600 group-hover/link:text-slate-900 transition-colors flex-grow text-left">
+                        <%= topic.name %>
+                      </span>
+                      <i class="fas fa-arrow-right text-[10px] text-slate-300 group-hover/link:text-[#f9a825] group-hover/link:translate-x-1 transition-all"></i>
+                    <% end %>
+                  <% end %>
+                </div>
+              <% else %>
+                <div class="mt-auto pt-6">
+                  <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 bg-slate-50 px-4 py-2 rounded-lg border border-slate-100">
+                    Coming Soon
+                  </span>
+                </div>
+              <% end %>
             </div>
-            <h3 class="text-xl font-bold text-slate-900 mb-4"><%= subject %></h3>
-            <span class="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 bg-slate-50 px-4 py-1.5 rounded-full border border-slate-200">
-              Coming Soon
-            </span>
+            
+
           </div>
         <% end %>
       </div>

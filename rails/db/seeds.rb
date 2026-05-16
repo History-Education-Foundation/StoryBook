@@ -290,7 +290,29 @@ puts "Concepts seeded."
     tagline: "Exploring the impact and legacy of #{name} in American civics.",
     bio: "Placeholder biography for #{name}. Content coming soon.",
     bio_heading: "Overview",
-    published: true
+    published: true,
+    grade_level: "High School", # Default for existing ones
+    subject: "U.S Government"
   )
 end
+
+# 8th Grade U.S. History Seeds
+[
+  "Separation of Powers",
+  "1st Amendment and the flag",
+  "Analyzing Columbus",
+  "Industrialization",
+  "Financial Scams"
+].each do |name|
+  topic = CivicTopic.find_or_create_by!(name: name)
+  topic.update!(
+    tagline: "Exploring #{name} in 8th Grade U.S. History.",
+    bio: "Placeholder biography for #{name}. Content coming soon.",
+    bio_heading: "Overview",
+    published: true,
+    grade_level: "8th Grade",
+    subject: "U.S. History"
+  )
+end
+puts "8th Grade U.S. History lesson plans seeded."
 puts "Civic Topics seeded."

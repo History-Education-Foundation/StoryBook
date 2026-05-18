@@ -1,0 +1,603 @@
+<%# app/views/civic_topics/_topic_detail.html.erb %>
+<%# Expected local: civic_topic %>
+
+<!-- Content Section -->
+<section class="py-24 bg-white">
+  <div class="max-w-4xl mx-auto px-6 lg:px-8">
+    <div class="prose prose-xl prose-slate max-w-none">
+      
+      <% if civic_topic.image_filename.present? %>
+        <div class="mb-16 max-w-2xl mx-auto rounded-3xl overflow-hidden shadow-xl border border-slate-100 transition-transform hover:scale-[1.01] duration-300 bg-white">
+          <%= image_tag civic_topic.image_filename, class: "w-full h-auto object-contain m-0", alt: civic_topic.name %>
+        </div>
+      <% end %>
+
+      <!-- Biography / Overview -->
+      <% if civic_topic.bio.present? %>
+        <% 
+          bio_text = civic_topic.bio
+          citation = nil
+          if bio_text.include?("Work Cited:")
+            parts = bio_text.split("Work Cited:", 2)
+            bio_text = parts[0]
+            citation = parts[1]
+          end
+        %>
+        <div class="mb-16">
+          <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= civic_topic.bio_heading.presence || 'Overview' %></h2>
+          <div class="text-slate-600 leading-relaxed text-lg
+                      [&>p]:mb-6
+                      [&>p:first-of-type]:first-letter:text-8xl 
+                      [&>p:first-of-type]:first-letter:font-bold 
+                      [&>p:first-of-type]:first-letter:text-[#f9a825] 
+                      [&>p:first-of-type]:first-letter:mr-4 
+                      [&>p:first-of-type]:first-letter:float-left
+                      [&>p:first-of-type]:first-letter:leading-[0.7]">
+            <% 
+              # Smart list detection for bio
+              processed_bio = bio_text.split("\n").map do |line|
+                if line.strip.match?(/^[-*•]\s+/)
+                  content = line.strip.gsub(/^[-*•]\s+/, "")
+                  "LIST_ITEM:#{content}"
+                else
+                  line
+                end
+              end
+
+              # Group consecutive list items
+              grouped_bio = []
+              current_list = []
+              
+              processed_bio.each do |line|
+                if line.start_with?("LIST_ITEM:")
+                  current_list << line.sub("LIST_ITEM:", "")
+                else
+                  if current_list.any?
+                    grouped_bio << current_list
+                    current_list = []
+                  end
+                  grouped_bio << line
+                end
+              end
+              grouped_bio << current_list if current_list.any?
+            %>
+
+            <% grouped_bio.each do |item| %>
+              <% if item.is_a?(Array) %>
+                <ul class="list-none p-0 my-10 space-y-6">
+                  <% item.each do |list_item| %>
+                    <li class="flex items-start gap-4 m-0">
+                      <div class="w-8 h-8 rounded-full bg-[#f9a825]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i class="fas fa-check text-[#f9a825] text-sm"></i>
+                      </div>
+                      <span class="text-slate-700 font-medium"><%= list_item %></span>
+                    </li>
+                  <% end %>
+                </ul>
+              <% else %>
+                <%= simple_format item %>
+              <% end %>
+            <% end %>
+          </div>
+
+          <% if citation.present? %>
+            <div class="mt-12 pt-8 border-t border-slate-100">
+              <div class="flex items-start gap-4 p-8 bg-slate-50 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <i class="fas fa-quote-right text-6xl text-slate-900"></i>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <i class="fas fa-bookmark text-[#f9a825]"></i>
+                </div>
+                <div>
+                  <h4 class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 flex items-center gap-2">
+                    Work Cited
+                  </h4>
+                  <div class="text-slate-500 italic font-serif text-lg leading-relaxed m-0 [&>p]:mb-4 last:[&>p]:mb-0">
+                    <%= simple_format citation.strip %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- Contributions / Key Details -->
+      <% if civic_topic.contributions.present? %>
+        <div class="mb-16 p-10 bg-slate-50 rounded-3xl border-l-8 border-[#f9a825] shadow-sm relative overflow-hidden">
+          <div class="absolute top-0 right-0 p-8 opacity-5">
+            <i class="fas fa-landmark text-8xl text-slate-900"></i>
+          </div>
+          <div class="relative z-10">
+            <h3 class="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-4">
+              <i class="fas fa-history text-[#f9a825]"></i>
+              <%= civic_topic.contributions_heading.presence || 'Key Details' %>
+            </h3>
+            <ul class="space-y-6 list-none p-0 m-0">
+              <% civic_topic.contributions.split("\n").reject(&:blank?).each do |contribution| %>
+                <li class="flex items-start gap-4 text-slate-700 text-lg m-0 group">
+                  <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center flex-shrink-0 shadow-sm group-hover:border-[#f9a825] transition-colors mt-0.5">
+                    <% 
+                      icon = "fa-check"
+                      icon = "fa-bullhorn" if contribution.downcase.include?("speech")
+                      icon = "fa-newspaper" if contribution.downcase.include?("press")
+                      icon = "fa-pray" if contribution.downcase.include?("religion")
+                      icon = "fa-users" if contribution.downcase.include?("assembly")
+                      icon = "fa-file-signature" if contribution.downcase.include?("petition")
+                    %>
+                    <i class="fas <%= icon %> text-[#f9a825]"></i>
+                  </div>
+                  <% if contribution.include?(":") %>
+                    <% parts = contribution.split(":", 2) %>
+                    <span class="pt-1">
+                      <strong class="text-slate-900 font-bold block text-xl mb-1"><%= parts[0].strip %></strong>
+                      <span class="text-slate-600"><%= parts[1].strip %></span>
+                    </span>
+                  <% elsif contribution.include?(" – ") %>
+                    <% parts = contribution.split(" – ", 2) %>
+                    <span class="pt-1">
+                      <strong class="text-slate-900 font-bold block text-xl mb-1"><%= parts[0].strip %></strong>
+                      <span class="text-slate-600"><%= parts[1].strip %></span>
+                    </span>
+                  <% else %>
+                    <span class="pt-2"><%= contribution %></span>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Quote Block -->
+      <% if civic_topic.quote.present? %>
+        <div class="mb-20 bg-slate-900 p-12 rounded-[3rem] relative overflow-hidden text-center">
+          <div class="absolute top-0 left-0 w-32 h-32 opacity-10 -ml-10 -mt-10">
+            <i class="fas fa-quote-left text-9xl text-white"></i>
+          </div>
+          <blockquote class="relative z-10 m-0">
+            <p class="text-2xl md:text-3xl font-serif text-white italic leading-relaxed mb-8">
+              “<%= civic_topic.quote %>”
+            </p>
+            <% if civic_topic.quote_author.present? %>
+              <cite class="text-[#f9a825] text-xl font-bold not-italic flex items-center justify-center gap-3">
+                <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
+                <%= civic_topic.quote_author %>
+                <span class="w-8 h-[1px] bg-[#f9a825]/30"></span>
+              </cite>
+            <% end %>
+          </blockquote>
+        </div>
+      <% end %>
+
+      <!-- Main Ideas / Perspectives -->
+      <% if civic_topic.main_ideas.present? %>
+        <div class="mb-20">
+          <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
+            <%= civic_topic.main_ideas_heading.presence || 'Main Ideas' %>
+          </h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <% civic_topic.main_ideas.split("\n").reject(&:blank?).each do |idea| %>
+              <div class="card bg-white border-2 border-slate-100 shadow-sm hover:shadow-2xl hover:border-[#f9a825]/20 transition-all duration-300 rounded-[2rem] overflow-hidden group">
+                <div class="card-body p-8">
+                  <div class="flex items-start gap-6 mb-4">
+                    <div class="w-14 h-14 rounded-2xl bg-[#f9a825]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#f9a825] group-hover:text-white transition-colors duration-300">
+                      <% 
+                        icon = 'fa-lightbulb'
+                        icon = 'fa-balance-scale' if idea.downcase.include?('court') || idea.downcase.include?('v.') || idea.downcase.include?('judicial')
+                        icon = 'fa-landmark' if idea.downcase.include?('congress') || idea.downcase.include?('legislative')
+                        icon = 'fa-user-tie' if idea.downcase.include?('president') || idea.downcase.include?('executive')
+                      %>
+                      <i class="fas <%= icon %> text-[#f9a825] text-xl group-hover:text-white"></i>
+                    </div>
+                    <% if idea.include?(":") %>
+                      <% parts = idea.split(":", 2) %>
+                      <h4 class="font-bold text-slate-900 text-xl leading-tight pt-2"><%= parts[0] %></h4>
+                    <% end %>
+                  </div>
+                  
+                  <div class="text-slate-600 m-0">
+                    <% if idea.include?(":") %>
+                      <% parts = idea.split(":", 2) %>
+                      <p class="text-lg leading-relaxed m-0"><%= parts[1] %></p>
+                    <% else %>
+                      <p class="text-lg leading-relaxed m-0"><%= idea %></p>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Criticism / Risks -->
+      <% if civic_topic.criticism.present? %>
+        <% 
+          use_analysis_box = civic_topic.criticism_heading == 'Structured Academic Controversy'
+          heading_border = 'border-[#f9a825]'
+        %>
+        <div class="mb-20">
+          <% if use_analysis_box %>
+            <% 
+              # Primary Handout Source
+              handout_url = "https://www.learner.org/wp-content/uploads/2019/07/RWD.HSSU8_.SACHandouts.pdf"
+              show_pdf = [9, 40].include?(civic_topic.id) || civic_topic.handout_pdf.attached?
+              pdf_src = civic_topic.handout_pdf.attached? ? url_for(civic_topic.handout_pdf) : handout_url
+            %>
+
+            <% if civic_topic.criticism.present? %>
+              <% if [9, 40].include?(civic_topic.id) %>
+                <%# Custom Layout for Lobbying Lesson Plan %>
+                <div class="space-y-16">
+                  <% 
+                    # Split content into sections based on known headings
+                    raw_parts = civic_topic.criticism.split(/(Hook|Lobbying Mini-Lesson|Textual Analysis|Structured Academic Controversy|Synthesis|Exit)/)
+                    # raw_parts[0] is everything before the first heading (should be empty)
+                    # Then pairs of (heading, content) follow
+                    parts_to_render = []
+                    (1..raw_parts.length-1).step(2).each do |i|
+                      parts_to_render << { heading: raw_parts[i], content: raw_parts[i+1] }
+                    end
+                  %>
+                  
+                  <% parts_to_render.each do |section| %>
+                    <% 
+                      heading = section[:heading]
+                      content = section[:content] || ""
+                    %>
+
+                    <% if heading == "Synthesis" && show_pdf %>
+                      <%# Insert PDF above Synthesis %>
+                      <div class="bg-slate-900 rounded-[2.5rem] p-4 md:p-8 shadow-2xl overflow-hidden border border-white/10">
+                        <div class="flex items-center justify-between mb-6 px-4">
+                          <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-[#f9a825]/20 flex items-center justify-center text-[#f9a825]">
+                              <i class="fas fa-file-pdf text-xl"></i>
+                            </div>
+                            <div>
+                              <h4 class="text-white font-bold text-lg leading-tight">Interactive Handout</h4>
+                              <p class="text-white/40 text-xs uppercase tracking-widest font-black">Official Teaching Guide</p>
+                            </div>
+                          </div>
+                          <%= link_to pdf_src, target: "_blank", class: "btn btn-sm btn-ghost text-white/60 hover:text-[#f9a825] hover:bg-white/5 gap-2" do %>
+                            <i class="fas fa-external-link-alt"></i>
+                            Open in New Tab
+                          <% end %>
+                        </div>
+                        <div class="rounded-2xl overflow-hidden bg-slate-800 shadow-inner h-[800px]">
+                          <iframe 
+                            src="<%= pdf_src %>" 
+                            width="100%" 
+                            height="100%" 
+                            style="border: none;"
+                            title="Educational Handout PDF">
+                          </iframe>
+                        </div>
+                      </div>
+                    <% end %>
+
+                    <div class="relative group">
+                      <div class="flex flex-col md:flex-row gap-8 md:gap-16">
+                        <div class="md:w-1/4">
+                          <h3 class="text-3xl font-black text-slate-900 uppercase tracking-tighter leading-none sticky top-10">
+                            <span class="block text-[#f9a825] text-sm tracking-[0.3em] mb-2">Section</span>
+                            <%= heading %>
+                          </h3>
+                        </div>
+                        <div class="md:w-3/4 border-l-8 border-[#f9a825] pl-8 md:pl-12 py-2">
+                          <div class="prose prose-slate prose-xl max-w-none text-slate-600 leading-relaxed 
+                                    [&>p:first-of-type]:first-letter:text-8xl [&>p:first-of-type]:first-letter:font-black 
+                                    [&>p:first-of-type]:first-letter:text-[#f9a825] [&>p:first-of-type]:first-letter:mr-3 
+                                    [&>p:first-of-type]:first-letter:float-left [&>p:first-of-type]:first-letter:leading-[0.8]">
+                            <%= simple_format content.strip %>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% else %>
+                <%# Standard Analysis Box for other topics %>
+                <div class="bg-slate-50 rounded-[2.5rem] p-10 md:p-16 border border-slate-100 shadow-sm relative overflow-hidden">
+                  <div class="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none">
+                    <i class="fas fa-balance-scale text-[12rem] text-slate-900"></i>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 relative z-10">
+                    <% civic_topic.criticism.split("\n").reject(&:blank?).each do |item| %>
+                      <div>
+                        <% if item.include?(":") %>
+                          <% parts = item.split(":", 2) %>
+                          <h4 class="font-bold text-slate-900 text-xl mb-4 flex items-center gap-3">
+                            <span class="w-8 h-[2px] bg-[#f9a825]"></span>
+                            <%= parts[0] %>
+                          </h4>
+                          <p class="text-lg text-slate-600 leading-relaxed m-0"><%= parts[1] %></p>
+                        <% else %>
+                          <p class="text-lg text-slate-600 leading-relaxed m-0"><%= item %></p>
+                        <% end %>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          <% else %>
+            <div class="bg-slate-50 rounded-[3rem] p-10 md:p-16 border-l-8 border-[#f9a825] relative overflow-hidden group shadow-sm">
+              <div class="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform duration-700">
+                <i class="fas fa-exclamation-triangle text-[12rem] text-slate-900"></i>
+              </div>
+              
+              <div class="relative z-10 space-y-10">
+                <% 
+                  # Smart list detection for criticism
+                  processed_items = civic_topic.criticism.split("\n").reject(&:blank?).map do |line|
+                    if line.strip.match?(/^[-*•]\s+/)
+                      content = line.strip.gsub(/^[-*•]\s+/, "")
+                      "LIST_ITEM:#{content}"
+                    else
+                      line
+                    end
+                  end
+
+                  grouped_items = []
+                  current_list = []
+                  processed_items.each do |line|
+                    if line.start_with?("LIST_ITEM:")
+                      current_list << line.sub("LIST_ITEM:", "")
+                    else
+                      if current_list.any?
+                        grouped_items << current_list
+                        current_list = []
+                      end
+                      grouped_items << line
+                    end
+                  end
+                  grouped_items << current_list if current_list.any?
+                %>
+
+                <% grouped_items.each do |item| %>
+                  <% if item.is_a?(Array) %>
+                    <ul class="list-none p-0 my-10 space-y-5">
+                      <% item.each do |list_item| %>
+                        <li class="flex items-start gap-4 m-0">
+                          <div class="w-8 h-8 rounded-full bg-[#f9a825]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <i class="fas fa-exclamation-circle text-[#f9a825] text-sm"></i>
+                          </div>
+                          <span class="text-slate-700 font-medium text-lg leading-relaxed pt-0.5"><%= list_item %></span>
+                        </li>
+                      <% end %>
+                    </ul>
+                  <% elsif item.strip.start_with?("“") && item.include?("”") %>
+                    <blockquote class="m-0 border-none p-0 text-center py-8">
+                      <% if item.include?(" – ") %>
+                        <% quote_parts = item.split(" – ", 2) %>
+                        <p class="text-2xl md:text-4xl font-serif text-slate-800 italic leading-relaxed mb-8"><%= quote_parts[0] %></p>
+                        <cite class="text-[#f9a825] text-xl font-bold not-italic flex items-center justify-center gap-3">
+                          <span class="w-12 h-[1px] bg-[#f9a825]/20"></span>
+                          <%= quote_parts[1] %>
+                          <span class="w-12 h-[1px] bg-[#f9a825]/20"></span>
+                        </cite>
+                      <% else %>
+                        <p class="text-2xl md:text-4xl font-serif text-slate-800 italic leading-relaxed m-0"><%= item %></p>
+                      <% end %>
+                    </blockquote>
+                  <% else %>
+                    <div class="text-slate-700 text-lg m-0 leading-relaxed">
+                      <% if item.include?(":") %>
+                        <% parts = item.split(":", 2) %>
+                        <div class="mb-4">
+                          <h4 class="text-[#f9a825] font-black uppercase tracking-[0.2em] text-xs mb-3 flex items-center gap-3">
+                            <span class="w-8 h-[2px] bg-[#f9a825]"></span>
+                            <%= parts[0].strip %>
+                          </h4>
+                          <p class="text-2xl text-slate-900 font-bold leading-tight m-0"><%= parts[1].strip %></p>
+                        </div>
+                      <% else %>
+                        <p class="text-xl text-slate-700 leading-relaxed m-0"><%= item %></p>
+                      <% end %>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- Legacy / Context / Participation -->
+      <% if civic_topic.legacy.present? %>
+        <% 
+          legacy_text = civic_topic.legacy
+          conclusion_text = nil
+          if legacy_text.include?("\n\nConclusion")
+            parts = legacy_text.split("\n\nConclusion", 2)
+            legacy_text = parts[0]
+            conclusion_text = parts[1]
+          elsif legacy_text.include?("\nConclusion")
+            parts = legacy_text.split("\nConclusion", 2)
+            legacy_text = parts[0]
+            conclusion_text = parts[1]
+          end
+
+          is_activity = legacy_text.downcase.include?('activity') || legacy_text.downcase.include?('move to')
+        %>
+        <div class="mb-20">
+          <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
+            <%= civic_topic.legacy_heading.presence || (is_activity ? 'Classroom Activity' : 'Legacy & Context') %>
+          </h2>
+          
+          <% if is_activity %>
+            <div class="bg-slate-900 text-white p-10 md:p-16 rounded-[3rem] shadow-2xl relative overflow-hidden group border-4 border-[#f9a825]/20 hover:border-[#f9a825]/40 transition-all">
+              <div class="absolute top-0 right-0 p-12 opacity-10 group-hover:scale-110 transition-transform">
+                <i class="fas fa-users text-[10rem]"></i>
+              </div>
+              <div class="relative z-10">
+                <div class="flex items-center gap-4 mb-8">
+                  <div class="w-12 h-12 rounded-full bg-[#f9a825] flex items-center justify-center text-slate-900 shadow-lg">
+                    <i class="fas fa-running text-xl"></i>
+                  </div>
+                  <span class="text-[#f9a825] font-black uppercase tracking-[0.3em] text-sm">Action Block</span>
+                </div>
+                <div class="text-2xl md:text-3xl font-bold leading-relaxed mb-0">
+                  <%= simple_format legacy_text %>
+                </div>
+              </div>
+            </div>
+          <% else %>
+            <div class="text-slate-700 leading-relaxed text-xl bg-[#f9a825]/5 p-10 rounded-3xl italic relative border-t-4 border-[#f9a825] [&>p]:mb-4">
+              <div class="absolute -top-4 right-10 w-8 h-8 bg-[#f9a825] rounded-full flex items-center justify-center text-white text-xs shadow-lg">
+                <i class="fas fa-clock"></i>
+              </div>
+              <%= simple_format legacy_text %>
+            </div>
+          <% end %>
+
+          <% if conclusion_text.present? %>
+            <div class="mt-20">
+              <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block">Conclusion</h2>
+              <div class="text-slate-600 leading-relaxed text-lg">
+                <%= simple_format conclusion_text.strip %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- Suggested Reading / Discussion Questions -->
+      <% if civic_topic.suggested_reading.present? && civic_topic.id != 9 %>
+        <div class="mb-20">
+          <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
+            <%= civic_topic.suggested_reading_heading.presence || (civic_topic.is_lesson_plan? ? 'Reflection / Discussion' : 'Suggested Reading') %>
+          </h2>
+          
+          <div class="bg-slate-50 border-l-8 border-[#f9a825] p-10 md:p-16 rounded-[3rem] shadow-sm relative overflow-hidden group">
+            <div class="absolute -top-10 -right-10 w-64 h-64 bg-[#f9a825]/5 rounded-full blur-3xl group-hover:bg-[#f9a825]/10 transition-all duration-700"></div>
+            <div class="absolute top-0 right-0 p-12 opacity-[0.03]">
+              <i class="fas fa-comments text-[12rem] text-slate-900"></i>
+            </div>
+            
+            <div class="relative z-10 space-y-12">
+              <% civic_topic.suggested_reading.split("\n").reject(&:blank?).each do |reading| %>
+                <% 
+                  is_header = !reading.strip.end_with?("?") && reading.length < 50
+                %>
+                <% if is_header %>
+                  <div class="pt-8 first:pt-0">
+                    <h4 class="text-[#f9a825] font-black uppercase tracking-[0.2em] text-sm mb-4 flex items-center gap-3">
+                      <span class="w-8 h-[2px] bg-[#f9a825]"></span>
+                      <%= reading.strip %>
+                    </h4>
+                  </div>
+                <% else %>
+                  <div class="flex items-start gap-8">
+                    <div class="w-16 h-16 rounded-3xl bg-white border-2 border-slate-100 flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform">
+                      <i class="fas fa-comment-dots text-[#f9a825] text-2xl"></i>
+                    </div>
+                    <div class="pt-2">
+                      <p class="text-2xl text-slate-800 font-serif italic leading-relaxed m-0">“<%= reading %>”</p>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Teacher Resources -->
+      <% if civic_topic.handout_pdf.attached? || civic_topic.id == 12 %>
+        <div class="mb-20 bg-slate-900 rounded-[3rem] p-8 md:p-12 shadow-2xl relative overflow-hidden group border-4 border-[#f9a825]/10">
+          <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:rotate-12 transition-transform">
+            <i class="fas fa-apple-alt text-[8rem] text-white"></i>
+          </div>
+          <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
+            <div class="w-20 h-20 rounded-2xl bg-[#f9a825] flex items-center justify-center text-slate-900 shadow-xl flex-shrink-0">
+              <i class="fas fa-chalkboard-teacher text-3xl"></i>
+            </div>
+            <div class="flex-grow text-center md:text-left">
+              <h3 class="text-2xl font-bold text-white mb-2">Teacher Resources</h3>
+              <p class="text-white/60 mb-0">Download lesson plans, student handouts, and additional teaching materials for this topic.</p>
+            </div>
+            <% if civic_topic.handout_pdf.attached? %>
+              <%= link_to url_for(civic_topic.handout_pdf), class: "btn btn-primary bg-[#f9a825] border-none text-slate-900 hover:bg-white hover:text-[#f9a825] gap-2 px-8 rounded-xl font-bold shadow-lg", target: "_blank" do %>
+                <i class="fas fa-download"></i>
+                Download PDF
+              <% end %>
+            <% elsif civic_topic.id == 12 %>
+              <%= link_to "#", class: "btn btn-primary bg-[#f9a825] border-none text-slate-900 hover:bg-white hover:text-[#f9a825] gap-2 px-8 rounded-xl font-bold shadow-lg" do %>
+                <i class="fas fa-download"></i>
+                Download Lesson Bundle
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Featured Books -->
+      <% if civic_topic.publications.present? %>
+        <div class="mb-20">
+          <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= civic_topic.publications_heading.presence || 'Featured Book' %></h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-50 p-8 rounded-3xl border border-slate-100">
+            <% civic_topic.publications.split("\n").reject(&:blank?).each do |publication| %>
+              <div class="flex flex-col gap-4">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 aspect-[4/3] flex items-center justify-center overflow-hidden group/img transition-all hover:shadow-md">
+                  <% if publication.include?("|") %>
+                    <% filename, caption = publication.split("|", 2) %>
+                    <%= image_tag filename, class: "max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-110", alt: caption %>
+                  <% else %>
+                    <div class="flex flex-col items-center gap-2 text-slate-300">
+                      <i class="fas fa-image text-4xl"></i>
+                    </div>
+                  <% end %>
+                </div>
+                <div class="text-base font-medium text-slate-600 italic px-2 text-center leading-snug">
+                  <% if publication.include?("|") %>
+                    <% filename, caption = publication.split("|", 2) %>
+                    <%= caption %>
+                  <% elsif publication.include?(":") %>
+                    <% parts = publication.split(":", 2) %>
+                    <strong class="text-slate-900 font-bold"><%= parts[0] %>:</strong><%= parts[1] %>
+                  <% else %>
+                    <%= publication %>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <% if civic_topic.video_url.present? %>
+        <div class="mb-20">
+          <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block">Lesson Video</h2>
+          <div class="aspect-video bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100">
+            <% 
+              video_src = civic_topic.video_url
+              if video_src.include?("youtube.com/watch?v=")
+                video_src = video_src.gsub("youtube.com/watch?v=", "youtube.com/embed/")
+              elsif video_src.include?("youtu.be/")
+                video_src = video_src.gsub("youtu.be/", "youtube.com/embed/")
+              end
+            %>
+            <iframe 
+              src="<%= video_src %>" 
+              class="w-full h-full"
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+              referrerpolicy="strict-origin-when-cross-origin" 
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Footer -->
+      <div class="mt-24 pt-12 border-t border-slate-100 text-slate-400 text-sm text-center italic">
+        <p>© 2024 The History Education Foundation | Images from Wikimedia Commons</p>
+      </div>
+    </div>
+  </div>
+</section>

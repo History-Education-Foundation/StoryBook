@@ -8,4 +8,11 @@ class CivicTopic < ApplicationRecord
   scope :by_subject, ->(subject) { where(subject: subject) }
   scope :grade_8, -> { where(grade_level: "8th Grade") }
   scope :us_history, -> { where(subject: "U.S. History") }
+
+  def is_lesson_plan?
+    # Logic to determine if it's a lesson plan
+    # For now, let's assume specific IDs or a naming convention
+    # In a real app, this might be a boolean column or a category
+    [12, 9, 40].include?(id) || subject == "Lesson Plan"
+  end
 end

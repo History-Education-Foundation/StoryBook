@@ -41,7 +41,7 @@
         <div class="mb-24 last:mb-0">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <% topics.each do |topic| %>
-              <% is_ready = topic.published? %>
+              <% is_ready = topic.published? && topic.bio.present? %>
               
               <div class="group relative bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden">
                 <% if is_ready %>
@@ -82,16 +82,38 @@
                     </div>
                   <% end %>
                 <% else %>
-                  <div class="p-8 opacity-60 flex flex-col h-full grayscale">
+                  <div class="p-8 flex flex-col h-full bg-slate-50/50 grayscale opacity-80 group/soon relative overflow-hidden">
+                    <div class="absolute top-4 right-4 z-20">
+                      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-400 shadow-sm">
+                        <i class="fas fa-clock text-[8px]"></i>
+                        Coming Soon
+                      </span>
+                    </div>
+
                     <div class="flex items-start gap-6 mb-6">
                       <div class="w-20 h-20 bg-slate-200 rounded-2xl flex items-center justify-center shadow-inner flex-shrink-0 overflow-hidden border-2 border-white">
-                        <i class="fas fa-clock text-3xl text-slate-400"></i>
+                        <% if topic.image.attached? %>
+                          <%= image_tag topic.image, class: "w-full h-full object-cover grayscale opacity-50" %>
+                        <% elsif topic.image_data.present? %>
+                          <img src="<%= topic.image_data %>" class="w-full h-full object-cover grayscale opacity-50" alt="<%= topic.name %>">
+                        <% elsif topic.image_filename.present? %>
+                          <%= image_tag topic.image_filename, class: "w-full h-full object-cover grayscale opacity-50" %>
+                        <% else %>
+                          <i class="fas fa-landmark text-3xl text-slate-300"></i>
+                        <% end %>
                       </div>
                       <div class="pt-2">
-                        <h3 class="text-xl font-bold text-slate-400"><%= topic.name %></h3>
-                        <span class="inline-block mt-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
-                          Coming Soon
-                        </span>
+                        <h3 class="text-xl font-bold text-slate-400 mb-1"><%= topic.name %></h3>
+                        <% if topic.grade_level.present? %>
+                          <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest"><%= topic.grade_level %></span>
+                        <% end %>
+                      </div>
+                    </div>
+
+                    <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+                      <span class="text-xs font-bold uppercase tracking-[0.2em] text-slate-300">In Development</span>
+                      <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-200">
+                        <i class="fas fa-lock text-[10px]"></i>
                       </div>
                     </div>
                   </div>

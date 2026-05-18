@@ -175,4 +175,50 @@ RSpec.describe CivicTopic, type: :model do
       expect(topic.is_lesson_plan?).to be false
     end
   end
+
+  describe 'Praise in public (ID 30) content' do
+    before do
+      topic = CivicTopic.find_or_initialize_by(id: 30)
+      topic.update!(
+        name: 'Praise in public',
+        tagline: 'Leadership is influence + responsibility, not popularity, titles, or being liked.',
+        bio: "Essential Question: What is the true source of leadership influence?\n\nHook: Imagine a leader who is loved by everyone but never makes a decision that changes anything. Are they leading?",
+        published: true
+      )
+    end
+
+    let(:topic) { CivicTopic.find(30) }
+
+    it 'is published and lacks placeholder text' do
+      expect(topic.published).to be_truthy
+      expect(topic.bio).not_to include("Placeholder")
+    end
+
+    it 'contains the leadership tagline' do
+      expect(topic.tagline).to include("Leadership is influence + responsibility")
+    end
+  end
+
+  describe 'Time is power (ID 31) content' do
+    before do
+      topic = CivicTopic.find_or_initialize_by(id: 31)
+      topic.update!(
+        name: 'Time is power',
+        tagline: "Leaders don’t just want power — they want capacity.",
+        bio: "Essential Question: How do your daily habits affect your leadership capacity and credibility?",
+        published: true
+      )
+    end
+
+    let(:topic) { CivicTopic.find(31) }
+
+    it 'is published and lacks placeholder text' do
+      expect(topic.published).to be_truthy
+      expect(topic.bio).not_to include("Placeholder")
+    end
+
+    it 'contains the time/capacity tagline' do
+      expect(topic.tagline).to include("want capacity")
+    end
+  end
 end

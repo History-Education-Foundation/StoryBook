@@ -13,6 +13,6 @@ class CivicTopic < ApplicationRecord
     # Logic to determine if it's a lesson plan
     # For now, let's assume specific IDs or a naming convention
     # In a real app, this might be a boolean column or a category
-    [12, 9, 40].include?(id) || subject == "Lesson Plan"
+    [12, 9, 40, 20, 19, 21].include?(id) || subject == "Lesson Plan"
   end
 end

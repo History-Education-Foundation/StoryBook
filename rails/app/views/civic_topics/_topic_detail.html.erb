@@ -12,8 +12,11 @@
         </div>
       <% end %>
 
-      <!-- Biography / Overview -->
-      <% if civic_topic.bio.present? %>
+      <% if civic_topic.is_lesson_plan? %>
+        <%= render 'civic_topics/lesson_plan_detail', civic_topic: civic_topic %>
+      <% else %>
+        <!-- Biography / Overview -->
+        <% if civic_topic.bio.present? %>
         <% 
           bio_text = civic_topic.bio
           citation = nil
@@ -592,6 +595,8 @@
             </iframe>
           </div>
         </div>
+      <% end %>
+
       <% end %>
 
       <!-- Footer -->

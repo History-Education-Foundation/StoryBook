@@ -143,4 +143,31 @@ RSpec.describe CivicTopic, type: :model do
       expect(CivicTopic.where(subject: 'Student Leaders').count).to eq(2)
     end
   end
+
+  describe '#is_lesson_plan?' do
+    it 'returns true for ID 20' do
+      topic = CivicTopic.new(id: 20)
+      expect(topic.is_lesson_plan?).to be true
+    end
+
+    it 'returns true for ID 9' do
+      topic = CivicTopic.new(id: 9)
+      expect(topic.is_lesson_plan?).to be true
+    end
+
+    it 'returns true for ID 40' do
+      topic = CivicTopic.new(id: 40)
+      expect(topic.is_lesson_plan?).to be true
+    end
+
+    it 'returns true for subject "Lesson Plan"' do
+      topic = CivicTopic.new(subject: 'Lesson Plan')
+      expect(topic.is_lesson_plan?).to be true
+    end
+
+    it 'returns false for other IDs' do
+      topic = CivicTopic.new(id: 999)
+      expect(topic.is_lesson_plan?).to be false
+    end
+  end
 end

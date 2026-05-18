@@ -3,11 +3,11 @@
 
 <!-- Content Section -->
 <section class="py-24 bg-white">
-  <div class="max-w-4xl mx-auto px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8">
     <div class="prose prose-xl prose-slate max-w-none">
       
       <% if civic_topic.image_filename.present? %>
-        <div class="mb-16 max-w-2xl mx-auto rounded-3xl overflow-hidden shadow-xl border border-slate-100 transition-transform hover:scale-[1.01] duration-300 bg-white">
+        <div class="mb-16 max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-xl border border-slate-100 transition-transform hover:scale-[1.01] duration-300 bg-white">
           <%= image_tag civic_topic.image_filename, class: "w-full h-auto object-contain m-0", alt: civic_topic.name %>
         </div>
       <% end %>

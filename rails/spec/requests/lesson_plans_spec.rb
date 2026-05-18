@@ -1,38 +1,56 @@
 require 'rails_helper'
 
 RSpec.describe "LessonPlans", type: :request do
-  describe "GET /lesson_plan/20" do
-    let!(:lesson_plan) do
-      CivicTopic.find_or_create_by!(id: 20) do |t|
-        t.name = "Taxes & Retirement"
-        t.subject = "Financial Literacy"
-        t.bio = "Lesson Overview"
-        t.contributions = "Standard 1: Taxes\nStandard 2: Retirement"
-        t.legacy = "PART 1: Taxes"
-        t.main_ideas = "PART 2: Retirement Accounts"
-        t.criticism = "PART 3: Real-World Tie-In"
-        t.suggested_reading = "Exit Ticket content"
-        t.published = true
-      end
+  describe "GET /lesson_plans/:id" do
+    let!(:topic) do
+      CivicTopic.find_by(id: 29) || CivicTopic.create!(
+        id: 29,
+        name: "Iran Monitoring Civilians",
+        bio: "Explain (in simple terms) section content.",
+        legacy_heading: "Mini-Lecture",
+        legacy: "Mini-Lesson: Surveillance Systems as Networks (10 minutes)",
+        main_ideas_heading: "Group Activity",
+        main_ideas: "Activity: “Match the Hardware to the Function” (15 minutes)\n\nHardware | Function",
+        criticism_heading: "Case Study",
+        criticism: "Iran’s Monitoring Tools",
+        suggested_reading: "Discussion: Ethical Questions (8 minutes)",
+        is_lesson_plan: true,
+        published: true
+      )
     end
 
-    it "renders the custom lesson plan layout" do
-      # Assuming the route is /lesson_plan/:id
-      # I'll check routes.rb to be sure, but based on context page="/lesson_plan/20"
-      get "/lesson_plan/20"
+    it "loads the lesson plan layout for ID 29" do
+      get lesson_plan_path(topic)
       expect(response).to have_http_status(:success)
-      expect(response.body).to include("Utah State Standards Alignment")
-      expect(response.body).to include("PART 1")
-      expect(response.body).to include("PART 2")
-      expect(response.body).to include("PART 3")
-      expect(response.body).to include("Exit Ticket")
+      expect(response.body).to include("Iran Monitoring Civilians")
+      expect(response.body).to include("Phase 01")
+      expect(response.body).to include("Mini-Lesson")
+      expect(response.body).not_to include("Placeholder")
     end
 
-    it "styles markers correctly" do
-      lesson_plan.update!(legacy: "Mini-Lesson: How to file taxes")
-      get "/lesson_plan/20"
-      expect(response.body).to include("Mini-Lesson")
-      expect(response.body).to include("bg-[#f9a825]/10")
+    it "renders the hardware matching table" do
+      get lesson_plan_path(topic)
+      expect(response.body).to include("<table")
+      expect(response.body).to include("Hardware")
+      expect(response.body).to include("Function")
+    end
+  end
+
+  describe "GET /lesson_plans" do
+    let!(:topic) do
+      CivicTopic.find_by(id: 29) || CivicTopic.create!(
+        id: 29,
+        name: "Iran Monitoring Civilians",
+        bio: "Explain (in simple terms) section content.",
+        is_lesson_plan: true,
+        published: true
+      )
+    end
+
+    it "shows Iran Monitoring as active and not marked Soon" do
+      get "/lesson_plans"
+      expect(response.body).to include("Iran Monitoring Civilians")
+      expect(response.body).not_to include("Soon")
     end
   end
 end

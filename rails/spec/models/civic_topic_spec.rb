@@ -145,7 +145,12 @@ RSpec.describe CivicTopic, type: :model do
   end
 
   describe '#is_lesson_plan?' do
-    it 'returns true for ID 20' do
+    it 'returns true for ID 29 (Iran Monitoring)' do
+      topic = CivicTopic.find_by(id: 29) || CivicTopic.create!(id: 29, name: 'Iran Monitoring', is_lesson_plan: true)
+      expect(topic.is_lesson_plan?).to be true
+    end
+
+    it 'returns true for other IDs' do
       topic = CivicTopic.new(id: 20)
       expect(topic.is_lesson_plan?).to be true
     end

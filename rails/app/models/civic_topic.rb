@@ -10,9 +10,6 @@ class CivicTopic < ApplicationRecord
   scope :us_history, -> { where(subject: "U.S. History") }
 
   def is_lesson_plan?
-    # Logic to determine if it's a lesson plan
-    # For now, let's assume specific IDs or a naming convention
-    # In a real app, this might be a boolean column or a category
-    [12, 9, 40, 20, 19, 21].include?(id) || subject == "Lesson Plan"
+    is_lesson_plan || [12, 9, 40, 20, 19, 21].include?(id) || subject == "Lesson Plan"
   end
 end

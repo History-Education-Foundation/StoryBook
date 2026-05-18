@@ -49,14 +49,16 @@ Rails.application.routes.draw do
   get "chat" => "public#chat"
   get "pricing", to: "static_pages#pricing"
   get "about", to: "static_pages#about"
-  get "lesson_plans", to: "static_pages#lesson_plans", as: :lesson_plans
+  
+  resources :lesson_plans, only: [:index, :show]
+  resources :civics, only: [:index, :show]
+
   get "contact", to: "static_pages#contact"
   
   resources :concepts, only: [:index, :show]
   resources :scholars, only: [:index, :show]
   resources :controversies, only: [:index, :show]
   resources :posts, only: [:index, :show]
-  resources :civics, only: [:index, :show]
 
   namespace :admin do
     root to: "dashboard#index"

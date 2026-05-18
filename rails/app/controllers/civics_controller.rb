@@ -3,7 +3,36 @@ class CivicsController < ApplicationController
 
   # GET /civics or /civics.json
   def index
-    @civic_topics = CivicTopic.all
+    allowed_names = [
+      "Andrew Yang",
+      "Bernie Sanders",
+      "New Deal",
+      "U.S. Intervention abroad",
+      "Israel and 9/11",
+      "James Lindsay",
+      "Intimidation during the Iraq War",
+      "American Civics Renewal Act",
+      "Lobbying",
+      "Potential context for Utah’s 1st Congressional District (CD1) Race"
+    ]
+    
+    @grouped_topics = CivicTopic.where(name: allowed_names).group_by { |t| t.subject.presence || "Political Figures & Policies" }
+    
+    # Sort the allowed topics according to the order in allowed_names for the "Political Figures & Policies" section
+    if @grouped_topics["Political Figures & Policies"]
+      @grouped_topics["Political Figures & Policies"] = @grouped_topics["Political Figures & Policies"].sort_by { |t| allowed_names.index(t.name) || 99 }
+    end
+
+    @subject_order = [
+      "Political Figures & Policies",
+      "U.S. History",
+      "World History",
+      "World Geography",
+      "Financial Literacy",
+      "Psychology",
+      "Digital Literacy",
+      "Student Leaders"
+    ]
   end
 
   # GET /civics/1 or /civics/1.json

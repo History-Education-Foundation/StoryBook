@@ -22,19 +22,7 @@
   <section class="py-24 bg-slate-50">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <% [
-          { display: "8th Grade U.S. History", grade: "8th Grade", subject: "U.S. History" },
-          { display: "10th Grade World History", grade: "10th Grade", subject: "World History" },
-          { display: "11th Grade U.S. History", grade: "11th Grade", subject: "U.S. History" },
-          { display: "Financial Literacy", grade: nil, subject: "Financial Literacy" },
-          { display: "World Geography", grade: nil, subject: "World Geography" },
-          { display: "U.S Government", grade: nil, subject: "U.S Government" },
-          { display: "Psychology", grade: nil, subject: "Psychology" },
-          { display: "NBCT Study Standards", grade: nil, subject: "NBCT Study Standards" },
-          { display: "NBCT Standards Ages 7-10", grade: nil, subject: "NBCT Standards Ages 7-10" },
-          { display: "Digital Literacy", grade: nil, subject: "Digital Literacy" },
-          { display: "Student Leaders", grade: nil, subject: "Student Leaders" }
-        ].each do |config| %>
+        <% @lesson_plans_config.each do |config| %>
           <% 
             topics = CivicTopic.published
             topics = topics.where(grade_level: config[:grade]) if config[:grade]
@@ -72,7 +60,7 @@
                         </span>
                       </div>
                     <% else %>
-                      <%= link_to civic_path(topic), class: "flex items-center p-3 rounded-xl hover:bg-slate-50 transition-all group/link border border-transparent hover:border-slate-100" do %>
+                      <%= link_to lesson_plan_path(topic), class: "flex items-center p-3 rounded-xl hover:bg-slate-50 transition-all group/link border border-transparent hover:border-slate-100" do %>
                         <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center mr-3 group-hover/link:bg-white transition-colors">
                           <i class="fas fa-file-alt text-xs text-slate-400 group-hover/link:text-[#f9a825]"></i>
                         </div>

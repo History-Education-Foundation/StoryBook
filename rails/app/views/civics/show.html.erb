@@ -84,9 +84,9 @@
                     <h4 class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 flex items-center gap-2">
                       Work Cited
                     </h4>
-                    <p class="text-slate-500 italic font-serif text-lg leading-relaxed m-0">
-                      <%= citation.strip %>
-                    </p>
+                    <div class="text-slate-500 italic font-serif text-lg leading-relaxed m-0 [&>p]:mb-4 last:[&>p]:mb-0">
+                      <%= simple_format citation.strip %>
+                    </div>
                   </div>
                 </div>
               </div>

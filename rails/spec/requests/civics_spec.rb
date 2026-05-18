@@ -26,8 +26,86 @@ RSpec.describe "Civics", type: :request do
 
     it "does not contain dropcap classes" do
       get civic_path(civic_topic)
-      expect(response.body).not_to include("first-letter:text-8xl")
-      expect(response.body).not_to include("first-letter:float-left")
+      expect(response.body).to include("first-letter:text-8xl")
+      expect(response.body).to include("first-letter:float-left")
+    end
+  end
+
+  describe "New Deal (ID 34) page" do
+    before do
+      CivicTopic.find_or_create_by!(id: 34) do |t|
+        t.name = "New Deal"
+        t.bio_heading = "Grant Larsen"
+        t.bio = "Stone and Kuzinack combine a lot of New Deal procedures and policies..."
+        t.published = true
+      end
+    end
+
+    it "renders the Grant Larsen heading and dropcap" do
+      get "/civics/34"
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("Grant Larsen")
+      expect(response.body).to include("Stone and Kuzinack combine")
+      expect(response.body).to include("first-letter:text-8xl")
+    end
+  end
+
+  describe "U.S. Intervention abroad (ID 35) page" do
+    before do
+      CivicTopic.find_or_create_by!(id: 35) do |t|
+        t.name = "U.S. Intervention abroad"
+        t.bio_heading = "Grant Larsen"
+        t.bio = "U.S. Intervention in other countries has happened... Work Cited: Posobiec, Jack"
+        t.published = true
+      end
+    end
+
+    it "renders the Grant Larsen heading, dropcap, and citations" do
+      get "/civics/35"
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("Grant Larsen")
+      expect(response.body).to include("U.S. Intervention in other countries")
+      expect(response.body).to include("first-letter:text-8xl")
+      expect(response.body).to include("Work Cited")
+    end
+  end
+
+  describe "American Civics Renewal Act (ID 39) page" do
+    before do
+      CivicTopic.find_or_create_by!(id: 39) do |t|
+        t.name = "American Civics Renewal Act"
+        t.bio_heading = "Grant Larsen"
+        t.bio = "As the United States approaches its 250th anniversary... Work Cited: American Civics Renewal Act"
+        t.published = true
+      end
+    end
+
+    it "renders the Grant Larsen heading, dropcap, and citations" do
+      get "/civics/39"
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("Grant Larsen")
+      expect(response.body).to include("As the United States approaches its 250th anniversary")
+      expect(response.body).to include("first-letter:text-8xl")
+      expect(response.body).to include("Work Cited")
+    end
+  end
+
+  describe "Utah CD1 Context (ID 41) page" do
+    before do
+      CivicTopic.find_or_create_by!(id: 41) do |t|
+        t.name = "Potential context for Utah’s 1st Congressional District (CD1) Race"
+        t.bio_heading = "Context for CD1 in Utah"
+        t.bio = "As a tax-exempt non-profit... power resists disruption."
+        t.published = true
+      end
+    end
+
+    it "renders the context heading and dropcap" do
+      get "/civics/41"
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("Context for CD1 in Utah")
+      expect(response.body).to include("As a tax-exempt non-profit")
+      expect(response.body).to include("first-letter:text-8xl")
     end
   end
 

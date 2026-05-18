@@ -4,7 +4,7 @@ RSpec.describe "Civics", type: :request do
   let!(:civic_topic) do 
     CivicTopic.create!(
       name: "Andrew Yang", 
-      bio: "Andrew Yang emerged as a distinctive figure in the 2020 Democratic presidential campaign.",
+      bio: "Andrew Yang emerged as a distinctive figure in the 2020 Democratic presidential campaign. His innovative ideas and bold strategies aimed to reshape American politics and address the challenges of modern society.",
       bio_heading: "2020 Presidential Campaign",
       contributions: "Founded Venture for America in 2011\nRaised over $40 million in campaign contributions\nProposed Universal Basic Income of $1,000/month\nQualified for 7 Democratic debates\nSuspended campaign February 11, 2020",
       contributions_heading: "Key Facts",

@@ -328,6 +328,129 @@ flag.update!(
   video_url: "https://www.youtube.com/embed/ZVZt613Jnqs?si=ijvyB6kF9A_Fz5pX"
 )
 
+# Andrew Yang (ID 32)
+yang = CivicTopic.find_or_initialize_by(id: 32)
+yang.update!(
+  name: "Andrew Yang",
+  bio_heading: "2020 Presidential Campaign",
+  bio: "Andrew Yang emerged as a distinctive figure in the 2020 Democratic presidential campaign. His innovative ideas and bold strategies aimed to reshape American politics and address the challenges of modern society.",
+  contributions_heading: "Key Facts",
+  contributions: "Founded Venture for America in 2011\nRaised over $40 million in campaign contributions\nProposed Universal Basic Income of $1,000/month\nQualified for 7 Democratic debates\nSuspended campaign February 11, 2020",
+  publications_heading: "Featured Book",
+  publications: "The War on Normal People",
+  published: true
+)
+
+# James Lindsay (ID 37)
+lindsay = CivicTopic.find_or_initialize_by(id: 37)
+lindsay.update!(
+  name: "James Lindsay",
+  tagline: "American author and Political Commentator.",
+  bio_heading: "Biography",
+  bio: "James Stephen Lindsay (b. 1979) is an American author most notably known for co-authoring the book Cynical Theories (2020) with Helen Pluckrose, a British author and cultural writer. Lindsay has gained notoriety for appearing on the Joe Rogan podcast “The Joe Rogan Experience” four times and for speaking at Turning Point USA’s 2022 AmericaFest conference.",
+  main_ideas_heading: "Social Media Analysis",
+  main_ideas: "Derogatory Language: Uses insults or labels instead of arguments. Reduces complex issues to name-calling (‘only an idiot would support that policy.’) Signals group loyalty rather than critical reasoning.\nStrawman Framing: Misrepresenting an opponent’s argument to make it easier to attack; replaces a nuanced position with an exaggerated one. Avoids engaging with the strongest version of the opposing argument (steel-manning).\nHyperbolic Claims: Uses deliberate exaggeration to intensify emotion. For example, claiming ‘thousands of wasps’ when finding a nest to emphasize scale.\nIn-Group & Out-Group Language: Used to separate people into categories, which can result in alienation, preferred treatment, and bullying. We often see this in politics with Democrats vs. Republicans.\nMeme Ambiguity (Plausible Deniability): Uses humor and ambiguity to spread political ideas while avoiding accountability. Allows the creator to deny intent or claim it was a joke.\nClaims Presented Without Evidence: When looking at media, it’s important to look for the holes. If something is being presented as fact without a source, it encourages the audience to skip independent research.",
+  criticism_heading: "Ideological Focus",
+  criticism: "Lindsay is particularly fond of denouncing “woke” ideologies, which include collectivism, queer identities, and liberal practices.",
+  publications_heading: nil,
+  publications: nil,
+  published: true
+)
+
+# American Civics Renewal Act (ID 39) - Fixing typos
+acra = CivicTopic.find_or_initialize_by(id: 39)
+acra_bio = <<~TEXT
+  As the United States approaches its 250th anniversary, civics education has experienced a surge of legislation and funding. 44 states have introduced legislation concerning the subject in 2026, and the Department of Education announced over $150 million in grants in 2025. However, this push for better education has often been centered around a conservative view of the country. The Education Department’s America 250 Civics Coalition, which will plan programming for the celebrations this year, is comprised of over 40 right-leaning organizations. The Democratic senator Andy Kim has introduced a bill that advances a more bipartisan or nonpartisan approach. The bill, the American Civics Renewal Act, was read twice in the Senate and is currently being referred to the Committee on Health, Education, Labor, and Pensions as of March 2026. The act, if passed, would be a step towards a more collaborative and effective learning environment for students across the nation.
+
+  Central to the bill is the "Renewal Agenda," which authorizes $2 million to create a commission of eight members chosen by a mix of Republicans and Democrats to develop a proposed curriculum plan for students of all ages. This national model curriculum would be provided to schools online as a completely optional resource. The act emphasizes the importance of "Action Civics," a concept that encourages students to develop civic-minded engagement beyond traditional classroom instruction. This approach is backed by research suggesting that action civics can boost both civic knowledge and academic performance, potentially transforming educational outcomes for future generations.
+
+  The legislation’s strategy hinges on Bipartisan Collaboration. By fostering cooperation between Republicans and Democrats, the National Archives, and the Smithsonian, the bill aims to find educational solutions that are palatable to both sides of the political divide. Senator Andy Kim argues that action civics is often the type of education that sticks with people and lingers the most, suggesting that hands-on engagement is key to fostering long-term civic responsibility.
+
+  However, the bill faces controversy and pushback. Conservative critics, such as Stanley Kurtz, argue that action civics projects are nearly always leftist in nature and discourage individualism in favor of group decision-making. These critics further contend that group-based learning is inevitably influenced too greatly by teachers and lacks the rigor of abstract classroom instruction. In Texas, these concerns led to 2021 restrictions that banned some types of student communication with elected officials, resulting in the dissolution of many action civics projects. Despite these claims of inherent partisanship, reports from The 74 Million suggest that most action civics initiatives actually focus on local, non-partisan issues like bullying, youth vaping, or student newspapers.
+
+  If successful, the American Civics Renewal Act would be a landmark policy, creating a national curriculum model where few currently exist. Lessons from the past—such as the 1990s curriculum standards debate and the 2010s Common Core movement—show that national programs often become bogged down in controversy. Yet, despite challenges like low civic literacy, the act represents a first step in creating a more productive, bipartisan conversation about the future of education in America.
+
+  Work Cited:
+  “American Civics Renewal Act.” Congress.gov, 119th Congress, 11 Mar. 2026, https://www.congress.gov/bill/119th-congress/senate-bill/4057/text
+  Kurtz, Stanley. “Action Civics Replaces Citizenship with Partisanship.” The American Mind, 26 Jan. 2021, https://americanmind.org/memo/action-civics-replaces-citizenship-with-partisanship/
+  Lehrer-Small, Asher. “Texas Guts ‘Woke Civics.’ Now Kids Can’t Engage in a Key Democratic Process.” The Guardian, 1 May 2023, https://www.theguardian.com/us-news/2023/may/01/texas-civics-students-democratic-participation
+  Loveless, Tom. “The Curriculum Wars.” Hoover Institution, 21 Mar. 2014, https://www.hoover.org/research/curriculum-wars
+  Schwartz, Sarah. “A New Bill Calls for a Model Civics Curriculum at a Polarized Moment.” Education Week, 18 Mar. 2026, https://www.edweek.org/teaching-learning/a-new-bill-calls-for-a-model-civics-curriculum-at-a-polarized-moment/2026/03
+TEXT
+
+acra.update!(
+  name: "American Civics Renewal Act",
+  bio_heading: "American Civics Renewal Act",
+  bio: acra_bio,
+  published: true
+)
+
+# Lobbying Lesson Plan (ID 40)
+lobbying = CivicTopic.find_or_initialize_by(id: 40)
+lobbying_content = <<~TEXT
+  Hook
+  Brief explanation of lobbying: Companies pay a team to talk to congresspeople to try to get them to pass laws that are favorable to the company. As a form of leverage, they may also work with the press or start an organization in a congressperson’s home state to convince voters not to elect the congressperson in the future.
+
+  Student activity: Do you think lobbying is a form of free speech or legalized corruption? Stand up and move towards the left side of the room if you think lobbying is free speech, and move towards the right side of the room if you think lobbying is legalized corruption. If you’re pretty sure about your position, go all the way to the wall, but if you’re not as sure, stay closer to the middle of the room.
+
+  Call on several students to explain why they chose to stand in their position.
+
+  Have the students return to their seats.
+
+  Lobbying Mini-Lesson
+  The word “lobbyist” was originally used to describe people who waited in the lobby of Congress or of the President’s hotel to talk to them and try to change their mind about issues. Now, “lobbyist” more generally refers to any individual who spends a significant amount of time or money to influence the decisions of congresspeople or other government officials.
+
+  Companies and industries can hire people to represent them as lobbyists, giving gifts and spending time with people in government to persuade them to vote on certain actions. Lobbyists in this way bring about change in laws. Lobbying is effective and has brought about change, and money can affect not only the quality of lobbyists, but it also more deeply determines the amount of sway these companies and professional interests can have.
+
+  There are policies that try to stop insider trading and the monetization of professional relationships. This is achieved by having “cooling off periods” that prevent people who worked in public office (government positions) from immediately joining lobbying groups. This stops them from using inside information and capitalizing on relationships with government. Some lifelong bans also exist with looser restrictions that only apply to specific contracts or issues. However, lobbying is still criticized for existing at all, with many critics saying this practice is legalized corruption.
+
+  As an example of Lobbying, let’s look at the National Potato Council, or NPC. The NPC as an organization represents potato growers and tries to secure better laws that will help protect them and control their income, as many of them are owned and controlled by just four companies. The NPC actively lobbies in Washington, and works off of public donations. While they are a special interest group, they fight against companies that try to keep control of prices and continue to make more at growers’ expenses. The NPC has also been criticized for lobbying for the classification of potatoes as vegetables in school lunch programs in order to increase demand, a classification that partially contradicts scientific nutrition principles.
+
+  Textual Analysis
+  Share the following anti-lobbying passage with students:
+
+  Historically, scholars, practitioners, and even leaders of state expressed concerns over the ubiquitous role lobbying plays in influencing government officials (Mack, 1989; Silberfeld, 2006). Concerns over lobbying’s influence on government officials may be bolstered by a body of empirical research supporting the idea that firms’ lobbying can sway government officials to act in ways that benefit lobbying firms (Kaiser, 2010; Shaffer, 1995). 
+  Connaughton discussed how quickly votes can change in Congress with the Private Securities Litigation Reform Act of 1995, a bill that would make it harder to prove securities fraud for Wall Street bankers. Connaughton was able to help convince President Clinton to veto the bill, but it was overruled in congress, even by Senator Ted Kennedy, who supported the veto at first: “Even Ted Kennedy, the great champion of civil rights and liberties, who has assured plaintiffs’ groups that he was with them, flipped and went along with the corporate coalition and voted to override Clinton’s veto” (Connaughton, 2012, Pg 101, 110). “Money is the basis of almost all relationships in DC…The rest of the country may be divided into red and blue, but DC is green (that is, covered in money), and cheerfully so” (Pg 11).
+
+  Ask students to highlight or point out these three things in the above passage:
+  Examples of influence or financial power
+  Potential conflicts of interest
+  Who may benefit from these systems
+
+  Share the following pro-lobbying passage with students:
+
+  “Lobbying is advocacy of a point of view, either by groups or individuals. A special interest is nothing more than an identified group expressing a point of view — be it colleges and universities, churches, charities, public interest or environmental groups, senior citizens organizations, even state, local or foreign governments. While most people think of lobbyists only as paid professionals, there are also many independent, volunteer lobbyists — all of whom are protected by the same First Amendment.”
+  “Lobbying is a legitimate and necessary part of our democratic political process. Government decisions affect both people and organizations, and information must be provided in order to produce informed decisions. Public officials cannot make fair and informed decisions without considering information from a broad range of interested parties. All sides of an issue must be explored in order to produce equitable government policies.”
+
+  From https://www.lobbyinginstitute.com/about
+
+  Ask students to highlight or point out these three things in the above passage:
+  Legal justification for lobbying
+  How lobbying may be democratic
+  How lobbying may improve decision-making
+
+  Structured Academic Controversy
+  Structured Question: On balance, does lobbying strengthen democracy?
+
+  Instruct the students to form pairs. Give each pair a copy of the SAC handout PDF, which contains instructions for the debate activity. They will research both sides of the lobbying controversy, then join with another pair to form a group of 4. The pairs will each debate one side of the issue, then switch and debate the other side. After this, they will work as a group of 4 to come to a consensus about lobbying’s effect on Democracy.
+
+  Synthesis
+  Have the class reconvene to synthesize ideas through a teacher-facilitated discussion. Write their ideas down on the whiteboard using a T-chart or another form of visual organizer. What can students agree on? What additional evidence would help the class come to a consensus?
+
+  Exit
+  Have each student write their own short statement about lobbying’s effect on democracy based on the debate and discussion. They should mention at least one piece of evidence from each side to show that they understand the nuance of the issue.
+TEXT
+
+lobbying.update!(
+  name: "Lobbying",
+  bio: "Companies pay a team to talk to congresspeople to try to get them to pass laws that are favorable to the company. This lesson explores whether lobbying is a form of free speech or legalized corruption through a Structured Academic Controversy.",
+  bio_heading: "Lesson Overview",
+  criticism: lobbying_content,
+  criticism_heading: "Structured Academic Controversy",
+  published: true
+)
+
+
 puts "8th Grade U.S. History lesson plans seeded."
 
 # 10th Grade World History Seeds

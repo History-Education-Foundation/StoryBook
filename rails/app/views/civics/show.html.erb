@@ -192,12 +192,12 @@
               <% 
                 # Primary Handout Source
                 handout_url = "https://www.learner.org/wp-content/uploads/2019/07/RWD.HSSU8_.SACHandouts.pdf"
-                show_pdf = @civic_topic.id == 9 || @civic_topic.handout_pdf.attached?
+                show_pdf = [9, 40].include?(@civic_topic.id) || @civic_topic.handout_pdf.attached?
                 pdf_src = @civic_topic.handout_pdf.attached? ? url_for(@civic_topic.handout_pdf) : handout_url
               %>
 
               <% if @civic_topic.criticism.present? %>
-                <% if @civic_topic.id == 9 %>
+                <% if [9, 40].include?(@civic_topic.id) %>
                   <%# Custom Layout for Lobbying Lesson Plan %>
                   <div class="space-y-16">
                     <% 

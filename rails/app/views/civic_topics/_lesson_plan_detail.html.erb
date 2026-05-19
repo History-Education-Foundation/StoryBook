@@ -181,12 +181,17 @@
         end
       elsif temp_block.match?(/Discussion:/i)
         content = temp_block.gsub(/Discussion:/i, "").strip
-        content_tag(:div, class: "bg-slate-50 border-l-4 border-slate-300 p-6 my-8 rounded-r-2xl shadow-sm") do
+        bg_class = options[:dark_mode] ? "bg-white/5 border-white/10" : "bg-slate-50 border-slate-300"
+        text_color = options[:dark_mode] ? "text-white" : "text-slate-700"
+        header_bg = options[:dark_mode] ? "bg-white/10" : "bg-slate-200"
+        header_text = options[:dark_mode] ? "text-white/60" : "text-slate-500"
+        
+        content_tag(:div, class: "#{bg_class} border-l-4 p-6 my-8 rounded-r-2xl shadow-sm") do
           concat(content_tag(:div, class: "flex items-center gap-3 mb-2") do
-            concat(content_tag(:div, class: "w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600") { content_tag(:i, "", class: "fas fa-comments text-xs") })
-            concat(content_tag(:span, "Discussion Question", class: "text-slate-500 font-black uppercase tracking-[0.2em] text-xs"))
+            concat(content_tag(:div, class: "w-8 h-8 rounded-full #{header_bg} flex items-center justify-center #{header_text}") { content_tag(:i, "", class: "fas fa-comments text-xs") })
+            concat(content_tag(:span, "Discussion Question", class: "#{header_text} font-black uppercase tracking-[0.2em] text-xs"))
           end)
-          concat(content_tag(:div, simple_format(content), class: "text-slate-700 font-medium text-lg italic [&>p]:m-0"))
+          concat(content_tag(:div, simple_format(content), class: "#{text_color} font-medium text-lg italic [&>p]:m-0"))
         end
       elsif temp_block.match?(/Point:|Goal:|Core Tip:/i)
         # Style important callouts within sections
@@ -365,7 +370,7 @@
       <h2 class="text-4xl font-black text-slate-900 mb-8 border-b-8 border-[#f9a825] pb-4 inline-block tracking-tighter">
         <%= civic_topic.bio_heading.presence || 'Lesson Overview' %>
       </h2>
-      <div class="text-slate-600 leading-relaxed text-xl">
+      <div class="text-slate-600 leading-relaxed text-xl font-medium">
         <%= render_lesson_content(bio_text, civic_topic) %>
       </div>
 
@@ -473,7 +478,7 @@
           </div>
         </div>
         <div class="md:w-3/4 border-l-8 border-[#f9a825] pl-8 md:pl-12 py-2">
-          <div class="prose prose-slate prose-xl max-w-none text-slate-600 leading-relaxed">
+          <div class="prose prose-slate prose-xl max-w-none text-slate-600 leading-relaxed font-medium">
             <%= render_lesson_content(civic_topic.legacy, civic_topic) %>
           </div>
         </div>
@@ -500,7 +505,7 @@
           </div>
         </div>
         <div class="md:w-3/4 border-l-8 border-[#f9a825] pl-8 md:pl-12 py-2">
-          <div class="prose prose-slate prose-xl max-w-none text-slate-600 leading-relaxed">
+          <div class="prose prose-slate prose-xl max-w-none text-slate-600 leading-relaxed font-medium">
             <%= render_lesson_content(civic_topic.main_ideas, civic_topic) %>
           </div>
         </div>
@@ -527,7 +532,7 @@
           </div>
         </div>
         <div class="md:w-3/4 border-l-8 border-[#f9a825] pl-8 md:pl-12 py-2">
-          <div class="prose prose-slate prose-xl max-w-none text-slate-600 leading-relaxed">
+          <div class="prose prose-slate prose-xl max-w-none text-slate-600 leading-relaxed font-medium">
             <%= render_lesson_content(civic_topic.criticism, civic_topic) %>
           </div>
         </div>
@@ -562,7 +567,7 @@
             <% next if rendered_block.blank? || strip_tags(rendered_block).strip.blank? %>
             
             <div class="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] hover:bg-white/10 transition-all duration-500 hover:-translate-y-1">
-              <div class="text-white leading-relaxed text-xl font-serif italic">
+              <div class="text-white leading-relaxed text-2xl font-bold italic">
                 <%= rendered_block %>
               </div>
             </div>

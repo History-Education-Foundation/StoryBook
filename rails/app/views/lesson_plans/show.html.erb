@@ -2,7 +2,7 @@
 <% content_for :hide_header, true %>
 <% content_for :hide_navbar, true %>
 
-<div class="min-h-screen bg-white font-sans text-slate-800 <%= 'dossier-theme' if [17, 18, 22].include?(@civic_topic.id) %>">
+<div class="min-h-screen bg-white font-sans text-slate-800 <%= 'dossier-theme' if [17, 18, 23].include?(@civic_topic.id) %>">
   <%= render 'layouts/navigation' %>
 
   <!-- Hero/Header Section -->
@@ -11,7 +11,7 @@
       <div class="absolute inset-0 bg-[#f9a825]/10 mix-blend-overlay"></div>
     </div>
     <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-      <% if [17, 18, 22].include?(@civic_topic.id) %>
+      <% if [17, 18, 23].include?(@civic_topic.id) %>
         <div class="absolute -top-12 -right-12 opacity-10 pointer-events-none rotate-12 select-none z-0">
           <div class="border-8 border-[#8b0000] text-[#8b0000] font-mono text-7xl font-black px-8 py-4 uppercase">
             Confidential

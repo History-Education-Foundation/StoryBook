@@ -36,6 +36,35 @@ RSpec.describe "LessonPlans", type: :request do
     end
   end
 
+  describe "GET /lesson_plans/:id (Chile in the Cold War)" do
+    let!(:topic) do
+      CivicTopic.find_by(id: 22) || CivicTopic.create!(
+        id: 22,
+        name: "Chile in the Cold War",
+        bio: "Essential Question: How do power, perspective, and political interests shape the way history is told?\n\nPhase 01: Foundations\nPhase 02: Narrative Analysis\nPhase 03: Constructing Evidence\nExit Ticket",
+        video_url: "https://www.youtube.com/embed/sF5kczRhW9E",
+        is_lesson_plan: true,
+        published: true
+      )
+    end
+
+    it "loads the Chile in the Cold War lesson plan with correct content" do
+      get lesson_plan_path(topic)
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("Chile in the Cold War")
+      expect(response.body).to include("Essential Question: How do power, perspective, and political interests shape the way history is told?")
+      expect(response.body).to include("Phase 01: Foundations")
+      expect(response.body).to include("Phase 02: Narrative Analysis")
+      expect(response.body).to include("Phase 03: Constructing Evidence")
+      expect(response.body).to include("Exit Ticket")
+    end
+
+    it "renders the YouTube videos" do
+      get lesson_plan_path(topic)
+      expect(response.body).to include("https://www.youtube.com/embed/sF5kczRhW9E")
+    end
+  end
+
   describe "GET /lesson_plans" do
     let!(:topic) do
       CivicTopic.find_by(id: 29) || CivicTopic.create!(

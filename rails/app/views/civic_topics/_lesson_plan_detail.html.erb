@@ -348,6 +348,15 @@
 <div class="space-y-24">
   <!-- Header / Bio -->
   <% if civic_topic.bio.present? %>
+    <% 
+      bio_text = civic_topic.bio
+      citation = nil
+      if bio_text.include?("Work Cited:")
+        parts = bio_text.split("Work Cited:", 2)
+        bio_text = parts[0]
+        citation = parts[1]
+      end
+    %>
     <div class="mb-16">
       <div class="flex items-center gap-2 mb-2">
         <span class="w-6 h-[1px] bg-slate-300"></span>
@@ -357,8 +366,29 @@
         <%= civic_topic.bio_heading.presence || 'Lesson Overview' %>
       </h2>
       <div class="text-slate-600 leading-relaxed text-xl">
-        <%= render_lesson_content(civic_topic.bio, civic_topic) %>
+        <%= render_lesson_content(bio_text, civic_topic) %>
       </div>
+
+      <% if citation.present? %>
+        <div class="mt-12 pt-8 border-t border-slate-100">
+          <div class="flex items-start gap-4 p-8 bg-slate-50 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <i class="fas fa-quote-right text-6xl text-slate-900"></i>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center flex-shrink-0 shadow-sm">
+              <i class="fas fa-bookmark text-[#f9a825]"></i>
+            </div>
+            <div>
+              <h4 class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 flex items-center gap-2">
+                Work Cited
+              </h4>
+              <div class="text-slate-500 italic font-serif text-lg leading-relaxed m-0 [&>p]:mb-4 last:[&>p]:mb-0">
+                <%= simple_format citation.strip %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
 
       <% if pdf_block_html.present? %>
         <%= pdf_block_html %>
@@ -428,7 +458,7 @@
   <% if civic_topic.legacy.present? %>
     <div class="relative group pt-16 pb-16 px-10 -mx-10 rounded-[3rem] hover:bg-slate-50/50 transition-colors duration-500">
       <!-- Background Number -->
-      <div class="absolute -top-10 -left-10 text-[15rem] font-black text-slate-100 pointer-events-none select-none opacity-50 group-hover:text-[#f9a825]/10 transition-colors duration-700 leading-none">1</div>
+      <div class="absolute -top-10 -left-10 text-[15rem] font-black text-slate-100 phase-number pointer-events-none select-none opacity-50 group-hover:text-[#f9a825]/10 transition-colors duration-700 leading-none">1</div>
       
       <div class="flex flex-col md:flex-row gap-8 md:gap-16 relative z-10">
         <div class="md:w-1/4">
@@ -455,7 +485,7 @@
   <% if civic_topic.main_ideas.present? %>
     <div class="relative group pt-16 pb-16 px-10 -mx-10 rounded-[3rem] hover:bg-slate-50/50 transition-colors duration-500">
       <!-- Background Number -->
-      <div class="absolute -top-10 -left-10 text-[15rem] font-black text-slate-100 pointer-events-none select-none opacity-50 group-hover:text-[#f9a825]/10 transition-colors duration-700 leading-none">2</div>
+      <div class="absolute -top-10 -left-10 text-[15rem] font-black text-slate-100 phase-number pointer-events-none select-none opacity-50 group-hover:text-[#f9a825]/10 transition-colors duration-700 leading-none">2</div>
       
       <div class="flex flex-col md:flex-row gap-8 md:gap-16 relative z-10">
         <div class="md:w-1/4">
@@ -482,7 +512,7 @@
   <% if civic_topic.criticism.present? %>
     <div class="relative group pt-16 pb-16 px-10 -mx-10 rounded-[3rem] hover:bg-slate-50/50 transition-colors duration-500">
       <!-- Background Number -->
-      <div class="absolute -top-10 -left-10 text-[15rem] font-black text-slate-100 pointer-events-none select-none opacity-50 group-hover:text-[#f9a825]/10 transition-colors duration-700 leading-none">3</div>
+      <div class="absolute -top-10 -left-10 text-[15rem] font-black text-slate-100 phase-number pointer-events-none select-none opacity-50 group-hover:text-[#f9a825]/10 transition-colors duration-700 leading-none">3</div>
       
       <div class="flex flex-col md:flex-row gap-8 md:gap-16 relative z-10">
         <div class="md:w-1/4">
@@ -518,7 +548,9 @@
           </div>
           <span class="text-[#f9a825] font-black uppercase tracking-[0.3em] text-sm">Session Wrap-up</span>
         </div>
-        <h2 class="text-5xl font-black text-white mb-12 tracking-tighter">Exit Ticket</h2>
+        <h2 class="text-5xl font-black text-white mb-12 tracking-tighter">
+          <%= civic_topic.id == 17 ? 'Conclusion' : 'Exit Ticket' %>
+        </h2>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
           <% civic_topic.suggested_reading.to_s.split("\n\n").each do |block| %>
@@ -536,6 +568,14 @@
             </div>
           <% end %>
         </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% if civic_topic.id == 17 %>
+    <div class="flex justify-center opacity-5 pointer-events-none select-none my-12">
+      <div class="border-4 border-slate-900 text-slate-900 font-mono text-4xl font-black px-6 py-2 uppercase -rotate-6">
+        Declassified
       </div>
     </div>
   <% end %>

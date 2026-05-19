@@ -47,3 +47,194 @@
   color: #374151;
   margin-bottom: 0.25rem;
 }
+
+/* Dossier Theme */
+.dossier-theme {
+  background-color: #f4f1ea !important;
+  color: #1a1a1a !important;
+}
+
+.dossier-theme section:not(.bg-\[\#f9a825\]) {
+  background-color: transparent !important;
+}
+
+.dossier-theme h1, 
+.dossier-theme h2, 
+.dossier-theme h3, 
+.dossier-theme h4 {
+  font-family: 'Courier', 'Courier New', monospace !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+.dossier-theme .prose,
+.dossier-theme .font-serif {
+  color: #1a1a1a !important;
+  font-family: 'Courier', 'Courier New', monospace !important;
+}
+
+.dossier-theme .prose p {
+  color: #1a1a1a !important;
+}
+
+.dossier-theme .bg-slate-900 {
+  background-color: #1a1a1a !important; /* Heavy ink look */
+  border: none !important;
+}
+
+.dossier-theme .bg-slate-900 .text-white,
+.dossier-theme .bg-slate-900 h2,
+.dossier-theme .bg-slate-900 h2.text-white,
+.dossier-theme .bg-slate-900 .text-white p,
+.dossier-theme .bg-slate-900 .font-serif,
+.dossier-theme .bg-slate-900 .group:hover .text-white,
+.dossier-theme .bg-slate-900 .group:hover h2,
+.dossier-theme .bg-slate-900 .group:hover .font-serif {
+  color: #f4f1ea !important; /* Keep paper color even on hover */
+}
+
+.dossier-theme .bg-slate-900 .group:hover .text-white,
+.dossier-theme .bg-slate-900 .group:hover h2,
+.dossier-theme .bg-slate-900 .group:hover .font-serif,
+.dossier-theme .bg-slate-900 .group:hover p {
+  color: #f4f1ea !important;
+  opacity: 1 !important;
+}
+
+.dossier-theme .bg-slate-900 .group:hover .text-white\/70,
+.dossier-theme .bg-slate-900 .group:hover .text-slate-400,
+.dossier-theme .bg-slate-900 .group:hover .text-slate-300 {
+  color: #f4f1ea !important;
+  opacity: 0.9 !important;
+}
+
+.dossier-theme .bg-slate-900 .bg-white\/5 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dossier-theme .bg-slate-900 .hover\:bg-white\/10:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important; /* No change on hover */
+}
+
+.dossier-theme .bg-slate-900 .hover\:-translate-y-1:hover {
+  transform: none !important; /* No movement */
+}
+
+.dossier-theme .bg-slate-900 .group-hover\:scale-110 {
+  transform: none !important; /* No icon scaling */
+}
+
+.dossier-theme .bg-slate-900 .border-white\/10 {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dossier-theme .text-white:not(.bg-slate-900 *):not(.bg-\[\#f9a825\] *) {
+  color: #1a1a1a !important;
+}
+
+.dossier-theme .bg-\[\#f9a825\] .btn-outline {
+  color: #f4f1ea !important;
+  border-color: #f4f1ea !important;
+}
+
+.dossier-theme .bg-\[\#f9a825\] .btn-outline:hover {
+  background-color: #f4f1ea !important;
+  color: #8b0000 !important;
+}
+
+.dossier-theme .bg-white\/5:not(.bg-slate-900 *):not(.bg-\[\#f9a825\] *) {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+.dossier-theme .hover\:bg-white\/10:hover:not(.bg-slate-900 *):not(.bg-\[\#f9a825\] *) {
+  background-color: rgba(0, 0, 0, 0.07) !important;
+}
+
+.dossier-theme .border-white\/10:not(.bg-slate-900 *):not(.bg-\[\#f9a825\] *) {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.dossier-theme .bg-\[\#f9a825\] {
+  background-color: #f9a825 !important; /* Original Yellow */
+}
+
+.dossier-theme .text-\[\#f9a825\] {
+  color: #f9a825 !important;
+}
+
+.dossier-theme .border-\[\#f9a825\] {
+  border-color: #f9a825 !important;
+}
+
+.dossier-theme .bg-\[\#f9a825\] .text-white,
+.dossier-theme .bg-\[\#f9a825\] h2,
+.dossier-theme .bg-\[\#f9a825\] p {
+  color: #1a1a1a !important; /* Dark text on yellow background */
+}
+
+.dossier-theme .bg-\[\#f9a825\] .btn-outline {
+  color: #1a1a1a !important;
+  border-color: #1a1a1a !important;
+}
+
+.dossier-theme .bg-\[\#f9a825\] .btn-outline:hover {
+  background-color: #1a1a1a !important;
+  color: #f9a825 !important;
+}
+
+.dossier-theme .bg-white,
+.dossier-theme .bg-slate-50 {
+  background-color: #fcfaf5 !important; /* Slightly lighter than base paper */
+}
+
+.dossier-theme .text-slate-600,
+.dossier-theme .text-slate-500,
+.dossier-theme .text-slate-400 {
+  color: #2a2a2a !important;
+}
+
+.dossier-theme .group:hover:not(.bg-slate-900):not(.bg-\[\#f9a825\]) {
+  background-color: transparent !important;
+}
+
+/* Ensure the Conclusion container stays dark ink even on hover */
+.dossier-theme .bg-slate-900,
+.dossier-theme .bg-slate-900:hover {
+  background-color: #1a1a1a !important;
+  opacity: 1 !important;
+}
+
+.dossier-theme .bg-slate-900 .bg-\[\#f9a825\]\/10.mix-blend-overlay {
+  background-color: #1a1a1a !important; /* Remove yellow tint */
+  mix-blend-mode: normal !important;
+  opacity: 1 !important;
+}
+
+.dossier-theme .bg-slate-900 .opacity-20 {
+  opacity: 1 !important;
+}
+
+.dossier-theme section.bg-slate-900:hover {
+  background-color: #1a1a1a !important;
+}
+
+/* Confidential Stamp Effect */
+.dossier-theme .relative::before {
+  content: "CONFIDENTIAL";
+  position: absolute;
+  top: 10%;
+  right: 5%;
+  font-family: 'Courier', 'Courier New', monospace;
+  font-weight: 900;
+  font-size: 4rem;
+  color: rgba(139, 0, 0, 0.05);
+  border: 8px solid rgba(139, 0, 0, 0.05);
+  padding: 10px 20px;
+  transform: rotate(-15deg);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dossier-theme .phase-number {
+  color: rgba(26, 26, 26, 0.03) !important;
+}

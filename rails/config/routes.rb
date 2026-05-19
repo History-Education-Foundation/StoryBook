@@ -1,8 +1,7 @@
 Rails.application.routes.draw do
-  # LlamaBot was here
   resources :historical_figures
-  # resources :posts
-  devise_for :users, controllers: { registrations: 'users/registrations' }
+  resources :posts, only: [:index, :show, :new, :create]
+  devise_for :users, controllers: { registrations: "users/registrations" }
   resources :users
 
   resources :books do
@@ -15,32 +14,28 @@ Rails.application.routes.draw do
       end
     end
     member do
-      get :public, to: 'books#public_show'
-      get :builder, to: 'books#builder'
-      post :save,   to: 'saved_books#create'
-      delete :unsave, to: 'saved_books#destroy'
-      post :generate_audio, to: 'books#generate_audio'
-      post :generate_all_pictures, to: 'books#generate_all_pictures'
-      post :retry_failed_pictures, to: 'books#retry_failed_pictures'
-      patch :publish, to: 'books#publish'
-      patch :archive, to: 'books#archive'
-      patch :unarchive, to: 'books#unarchive'
-      get :audio_playlist, to: 'books#audio_playlist'
+      get :public, to: "books#public_show"
+      get :builder, to: "books#builder"
+      post :save,   to: "saved_books#create"
+      delete :unsave, to: "saved_books#destroy"
+      post :generate_audio, to: "books#generate_audio"
+      post :generate_all_pictures, to: "books#generate_all_pictures"
+      post :retry_failed_pictures, to: "books#retry_failed_pictures"
+      patch :publish, to: "books#publish"
+      patch :archive, to: "books#archive"
+      patch :unarchive, to: "books#unarchive"
+      get :audio_playlist, to: "books#audio_playlist"
     end
     collection do
-      get :library, to: 'books#library'
-      get ':id/read', to: 'books#reader', as: :read
+      get :library, to: "books#library"
+      get ":id/read", to: "books#reader", as: :read
     end
   end
 
   mount LlamaBotRails::Engine => "/llama_bot"
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/*
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
 
@@ -50,7 +45,8 @@ Rails.application.routes.draw do
   get "pricing", to: "static_pages#pricing"
   get "about", to: "static_pages#about"
   
-  resources :lesson_plans, only: [:index, :show]
+  resources :lesson_plans, path: "lesson_plan", only: [:show]
+  get "lesson_plans", to: "lesson_plans#index", as: :lesson_plans
   resources :civics, only: [:index, :show]
 
   get "contact", to: "static_pages#contact"
@@ -58,7 +54,6 @@ Rails.application.routes.draw do
   resources :concepts, only: [:index, :show]
   resources :scholars, only: [:index, :show]
   resources :controversies, only: [:index, :show]
-  resources :posts, only: [:index, :show]
 
   namespace :admin do
     root to: "dashboard#index"
@@ -76,7 +71,6 @@ Rails.application.routes.draw do
 
   post "/stop_impersonating", to: "application#stop_impersonating"
 
-  # Recall.ai webhook
   post "/webhooks/recall", to: "webhooks#recall"
 
   get "/prototypes/*page", to: "prototypes#show"

@@ -1,4 +1,33 @@
-<div>
-  <h1 class="font-bold text-4xl">Posts#new</h1>
-  <p>Find me in app/views/posts/new.html.erb</p>
+<div class="min-h-screen bg-slate-50 font-sans text-slate-800 pb-24">
+  <%= render 'layouts/navigation' %>
+
+  <div class="max-w-3xl mx-auto px-6 lg:px-8 mt-12">
+    <nav class="flex mb-8" aria-label="Breadcrumb">
+      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+        <li class="inline-flex items-center">
+          <%= link_to posts_path, class: "inline-flex items-center text-sm font-medium text-slate-500 hover:text-primary transition-colors" do %>
+            <i class="fas fa-home mr-2"></i>
+            Blog
+          <% end %>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <i class="fas fa-chevron-right text-slate-400 text-xs mx-2"></i>
+            <span class="text-sm font-medium text-slate-900">New Post</span>
+          </div>
+        </li>
+      </ol>
+    </nav>
+
+    <div class="card bg-white shadow-xl border border-slate-100 overflow-hidden">
+      <div class="bg-slate-900 p-8 text-white">
+        <h1 class="text-3xl font-bold mb-2">Create New Post</h1>
+        <p class="text-slate-400">Share your story with the world.</p>
+      </div>
+      
+      <div class="p-8">
+        <%= render "form", post: @post %>
+      </div>
+    </div>
+  </div>
 </div>

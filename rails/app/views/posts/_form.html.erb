@@ -1,15 +1,34 @@
-<%= form_with(model: post, local: true) do |form| %>
-  <div class="mb-4">
-    <%= form.label :title, class: 'block font-semibold mb-1' %>
-    <%= form.text_field :title, class: 'rounded border-gray-300 w-full' %>
+<%= form_with(model: post, class: "space-y-6") do |form| %>
+  <% if post.errors.any? %>
+    <div class="alert alert-error shadow-lg mb-6">
+      <div>
+        <i class="fas fa-exclamation-circle"></i>
+        <span><%= pluralize(post.errors.count, "error") %> prohibited this post from being saved:</span>
+        <ul class="list-disc list-inside mt-2">
+          <% post.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="form-control w-full">
+    <%= form.label :title, class: "label" do %>
+      <span class="label-text font-bold text-slate-700">Title</span>
+    <% end %>
+    <%= form.text_field :title, class: "input input-bordered w-full focus:input-primary transition-all duration-200", placeholder: "Enter a catchy title..." %>
   </div>
 
-  <div class="mb-4">
-    <%= form.label :body, class: 'block font-semibold mb-1' %>
-    <%= form.text_area :body, class: 'rounded border-gray-300 w-full', rows: 5 %>
+  <div class="form-control w-full">
+    <%= form.label :body, class: "label" do %>
+      <span class="label-text font-bold text-slate-700">Content</span>
+    <% end %>
+    <%= form.text_area :body, rows: 10, class: "textarea textarea-bordered w-full focus:textarea-primary transition-all duration-200", placeholder: "Share your thoughts with the community..." %>
   </div>
 
-  <div>
-    <%= form.submit class: 'bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700' %>
+  <div class="flex items-center gap-4 pt-4">
+    <%= form.submit "Publish Post", class: "btn btn-primary px-8" %>
+    <%= link_to "Cancel", posts_path, class: "btn btn-ghost" %>
   </div>
 <% end %>

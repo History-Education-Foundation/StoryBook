@@ -18,4 +18,55 @@ RSpec.describe "Posts", type: :request do
       expect(response.body).to include(post.title)
     end
   end
+
+  describe "GET /posts/new" do
+    context "when guest" do
+      it "redirects to login" do
+        get new_post_path
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+
+    context "when logged in" do
+      it "returns http success" do
+        user = create(:user)
+        sign_in user
+        get new_post_path
+        expect(response).to have_http_status(:success)
+        expect(response.body).to include("Create New Post")
+      end
+    end
+  end
+
+  describe "POST /posts" do
+    let(:valid_params) { { post: { title: "New Title", body: "New Body" } } }
+
+    context "when guest" do
+      it "redirects to login and does not create post" do
+        expect {
+          post posts_path, params: valid_params
+        }.not_to change(Post, :count)
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+
+    context "when logged in" do
+      it "creates a new post and redirects to index" do
+        user = create(:user)
+        sign_in user
+        expect {
+          post posts_path, params: valid_params
+        }.to change(Post, :count).by(1)
+        expect(response).to redirect_to(posts_path)
+        expect(Post.last.user).to eq(user)
+      end
+
+      it "returns unprocessable_entity for invalid params" do
+        user = create(:user)
+        sign_in user
+        post posts_path, params: { post: { title: "", body: "" } }
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+    end
+  end
 end

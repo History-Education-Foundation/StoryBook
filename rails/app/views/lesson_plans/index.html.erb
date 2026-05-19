@@ -64,7 +64,7 @@
                                            topic.handout_pdf.attached?
 
                       is_social_personality = (topic.name == "Social & Personality")
-                      forced_active = ["Social & Personality", "Deindividuation", "Social Influence"].include?(topic.name)
+                      forced_active = ["Social & Personality", "Social Influence"].include?(topic.name)
                       is_placeholder = !has_actual_content && !forced_active
                       
                       target_path = topic.id == 17 ? lesson_plan_path(18) : lesson_plan_path(topic)
@@ -114,7 +114,7 @@
                                               sub_topic.video_url.present? ||
                                               sub_topic.handout_pdf.attached?
 
-                            forced_sub_active = ["Deindividuation", "Social Influence"].include?(sub_topic.name)
+                            forced_sub_active = [].include?(sub_topic.name)
                             sub_placeholder = !has_sub_content && !forced_sub_active
                           %>
                           <% if sub_placeholder %>

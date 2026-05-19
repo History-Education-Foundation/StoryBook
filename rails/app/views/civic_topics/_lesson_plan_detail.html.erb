@@ -88,6 +88,15 @@
         images = content_urls.select { |url| url.match?(/\.(jpg|jpeg|png|gif|webp|avif|svg)/i) }
         images = images.reject { |url| url.downcase.match?(/(\/|^)(slide_|allende_|appeal_|cold_war_|why_|summary)/) } # Don't render slides inline
         
+        # Clean image URLs to handle "Title: image.jpg"
+        images = images.map do |img_url|
+          if img_url.include?(":") && !img_url.start_with?("http")
+            img_url.split(":").last.strip
+          else
+            img_url
+          end
+        end
+
         videos = content_urls.reject { |url| url.match?(/\.(jpg|jpeg|png|gif|webp|avif|svg)/i) }
         
         if images.any?
@@ -133,7 +142,13 @@
         
         if videos.any?
           media_html += videos.map do |video_url|
-            video_src = video_url
+            # Extract only the URL part if there is surrounding text
+            video_src = if video_url.match?(%r{https?://})
+              video_url.match(%r{https?://[^\s]+})[0]
+            else
+              video_url
+            end
+
             if video_src.include?("youtube.com/watch?v=")
               video_src = video_src.gsub("youtube.com/watch?v=", "youtube.com/embed/")
             elsif video_src.include?("youtu.be/")

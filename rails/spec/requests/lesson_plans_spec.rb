@@ -65,6 +65,67 @@ RSpec.describe "LessonPlans", type: :request do
     end
   end
 
+  describe "GET /lesson_plans/:id (Deindividuation)" do
+    let!(:topic) do
+      CivicTopic.find_by(name: "Deindividuation") || CivicTopic.create!(
+        name: "Deindividuation",
+        bio: "OBJECTIVES\n* Define the concept\nHook: STARTER QUESTIONS\nDisplay a blank version of Canva post",
+        legacy_heading: "Phase 01: Concept Introduction & Origins",
+        legacy: "Mini-Lesson: CONCEPT INTRODUCTION\nTerm: APA Dictionary of Psychology\nMini-Lesson: ORIGINS OF DEINDIVIDUATION",
+        main_ideas_heading: "Phase 02: Causes & Symptoms",
+        main_ideas: "CAUSES + SYMPTOMS OF DEINDIVIDUATION",
+        criticism_heading: "Phase 03: Main Activity",
+        criticism: "Activity: ACTIVITY #1: MASKED DECISION-MAKING ACTIVITY",
+        suggested_reading_heading: "Final Reflection & Application",
+        suggested_reading: "Discussion: HISTORY & REAL-WORLD CONNECTION\nDiscussion: FINAL REFLECTION",
+        is_lesson_plan: true,
+        published: true
+      )
+    end
+
+    it "loads the Deindividuation lesson plan with high-fidelity content" do
+      get lesson_plan_path(topic)
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("Deindividuation")
+      expect(response.body).to include("STARTER QUESTIONS")
+      expect(response.body).to include("CONCEPT INTRODUCTION")
+      expect(response.body).to include("MASKED DECISION-MAKING ACTIVITY")
+      expect(response.body).to include("FINAL REFLECTION")
+      expect(response.body).not_to include("Placeholder")
+    end
+  end
+
+  describe "GET /lesson_plans/:id (Social Influence)" do
+    let!(:topic) do
+      CivicTopic.find_by(name: "Social Influence") || CivicTopic.create!(
+        name: "Social Influence",
+        bio: "OBJECTIVES\nHook: INTRODUCTION ACTIVITY\nOption 1: Groupthink Experiment\nImage: Groupthink.png",
+        legacy_heading: "Initial Discussion",
+        legacy: "Discussion: Have students write down or ponder their answers",
+        main_ideas_heading: "Main Lesson: Concepts & Vocab",
+        main_ideas: "Video: Social Influence\nMini-Lesson: VOCABULARY\nTerm: Social Influence: “the process by which individuals adapt”",
+        criticism_heading: "Deep Dive: Historical Experiments",
+        criticism: "Activity: DEEP DIVE\n* Solomon Asch Line Experiment\n* Stanley Milgram Obedience Experiment",
+        suggested_reading_heading: "Final Reflection & Readings",
+        suggested_reading: "Discussion: BOOK CHAPTERS\nDiscussion: FINAL DISCUSSION",
+        is_lesson_plan: true,
+        published: true
+      )
+    end
+
+    it "loads the Social Influence lesson plan with high-fidelity content" do
+      get lesson_plan_path(topic)
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("Social Influence")
+      expect(response.body).to include("INTRODUCTION ACTIVITY")
+      expect(response.body).to include("Groupthink Experiment")
+      expect(response.body).to include("Solomon Asch Line Experiment")
+      expect(response.body).to include("Stanley Milgram Obedience Experiment")
+      expect(response.body).to include("BOOK CHAPTERS")
+      expect(response.body).not_to include("Placeholder")
+    end
+  end
+
   describe "GET /lesson_plans" do
     let!(:topic) do
       CivicTopic.find_by(id: 29) || CivicTopic.create!(

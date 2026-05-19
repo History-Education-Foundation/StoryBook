@@ -101,8 +101,16 @@ RSpec.describe CivicTopic, type: :model do
 
   describe 'Psychology placeholders' do
     before do
-      ['Biological', 'Cognition', 'Development & Learning', 'Social & Personality', 'Mental & Physical Health'].each do |name|
+      psych = ['Biological', 'Cognition', 'Development & Learning', 'Social & Personality', 'Mental & Physical Health'].map do |name|
         CivicTopic.find_or_create_by!(name: name, subject: 'Psychology') do |t|
+          t.bio = "Placeholder biography for #{name}."
+          t.published = true
+        end
+      end
+
+      parent = CivicTopic.find_by(name: 'Social & Personality', subject: 'Psychology')
+      ['Deindividuation', 'Social Influence'].each do |name|
+        CivicTopic.find_or_create_by!(name: name, parent: parent, subject: 'Psychology') do |t|
           t.bio = "Placeholder biography for #{name}."
           t.published = true
         end
@@ -110,7 +118,8 @@ RSpec.describe CivicTopic, type: :model do
     end
 
     it 'verifies that topics for Psychology exist' do
-      expect(CivicTopic.where(subject: 'Psychology').count).to eq(5)
+      expect(CivicTopic.where(subject: 'Psychology', parent_id: nil).count).to eq(5)
+      expect(CivicTopic.where(subject: 'Psychology').count).to eq(7)
     end
   end
 

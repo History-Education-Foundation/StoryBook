@@ -535,9 +535,26 @@ puts "World Geography lesson plans seeded."
     bio: "Placeholder biography for #{name}. Content coming soon.",
     bio_heading: "Overview",
     published: true,
+    is_lesson_plan: true,
     grade_level: nil,
     subject: "Psychology"
   )
+end
+
+# Add sub-topics for Social & Personality
+parent = CivicTopic.find_by(name: "Social & Personality", subject: "Psychology")
+if parent
+  ["Deindividuation", "Social Influence"].each do |name|
+    sub = CivicTopic.find_or_create_by!(name: name, parent: parent)
+    sub.update!(
+      subject: "Psychology",
+      tagline: "Exploring #{name} under Social & Personality.",
+      bio: "Placeholder biography for #{name}. Content coming soon.",
+      bio_heading: "Overview",
+      published: true,
+      is_lesson_plan: true
+    )
+  end
 end
 puts "Psychology lesson plans seeded."
 

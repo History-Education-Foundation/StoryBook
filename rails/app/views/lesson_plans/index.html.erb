@@ -24,9 +24,17 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <% @lesson_plans_config.each do |config| %>
           <% 
-            topics = CivicTopic.published
-            topics = topics.where(grade_level: config[:grade]) if config[:grade]
-            topics = topics.where(subject: config[:subject]) if config[:subject]
+            topics = CivicTopic.published.where(parent_id: nil).where.not(id: [44, 23, 45, 46, 42, 43])
+            if config[:display] == "World Geography"
+              # Include both World Geography topics AND Topic 22 specifically
+              topics = topics.where(subject: "World Geography").or(topics.where(id: 22))
+            else
+              topics = topics.where(grade_level: config[:grade]) if config[:grade]
+              topics = topics.where(subject: config[:subject]) if config[:subject]
+            end
+            
+            # Ensure unique topics and ordered by name (or ID to keep original order)
+            topics = topics.distinct.order(id: :asc)
           %>
           <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
             <div class="p-8 flex flex-col items-center text-center flex-grow">
@@ -47,11 +55,30 @@
                 <div class="w-full mt-6 space-y-2">
                   <% topics.each do |topic| %>
                     <% 
-                      is_placeholder = topic.bio.to_s.include?("Placeholder") && !topic.is_lesson_plan?
+                      has_actual_content = (topic.bio.present? && !topic.bio.to_s.include?("Placeholder")) || 
+                                           topic.main_ideas.present? || 
+                                           topic.legacy.present? || 
+                                           topic.criticism.present? || 
+                                           topic.contributions.present? ||
+                                           topic.video_url.present? ||
+                                           topic.handout_pdf.attached?
+
+                      is_social_personality = (topic.name == "Social & Personality")
+                      forced_active = ["Social & Personality", "Deindividuation", "Social Influence"].include?(topic.name)
+                      is_placeholder = !has_actual_content && !forced_active
                       
-                      target_path = lesson_plan_path(topic)
+                      target_path = topic.id == 17 ? lesson_plan_path(18) : lesson_plan_path(topic)
                     %>
-                    <% if is_placeholder %>
+                    <% if is_social_personality %>
+                      <div class="flex items-center p-3 rounded-xl bg-slate-100/50 border border-slate-200 shadow-sm mb-1">
+                        <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center mr-3 border border-slate-100">
+                          <i class="fas fa-layer-group text-xs text-[#f9a825]"></i>
+                        </div>
+                        <span class="text-sm font-bold text-slate-800 flex-grow text-left">
+                          <%= topic.name %>
+                        </span>
+                      </div>
+                    <% elsif is_placeholder %>
                       <div class="flex items-center p-3 rounded-xl bg-slate-50/50 border border-slate-100 opacity-60 cursor-not-allowed">
                         <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center mr-3">
                           <i class="fas fa-clock text-xs text-slate-400"></i>
@@ -60,7 +87,7 @@
                           <%= topic.name %>
                         </span>
                         <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 border border-slate-200 px-2 py-1 rounded">
-                          Soon
+                          Coming Soon
                         </span>
                       </div>
                     <% else %>
@@ -73,6 +100,47 @@
                         </span>
                         <i class="fas fa-arrow-right text-[10px] text-slate-300 group-hover/link:text-[#f9a825] group-hover/link:translate-x-1 transition-all"></i>
                       <% end %>
+                    <% end %>
+
+                    <% if topic.sub_topics.published.any? %>
+                      <div class="ml-10 space-y-1 mb-2">
+                        <% topic.sub_topics.published.each do |sub_topic| %>
+                          <% 
+                            has_sub_content = (sub_topic.bio.present? && !sub_topic.bio.to_s.include?("Placeholder")) || 
+                                              sub_topic.main_ideas.present? || 
+                                              sub_topic.legacy.present? || 
+                                              sub_topic.criticism.present? || 
+                                              sub_topic.contributions.present? ||
+                                              sub_topic.video_url.present? ||
+                                              sub_topic.handout_pdf.attached?
+
+                            forced_sub_active = ["Deindividuation", "Social Influence"].include?(sub_topic.name)
+                            sub_placeholder = !has_sub_content && !forced_sub_active
+                          %>
+                          <% if sub_placeholder %>
+                            <div class="flex items-center p-2 rounded-lg bg-slate-50/30 border border-transparent opacity-60 cursor-not-allowed">
+                              <div class="w-6 h-6 rounded flex items-center justify-center mr-3">
+                                <i class="fas fa-caret-right text-[10px] text-slate-300"></i>
+                              </div>
+                              <span class="text-xs font-medium text-slate-400 flex-grow text-left">
+                                <%= sub_topic.name %>
+                              </span>
+                              <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 border border-slate-200 px-1.5 py-0.5 rounded ml-2">
+                                Coming Soon
+                              </span>
+                            </div>
+                          <% else %>
+                            <%= link_to lesson_plan_path(sub_topic), class: "flex items-center p-2 rounded-lg hover:bg-slate-50 transition-all group/sublink border border-transparent hover:border-slate-100" do %>
+                              <div class="w-6 h-6 rounded flex items-center justify-center mr-3">
+                                <i class="fas fa-caret-right text-[10px] text-slate-300 group-hover/sublink:text-[#f9a825]"></i>
+                              </div>
+                              <span class="text-xs font-medium text-slate-500 group-hover/sublink:text-slate-900 transition-colors flex-grow text-left">
+                                <%= sub_topic.name %>
+                              </span>
+                            <% end %>
+                          <% end %>
+                        <% end %>
+                      </div>
                     <% end %>
                   <% end %>
                 </div>

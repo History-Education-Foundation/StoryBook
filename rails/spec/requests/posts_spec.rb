@@ -3,10 +3,103 @@ require 'rails_helper'
 RSpec.describe "Posts", type: :request do
   describe "GET /posts" do
     it "returns http success for guests" do
-      create(:post)
+      create(:post, status: :published)
       get posts_path
       expect(response).to have_http_status(:success)
       expect(response.body).to include("Our Blog")
+    end
+
+    it "shows only published posts for guests" do
+      published_post = create(:post, status: :published, title: "Published Post")
+      draft_post = create(:post, status: :draft, title: "Draft Post")
+      get posts_path
+      expect(response.body).to include("Published Post")
+      expect(response.body).not_to include("Draft Post")
+    end
+
+    it "shows own draft posts and published posts for logged in users" do
+      user = create(:user)
+      sign_in user
+      own_draft = create(:post, user: user, status: :draft, title: "My Draft")
+      other_draft = create(:post, status: :draft, title: "Other Draft")
+      other_published = create(:post, status: :published, title: "Other Published")
+      
+      get posts_path
+      expect(response.body).to include("My Draft")
+      expect(response.body).to include("Other Published")
+      expect(response.body).not_to include("Other Draft")
+    end
+  end
+
+  describe "PATCH /posts/:id" do
+    let(:user) { create(:user) }
+    let(:other_user) { create(:user) }
+    let(:my_post) { create(:post, user: user) }
+    let(:other_post) { create(:post, user: other_user) }
+
+    context "when owner" do
+      before { sign_in user }
+
+      it "updates the post and redirects to show" do
+        patch post_path(my_post), params: { post: { title: "Updated Title" } }
+        expect(response).to redirect_to(post_path(my_post))
+        expect(my_post.reload.title).to eq("Updated Title")
+      end
+
+      it "returns turbo stream response when requested" do
+        patch post_path(my_post), params: { post: { title: "Turbo Title" } }, as: :turbo_stream
+        expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+        expect(response.body).to include("turbo-stream action=\"replace\"")
+      end
+
+      it "can update status" do
+        patch post_path(my_post), params: { post: { status: "published" } }
+        expect(my_post.reload.status).to eq("published")
+      end
+    end
+
+    context "when not owner" do
+      before { sign_in user }
+
+      it "raises Pundit::NotAuthorizedError" do
+        expect {
+          patch post_path(other_post), params: { post: { title: "Hack" } }
+        }.to raise_error(Pundit::NotAuthorizedError)
+      end
+    end
+  end
+
+  describe "DELETE /posts/:id" do
+    let(:user) { create(:user) }
+    let(:other_user) { create(:user) }
+    let!(:my_post) { create(:post, user: user) }
+    let!(:other_post) { create(:post, user: other_user) }
+
+    context "when owner" do
+      before { sign_in user }
+
+      it "deletes the post" do
+        expect {
+          delete post_path(my_post)
+        }.to change(Post, :count).by(-1)
+        expect(response).to redirect_to(posts_path)
+      end
+
+      it "returns turbo stream response when requested" do
+        delete post_path(my_post), as: :turbo_stream
+        expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+        expect(response.body).to include("turbo-stream action=\"remove\"")
+      end
+    end
+
+    context "when not owner" do
+      before { sign_in user }
+
+      it "raises Pundit::NotAuthorizedError" do
+        expect {
+          delete post_path(other_post)
+        }.to raise_error(Pundit::NotAuthorizedError)
+      end
     end
   end
 

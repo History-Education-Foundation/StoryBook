@@ -5,41 +5,69 @@
 <div class="min-h-screen bg-white font-sans text-slate-800">
   <%= render 'layouts/navigation' %>
 
-  <article class="py-24">
-    <div class="max-w-3xl mx-auto px-6 lg:px-8">
-      <!-- Article Header -->
-      <header class="mb-12">
-        <% if @post.category %>
-          <span class="text-[#f9a825] font-bold text-xs uppercase tracking-widest mb-4 block"><%= @post.category.name %></span>
-        <% end %>
-        
-        <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-8 leading-tight tracking-tight">
-          <%= @post.title %>
-        </h1>
-        
-        <div class="flex items-center gap-4 py-8 border-y border-slate-100">
-          <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-lg text-[#f9a825] font-bold">
-            <%= (@post.author&.name || "A").first.upcase %>
+  <%= turbo_frame_tag dom_id(@post) do %>
+    <article class="py-24">
+      <div class="max-w-3xl mx-auto px-6 lg:px-8">
+        <!-- Article Header -->
+        <header class="mb-12">
+          <div class="flex justify-between items-start mb-4">
+            <div class="flex flex-col gap-2">
+              <% if @post.category %>
+                <span class="text-[#f9a825] font-bold text-xs uppercase tracking-widest block"><%= @post.category.name %></span>
+              <% end %>
+              
+              <%# Status Badge %>
+              <% badge_class = case @post.status
+                 when 'published' then 'badge-success'
+                 when 'archived' then 'badge-warning'
+                 else 'badge-ghost'
+                 end %>
+              <div class="badge <%= badge_class %> badge-sm uppercase font-bold text-[10px] border-none"><%= @post.status %></div>
+            </div>
+
+            <%# Management UI for Show Page %>
+            <% if policy(@post).update? %>
+              <div class="flex gap-2">
+                <%= link_to edit_post_path(@post), class: "btn btn-ghost btn-sm gap-2", data: { turbo_frame: "_top" } do %>
+                  <i class="fas fa-pen"></i>
+                  Edit
+                <% end %>
+                <%= button_to post_path(@post), method: :delete, class: "btn btn-error btn-sm text-white gap-2", data: { turbo_confirm: "Are you sure?", turbo_stream: true } do %>
+                  <i class="fas fa-trash"></i>
+                  Delete
+                <% end %>
+              </div>
+            <% end %>
           </div>
-          <div class="flex flex-col">
-            <span class="text-base font-bold text-slate-900"><%= @post.author&.name || "Anonymous" %></span>
-            <span class="text-sm text-slate-500"><%= @post.created_at.strftime("%B %d, %Y") %></span>
+          
+          <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-8 leading-tight tracking-tight">
+            <%= @post.title %>
+          </h1>
+          
+          <div class="flex items-center gap-4 py-8 border-y border-slate-100">
+            <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-lg text-[#f9a825] font-bold">
+              <%= (@post.author&.name || "A").first.upcase %>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-base font-bold text-slate-900"><%= @post.author&.name || "Anonymous" %></span>
+              <span class="text-sm text-slate-500"><%= @post.created_at.strftime("%B %d, %Y") %></span>
+            </div>
           </div>
+        </header>
+
+        <!-- Article Content -->
+        <div class="trix-content prose prose-lg max-w-none prose-slate prose-headings:font-bold prose-headings:text-slate-900 prose-p:leading-relaxed prose-p:text-slate-600 prose-a:text-[#f9a825] hover:prose-a:text-[#f9a825]/80 transition-colors">
+          <%= @post.body %>
         </div>
-      </header>
 
-      <!-- Article Content -->
-      <div class="trix-content prose prose-lg max-w-none prose-slate prose-headings:font-bold prose-headings:text-slate-900 prose-p:leading-relaxed prose-p:text-slate-600 prose-a:text-[#f9a825] hover:prose-a:text-[#f9a825]/80 transition-colors">
-        <%= @post.body %>
+        <!-- Article Footer -->
+        <footer class="mt-16 pt-12 border-t border-slate-100">
+          <%= link_to posts_path, class: "btn btn-ghost text-slate-500 hover:text-[#f9a825] px-0 gap-2 font-bold", data: { turbo_frame: "_top" } do %>
+            <i class="fas fa-arrow-left"></i>
+            Back to all posts
+          <% end %>
+        </footer>
       </div>
-
-      <!-- Article Footer -->
-      <footer class="mt-16 pt-12 border-t border-slate-100">
-        <%= link_to posts_path, class: "btn btn-ghost text-slate-500 hover:text-[#f9a825] px-0 gap-2 font-bold" do %>
-          <i class="fas fa-arrow-left"></i>
-          Back to all posts
-        <% end %>
-      </footer>
-    </div>
-  </article>
+    </article>
+  <% end %>
 </div>

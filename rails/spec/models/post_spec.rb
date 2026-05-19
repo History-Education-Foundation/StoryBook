@@ -136,4 +136,45 @@ RSpec.describe Post, type: :model do
       expect(post.author).to eq(author)
     end
   end
+
+  describe "status" do
+    let(:post) { create(:post) }
+
+    it "defaults to draft" do
+      expect(post.status).to eq("draft")
+      expect(post.draft?).to be true
+    end
+
+    it "can be published" do
+      post.published!
+      expect(post.status).to eq("published")
+      expect(post.published?).to be true
+    end
+
+    it "can be archived" do
+      post.archived!
+      expect(post.status).to eq("archived")
+      expect(post.archived?).to be true
+    end
+
+    it "validates presence of status" do
+      post.status = nil
+      expect(post).not_to be_valid
+    end
+
+    describe "scopes" do
+      let!(:draft_post) { create(:post, status: :draft) }
+      let!(:published_post) { create(:post, status: :published) }
+      let!(:archived_post) { create(:post, status: :archived) }
+
+      describe ".visible_to_guest" do
+        it "returns only published posts" do
+          results = Post.visible_to_guest
+          expect(results).to include(published_post)
+          expect(results).not_to include(draft_post)
+          expect(results).not_to include(archived_post)
+        end
+      end
+    end
+  end
 end

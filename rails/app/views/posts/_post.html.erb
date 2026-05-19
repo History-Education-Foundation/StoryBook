@@ -1,28 +1,88 @@
-<%= link_to post_path(post), id: dom_id(post), class: "card bg-white shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col h-full border border-slate-100 overflow-hidden" do %>
-  <div class="p-8 flex flex-col flex-grow">
-    <% if post.category %>
-      <span class="text-[#f9a825] font-bold text-xs uppercase tracking-widest mb-4"><%= post.category.name %></span>
-    <% end %>
+<%= turbo_frame_tag dom_id(post) do %>
+  <div class="relative card bg-white shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col h-full border border-slate-100 overflow-hidden">
+    <%# Main card link overlay %>
+    <%= link_to "", post_path(post), class: "absolute inset-0 z-0", data: { turbo_frame: "_top" } %>
     
-    <h2 class="text-2xl font-bold text-slate-900 mb-4 group-hover:text-[#f9a825] transition-colors leading-tight">
-      <%= post.title %>
-    </h2>
-    
-    <p class="text-slate-600 mb-6 flex-grow leading-relaxed">
-      <%= truncate(post.body.to_plain_text, length: 150) %>
-    </p>
-    
-    <div class="flex items-center justify-between mt-auto pt-6 border-t border-slate-50">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-sm text-[#f9a825] font-bold">
-          <%= (post.author&.name || post.user&.email || "A").first.upcase %>
-        </div>
-        <div class="flex flex-col">
-          <span class="text-sm font-bold text-slate-900"><%= post.author&.name || post.user&.email || "Anonymous" %></span>
-          <span class="text-xs text-slate-500"><%= post.created_at.strftime("%B %d, %Y") %></span>
+    <div class="p-8 flex flex-col flex-grow relative z-10 pointer-events-none">
+      <div class="flex justify-between items-start mb-4">
+        <div class="flex flex-col gap-2">
+          <% if post.category %>
+            <span class="text-[#f9a825] font-bold text-xs uppercase tracking-widest"><%= post.category.name %></span>
+          <% end %>
+          
+          <%# Status Badge %>
+          <% badge_class = case post.status
+             when 'published' then 'badge-success'
+             when 'archived' then 'badge-warning'
+             else 'badge-ghost'
+             end %>
+          <div class="badge <%= badge_class %> badge-sm uppercase font-bold text-[10px] border-none"><%= post.status %></div>
         </div>
       </div>
-      <i class="fas fa-arrow-right text-slate-300 group-hover:text-[#f9a825] transition-colors"></i>
+      
+      <h2 class="text-2xl font-bold text-slate-900 mb-4 group-hover:text-[#f9a825] transition-colors leading-tight">
+        <%= post.title %>
+      </h2>
+      
+      <p class="text-slate-600 mb-6 flex-grow leading-relaxed">
+        <%= truncate(post.body.to_plain_text, length: 150) %>
+      </p>
+      
+      <div class="flex items-center justify-between mt-auto pt-6 border-t border-slate-50">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-sm text-[#f9a825] font-bold">
+            <%= (post.author&.name || post.user&.email || "A").first.upcase %>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-sm font-bold text-slate-900"><%= post.author&.name || post.user&.email || "Anonymous" %></span>
+            <span class="text-xs text-slate-500"><%= post.created_at.strftime("%B %d, %Y") %></span>
+          </div>
+        </div>
+        <i class="fas fa-arrow-right text-slate-300 group-hover:text-[#f9a825] transition-colors"></i>
+      </div>
     </div>
+
+    <%# Management UI %>
+    <% if policy(post).update? %>
+      <div class="absolute top-4 right-4 flex flex-wrap justify-end gap-2 z-20 pointer-events-auto">
+        <%# Status Toggles %>
+        <% if post.draft? || post.archived? %>
+          <%= button_to post_path(post), 
+              params: { post: { status: 'published' } }, 
+              method: :patch, 
+              class: "btn btn-success btn-xs gap-1 shadow-md border-none", 
+              data: { turbo_stream: true } do %>
+            <i class="fas fa-check"></i>
+            Publish
+          <% end %>
+        <% elsif post.published? %>
+          <%= button_to post_path(post), 
+              params: { post: { status: 'archived' } }, 
+              method: :patch, 
+              class: "btn btn-warning btn-xs gap-1 shadow-md text-white border-none", 
+              data: { turbo_stream: true } do %>
+            <i class="fas fa-archive"></i>
+            Archive
+          <% end %>
+        <% end %>
+
+        <%# Edit Link %>
+        <%= link_to edit_post_path(post), 
+            class: "btn btn-ghost btn-xs bg-white/90 hover:bg-[#f9a825] hover:text-white border border-slate-200 gap-1 shadow-md transition-all", 
+            data: { turbo_frame: "_top" } do %>
+          <i class="fas fa-pen"></i>
+          Edit
+        <% end %>
+
+        <%# Delete Button %>
+        <%= button_to post_path(post), 
+            method: :delete, 
+            class: "btn btn-error btn-xs gap-1 shadow-md text-white border-none", 
+            data: { turbo_confirm: "Are you sure?", turbo_stream: true } do %>
+          <i class="fas fa-trash"></i>
+          Delete
+        <% end %>
+      </div>
+    <% end %>
   </div>
 <% end %>

@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   resources :historical_figures
-  resources :posts, only: [:index, :show, :new, :create]
+  resources :posts
   devise_for :users, controllers: { registrations: "users/registrations" }
   resources :users
 

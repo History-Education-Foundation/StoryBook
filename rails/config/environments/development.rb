@@ -2,7 +2,7 @@ require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
 
-  Rails.application.routes.default_url_options[:host] = 'localhost:3000'
+  # Rails.application.routes.default_url_options[:host] = 'localhost:3000'
   # Settings specified here will take precedence over those in config/application.rb.
 
   # In the development environment your application's code is reloaded any time
@@ -124,6 +124,8 @@ Rails.application.configure do
   # page with one that posts the exception back to the LlamaPress parent as a
   # prefill-chat command. Inserted AFTER DebugExceptions so we catch raised
   # exceptions before DebugExceptions renders its own page.
+  config.active_storage.variant_processor = :mini_magick
+  config.active_storage.resolve_model_to_route = :rails_storage_proxy
   require Rails.root.join("app/middleware/leonardo_error_page_middleware")
   config.middleware.insert_after ActionDispatch::DebugExceptions, LeonardoErrorPageMiddleware
 

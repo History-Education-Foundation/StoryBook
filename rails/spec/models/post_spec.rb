@@ -49,7 +49,7 @@ RSpec.describe Post, type: :model do
                    title: "My First Post",
                    body: "This is the content of my post")
       expect(post.title).to eq("My First Post")
-      expect(post.body).to eq("This is the content of my post")
+      expect(post.body.to_plain_text.strip).to eq("This is the content of my post")
     end
 
     it "cannot create a post without a user" do
@@ -89,23 +89,51 @@ RSpec.describe Post, type: :model do
   end
 
   describe "content fields" do
-    it "accepts nil title" do
+    it "requires a title" do
       user = create(:user)
-      post = create(:post, user: user, title: nil)
-      expect(post.title).to be_nil
+      post = build(:post, user: user, title: nil)
+      expect(post).not_to be_valid
     end
 
-    it "accepts nil body" do
+    it "requires a body" do
       user = create(:user)
-      post = create(:post, user: user, body: nil)
-      expect(post.body).to be_nil
+      post = build(:post, user: user, body: nil)
+      expect(post).not_to be_valid
     end
 
-    it "accepts long body content" do
-      user = create(:user)
-      long_body = "A" * 10000
-      post = create(:post, user: user, body: long_body)
-      expect(post.body).to eq(long_body)
+    it "is an instance of ActionText::RichText" do
+      post = create(:post, body: "Hello world")
+      expect(post.body).to be_an_instance_of(ActionText::RichText)
+    end
+  end
+
+  describe "inline creation" do
+    let(:user) { create(:user) }
+
+    it "creates a new category inline" do
+      post = Post.new(user: user, title: "Title", body: "Body", new_category_name: "Tech")
+      expect { post.save }.to change(Category, :count).by(1)
+      expect(post.category.name).to eq("Tech")
+    end
+
+    it "uses existing category if name matches" do
+      category = Category.create!(name: "Tech")
+      post = Post.new(user: user, title: "Title", body: "Body", new_category_name: "Tech")
+      expect { post.save }.not_to change(Category, :count)
+      expect(post.category).to eq(category)
+    end
+
+    it "creates a new author inline" do
+      post = Post.new(user: user, title: "Title", body: "Body", new_author_name: "John Doe")
+      expect { post.save }.to change(Author, :count).by(1)
+      expect(post.author.name).to eq("John Doe")
+    end
+
+    it "uses existing author if name matches" do
+      author = Author.create!(name: "John Doe")
+      post = Post.new(user: user, title: "Title", body: "Body", new_author_name: "John Doe")
+      expect { post.save }.not_to change(Author, :count)
+      expect(post.author).to eq(author)
     end
   end
 end

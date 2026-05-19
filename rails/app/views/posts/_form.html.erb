@@ -20,11 +20,43 @@
     <%= form.text_field :title, class: "input input-bordered w-full focus:input-primary transition-all duration-200", placeholder: "Enter a catchy title..." %>
   </div>
 
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="form-control w-full" data-controller="form-toggle">
+      <%= form.label :category_id, class: "label" do %>
+        <span class="label-text font-bold text-slate-700">Category</span>
+      <% end %>
+      <%= form.select :category_id, 
+          options_for_select([["Select Category", ""]] + Category.all.map { |c| [c.name, c.id] } + [["+ Create New Category...", "new"]], post.category_id), 
+          {}, 
+          { class: "select select-bordered w-full focus:select-primary transition-all duration-200", data: { action: "change->form-toggle#toggle", form_toggle_target: "select" } } %>
+      
+      <div class="mt-2 hidden" data-form_toggle_target="input">
+        <%= form.text_field :new_category_name, class: "input input-bordered w-full input-sm focus:input-primary transition-all duration-200", placeholder: "Enter new category name..." %>
+      </div>
+    </div>
+
+    <div class="form-control w-full" data-controller="form-toggle">
+      <%= form.label :author_id, class: "label" do %>
+        <span class="label-text font-bold text-slate-700">Author</span>
+      <% end %>
+      <%= form.select :author_id, 
+          options_for_select([["Select Author", ""]] + Author.all.map { |a| [a.name, a.id] } + [["+ Create New Author...", "new"]], post.author_id), 
+          {}, 
+          { class: "select select-bordered w-full focus:select-primary transition-all duration-200", data: { action: "change->form-toggle#toggle", form_toggle_target: "select" } } %>
+      
+      <div class="mt-2 hidden" data-form_toggle_target="input">
+        <%= form.text_field :new_author_name, class: "input input-bordered w-full input-sm focus:input-primary transition-all duration-200", placeholder: "Enter new author name..." %>
+      </div>
+    </div>
+  </div>
+
   <div class="form-control w-full">
     <%= form.label :body, class: "label" do %>
       <span class="label-text font-bold text-slate-700">Content</span>
     <% end %>
-    <%= form.text_area :body, rows: 10, class: "textarea textarea-bordered w-full focus:textarea-primary transition-all duration-200", placeholder: "Share your thoughts with the community..." %>
+    <div class="prose max-w-none">
+      <%= form.rich_text_area :body, class: "textarea textarea-bordered w-full min-h-[300px] focus:textarea-primary transition-all duration-200", placeholder: "Share your thoughts with the community..." %>
+    </div>
   </div>
 
   <div class="flex items-center gap-4 pt-4">

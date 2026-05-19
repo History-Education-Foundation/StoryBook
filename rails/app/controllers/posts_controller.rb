@@ -17,15 +17,7 @@ class PostsController < ApplicationController
     @post = current_user.posts.build(post_params)
 
     if @post.save
-      respond_to do |format|
-        format.html { redirect_to posts_path, notice: "Post was successfully created." }
-        format.turbo_stream {
-          render turbo_stream: [
-            turbo_stream.prepend("posts-grid", partial: "posts/post", locals: { post: @post }),
-            turbo_stream.update("new_post_form", "") # Close the form if it was in a frame
-          ]
-        }
-      end
+      redirect_to posts_path, notice: "Post was successfully published! Check it out in the feed below."
     else
       render :new, status: :unprocessable_entity
     end
@@ -34,6 +26,6 @@ class PostsController < ApplicationController
   private
 
   def post_params
-    params.require(:post).permit(:title, :body, :category_id, :author_id)
+    params.require(:post).permit(:title, :body, :category_id, :author_id, :new_category_name, :new_author_name)
   end
 end

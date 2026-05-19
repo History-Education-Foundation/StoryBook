@@ -61,6 +61,29 @@ RSpec.describe "Posts", type: :request do
         expect(Post.last.user).to eq(user)
       end
 
+      it "creates a post with a new category and author inline" do
+        user = create(:user)
+        sign_in user
+        params = {
+          post: {
+            title: "New Title",
+            body: "<div>Rich Content</div>",
+            new_category_name: "Innovation",
+            new_author_name: "Jane Smith"
+          }
+        }
+        expect {
+          post posts_path, params: params
+        }.to change(Post, :count).by(1)
+         .and change(Category, :count).by(1)
+         .and change(Author, :count).by(1)
+        
+        post = Post.last
+        expect(post.category.name).to eq("Innovation")
+        expect(post.author.name).to eq("Jane Smith")
+        expect(post.body.to_s).to include("Rich Content")
+      end
+
       it "returns unprocessable_entity for invalid params" do
         user = create(:user)
         sign_in user

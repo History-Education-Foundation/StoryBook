@@ -2,8 +2,8 @@
 import "@hotwired/turbo-rails"
 import "controllers"
 
-// import "trix"
-// import "@rails/actiontext"
+import "trix"
+import "@rails/actiontext"
 
 import * as ActionCable from "@rails/actioncable"
 window.ActionCable = ActionCable

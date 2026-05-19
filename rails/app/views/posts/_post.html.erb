@@ -9,7 +9,7 @@
     </h2>
     
     <p class="text-slate-600 mb-6 flex-grow leading-relaxed">
-      <%= truncate(post.body, length: 150) %>
+      <%= truncate(post.body.to_plain_text, length: 150) %>
     </p>
     
     <div class="flex items-center justify-between mt-auto pt-6 border-t border-slate-50">

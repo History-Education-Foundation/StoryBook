@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_19_152227) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_19_193021) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -153,6 +153,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_152227) do
     t.string "video_url"
     t.boolean "is_lesson_plan", default: false, null: false
     t.integer "parent_id"
+    t.string "legacy_url"
+    t.index ["legacy_url"], name: "index_civic_topics_on_legacy_url", unique: true
     t.index ["parent_id"], name: "index_civic_topics_on_parent_id"
   end
 
@@ -181,6 +183,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_152227) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "published", default: false
+    t.string "legacy_url"
+    t.index ["legacy_url"], name: "index_concepts_on_legacy_url", unique: true
   end
 
   create_table "controversies", force: :cascade do |t|
@@ -207,6 +211,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_152227) do
     t.string "image_position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "legacy_url"
+    t.index ["legacy_url"], name: "index_controversies_on_legacy_url", unique: true
   end
 
   create_table "goals", force: :cascade do |t|
@@ -244,6 +250,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_152227) do
     t.string "image_position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "legacy_url"
+    t.index ["legacy_url"], name: "index_historical_figures_on_legacy_url", unique: true
   end
 
   create_table "journal_entries", force: :cascade do |t|
@@ -483,8 +491,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_152227) do
     t.bigint "category_id"
     t.bigint "author_id"
     t.integer "status", default: 0
+    t.string "legacy_url"
     t.index ["author_id"], name: "index_posts_on_author_id"
     t.index ["category_id"], name: "index_posts_on_category_id"
+    t.index ["legacy_url"], name: "index_posts_on_legacy_url", unique: true
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
 
@@ -521,6 +531,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_152227) do
     t.string "image_filename"
     t.text "image_data"
     t.string "image_position"
+    t.string "legacy_url"
+    t.index ["legacy_url"], name: "index_scholars_on_legacy_url", unique: true
   end
 
   create_table "users", force: :cascade do |t|

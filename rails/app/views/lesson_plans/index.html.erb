@@ -46,7 +46,12 @@
               <% if topics.any? %>
                 <div class="w-full mt-6 space-y-2">
                   <% topics.each do |topic| %>
-                    <% is_placeholder = topic.bio.to_s.include?("Placeholder") %>
+                    <% 
+                      is_chile_topic = topic.name.match?(/Chile|Pinochet/i)
+                      is_placeholder = topic.bio.to_s.include?("Placeholder") && !topic.is_lesson_plan? && !is_chile_topic 
+                      
+                      target_path = is_chile_topic ? lesson_plan_path(17) : lesson_plan_path(topic)
+                    %>
                     <% if is_placeholder %>
                       <div class="flex items-center p-3 rounded-xl bg-slate-50/50 border border-slate-100 opacity-60 cursor-not-allowed">
                         <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center mr-3">
@@ -60,7 +65,7 @@
                         </span>
                       </div>
                     <% else %>
-                      <%= link_to lesson_plan_path(topic), class: "flex items-center p-3 rounded-xl hover:bg-slate-50 transition-all group/link border border-transparent hover:border-slate-100" do %>
+                      <%= link_to target_path, class: "flex items-center p-3 rounded-xl hover:bg-slate-50 transition-all group/link border border-transparent hover:border-slate-100" do %>
                         <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center mr-3 group-hover/link:bg-white transition-colors">
                           <i class="fas fa-file-alt text-xs text-slate-400 group-hover/link:text-[#f9a825]"></i>
                         </div>

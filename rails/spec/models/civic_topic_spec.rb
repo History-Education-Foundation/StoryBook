@@ -165,6 +165,11 @@ RSpec.describe CivicTopic, type: :model do
       expect(topic.is_lesson_plan?).to be true
     end
 
+    it 'returns true for ID 17 (Chile in the Cold War)' do
+      topic = CivicTopic.new(id: 17)
+      expect(topic.is_lesson_plan?).to be true
+    end
+
     it 'returns true for subject "Lesson Plan"' do
       topic = CivicTopic.new(subject: 'Lesson Plan')
       expect(topic.is_lesson_plan?).to be true

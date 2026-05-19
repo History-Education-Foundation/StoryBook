@@ -2,6 +2,67 @@
 <%# Expected local: civic_topic %>
 
 <%
+  handout_url = "https://www.learner.org/wp-content/uploads/2019/07/RWD.HSSU8_.SACHandouts.pdf"
+  show_pdf = [9, 40].include?(civic_topic&.id) || civic_topic&.handout_pdf&.attached?
+  pdf_src = civic_topic.handout_pdf.attached? ? url_for(civic_topic.handout_pdf) : handout_url
+
+  # Extract ALL slides from ALL fields to show them together
+  all_content = [civic_topic.bio, civic_topic.legacy, civic_topic.main_ideas, civic_topic.criticism].join("\n")
+  # Use a more specific regex to avoid matching directory names (like chile_cold_war)
+  all_slides = all_content.scan(/Image:\s*([^\n]*(?:\/|^)(?:slide_|allende_|appeal_|cold_war_|why_|summary)[^\n]+)/i).flatten.map(&:strip).uniq
+
+  master_slides_html = if all_slides.any?
+    deck_id = "master_deck_#{civic_topic.id}"
+    content_tag(:div, class: "flex h-[600px] md:h-[800px] bg-slate-900 rounded-[3rem] overflow-hidden shadow-2xl border-4 border-slate-900 my-12 group/deck relative") do
+      # Left Sidebar: Thumbnails
+      thumbnails = content_tag(:div, class: "w-24 md:w-48 overflow-y-auto bg-slate-800/80 p-4 space-y-4 border-r border-white/5 hidden sm:block scrollbar-hide") do
+        all_slides.map.with_index do |img_url, idx|
+          content_tag(:a, href: "##{deck_id}_slide_#{idx}", class: "block rounded-xl overflow-hidden border-2 border-transparent hover:border-[#f9a825] transition-all opacity-50 hover:opacity-100") do
+            image_tag(img_url, class: "w-full aspect-[4/3] object-cover bg-white")
+          end
+        end.join.html_safe
+      end
+
+      # Main Content: Slides
+      slides = content_tag(:div, class: "flex-grow overflow-y-auto bg-slate-900/50 scroll-smooth p-6 md:p-16 space-y-16") do
+        all_slides.map.with_index do |img_url, idx|
+          content_tag(:div, id: "#{deck_id}_slide_#{idx}", class: "w-full flex flex-col items-center gap-4") do
+            content_tag(:div, class: "w-full bg-white shadow-2xl rounded-2xl overflow-hidden relative group/slide") do
+              concat(image_tag(img_url, class: "w-full h-auto object-contain", alt: "Slide #{idx + 1}"))
+              concat(content_tag(:div, class: "absolute bottom-4 right-4 z-20") do
+                content_tag(:span, "Slide #{idx + 1} / #{all_slides.length}", class: "bg-slate-900/60 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10")
+              end)
+            end
+          end
+        end.join.html_safe
+      end
+
+      concat(thumbnails)
+      concat(slides)
+    end
+  end
+
+  pdf_block_html = if show_pdf
+    card = content_tag(:div, class: "my-12 bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm flex items-center gap-6 group hover:border-[#f9a825] transition-colors") do
+      concat(content_tag(:div, class: "w-16 h-16 rounded-2xl bg-[#f9a825]/10 flex items-center justify-center text-[#f9a825] group-hover:bg-[#f9a825] group-hover:text-slate-900 transition-colors") { content_tag(:i, "", class: "fas fa-file-pdf text-2xl") })
+      concat(content_tag(:div, class: "flex-grow") do
+        concat(content_tag(:h4, "Lesson Handout Available", class: "text-slate-900 font-bold text-lg mb-1"))
+        concat(content_tag(:p, "Review or download the student activity sheet below.", class: "text-slate-500 text-sm mb-0"))
+      end)
+      concat(link_to(pdf_src, class: "btn btn-circle bg-slate-900 border-none text-white hover:bg-[#f9a825] hover:text-slate-900 shadow-lg", target: "_blank") { content_tag(:i, "", class: "fas fa-arrow-down") })
+    end
+
+    viewer = content_tag(:div, class: "w-full h-[600px] md:h-[800px] bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-slate-900 my-10 relative group") do
+      content_tag(:iframe, "", 
+        src: "#{pdf_src}#pagemode=thumbs&view=FitH", 
+        class: "w-full h-full bg-white",
+        style: "border: none;",
+        title: "Lesson Handout Preview")
+    end
+    
+    (card + viewer).html_safe
+  end
+
   def render_lesson_content(text, civic_topic = nil, options = {})
     return "" if text.blank?
     
@@ -13,10 +74,6 @@
     # Split by double newline to get blocks
     blocks = text.split("\n\n")
     
-    # PDF logic for IDs 9 and 40
-    show_pdf = [9, 40].include?(civic_topic&.id) || civic_topic&.handout_pdf&.attached?
-    pdf_rendered = false
-
     html = blocks.map do |block|
       # Extract and render media first (Images and Videos)
       media_html = ""
@@ -26,21 +83,51 @@
       media_matches = temp_block.scan(/(?:Image|Video):\s*([^\n]+)/i)
       if media_matches.any?
         content_urls = media_matches.flatten.map(&:strip)
-        images = content_urls.select { |url| url.match?(/\.(jpg|jpeg|png|gif|webp|avif)/i) }
-        videos = content_urls.reject { |url| url.match?(/\.(jpg|jpeg|png|gif|webp|avif)/i) }
+        
+        # FILTER: Ignore URLs that are part of the main slide deck
+        images = content_urls.select { |url| url.match?(/\.(jpg|jpeg|png|gif|webp|avif|svg)/i) }
+        images = images.reject { |url| url.downcase.match?(/(\/|^)(slide_|allende_|appeal_|cold_war_|why_|summary)/) } # Don't render slides inline
+        
+        videos = content_urls.reject { |url| url.match?(/\.(jpg|jpeg|png|gif|webp|avif|svg)/i) }
         
         if images.any?
-          grid_class = images.length > 1 ? "grid grid-cols-1 md:grid-cols-#{[images.length, 3].min} gap-4 my-10" : "my-10"
-          media_html += content_tag(:div, class: grid_class) do
-            images.map do |img_url|
-              content_tag(:div, class: "rounded-[2rem] overflow-hidden shadow-2xl border border-slate-100 bg-slate-50 p-2 group/img relative") do
-                concat(image_tag(img_url, class: "w-full h-48 md:h-64 object-cover rounded-xl group-hover/img:scale-105 transition-transform duration-700", alt: "Lesson Illustration"))
-                concat(content_tag(:div, class: "mt-2 flex items-center gap-2 text-slate-400 text-[10px] font-bold uppercase tracking-widest px-2") do
-                  concat(content_tag(:i, "", class: "fas fa-image"))
-                  concat("View Illustration")
-                end)
+          if images.size == 1
+            # Render a single regular image with high-fidelity styling
+            media_html += content_tag(:div, class: "my-12 relative group") do
+              content_tag(:div, class: "overflow-hidden rounded-[2.5rem] shadow-2xl border-4 border-white bg-white") do
+                image_tag(images.first, class: "w-full h-auto object-contain hover:scale-[1.02] transition-transform duration-700")
               end
-            end.join.html_safe
+            end
+          else
+            # Render multiple images as a mini-deck
+            deck_id = "deck_#{SecureRandom.hex(4)}"
+            media_html += content_tag(:div, class: "flex h-[600px] md:h-[800px] bg-slate-900 rounded-[3rem] overflow-hidden shadow-2xl border-4 border-slate-900 my-12 group/deck relative") do
+              # Left Sidebar: Thumbnails
+              thumbnails = content_tag(:div, class: "w-24 md:w-48 overflow-y-auto bg-slate-800/80 p-4 space-y-4 border-r border-white/5 hidden sm:block") do
+                images.map.with_index do |img_url, idx|
+                  content_tag(:a, href: "##{deck_id}_slide_#{idx}", class: "block rounded-xl overflow-hidden border-2 border-transparent hover:border-[#f9a825] transition-all opacity-50 hover:opacity-100") do
+                    image_tag(img_url, class: "w-full aspect-[4/3] object-cover bg-white")
+                  end
+                end.join.html_safe
+              end
+
+              # Main Content: Slides
+              slides = content_tag(:div, class: "flex-grow overflow-y-auto bg-slate-900/50 scroll-smooth p-6 md:p-16 space-y-16") do
+                images.map.with_index do |img_url, idx|
+                  content_tag(:div, id: "#{deck_id}_slide_#{idx}", class: "w-full flex flex-col items-center gap-4") do
+                    content_tag(:div, class: "w-full bg-white shadow-2xl rounded-2xl overflow-hidden relative group/slide") do
+                      concat(image_tag(img_url, class: "w-full h-auto object-contain", alt: "Slide #{idx + 1}"))
+                      concat(content_tag(:div, class: "absolute bottom-4 right-4 z-20") do
+                        content_tag(:span, "Slide #{idx + 1}", class: "bg-slate-900/60 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10")
+                      end)
+                    end
+                  end
+                end.join.html_safe
+              end
+
+              concat(thumbnails)
+              concat(slides)
+            end
           end
         end
         
@@ -53,7 +140,7 @@
               video_src = video_src.gsub("youtu.be/", "youtube.com/embed/")
             end
 
-            content_tag(:div, class: "my-10 aspect-video bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 group/video relative") do
+            content_tag(:div, class: "my-10 aspect-video bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-slate-900 group/video relative") do
               content_tag(:iframe, "", 
                 src: video_src, 
                 class: "w-full h-full relative z-10",
@@ -69,19 +156,7 @@
         temp_block = temp_block.gsub(/(?:Image|Video):\s*[^\n]+\n?/i, "").strip
       end
 
-      # PDF insertion for lobbying lesson plans
-      pdf_html = ""
-      if show_pdf && !pdf_rendered && (temp_block.match?(/Activity:/i) || temp_block.match?(/Mini-Lesson:/i))
-        pdf_rendered = true
-        pdf_html = content_tag(:div, class: "my-12 bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm flex items-center gap-6 group hover:border-[#f9a825] transition-colors") do
-          concat(content_tag(:div, class: "w-16 h-16 rounded-2xl bg-[#f9a825]/10 flex items-center justify-center text-[#f9a825] group-hover:bg-[#f9a825] group-hover:text-slate-900 transition-colors") { content_tag(:i, "", class: "fas fa-file-pdf text-2xl") })
-          concat(content_tag(:div, class: "flex-grow") do
-            concat(content_tag(:h4, "Lesson Handout Available", class: "text-slate-900 font-bold text-lg mb-1"))
-            concat(content_tag(:p, "Download the student activity sheet for this section.", class: "text-slate-500 text-sm mb-0"))
-          end)
-          concat(link_to(url_for(civic_topic.handout_pdf), class: "btn btn-circle bg-slate-900 border-none text-white hover:bg-[#f9a825] hover:text-slate-900 shadow-lg", target: "_blank") { content_tag(:i, "", class: "fas fa-arrow-down") })
-        end
-      end
+      lines = temp_block.split("\n")
 
       block_html = if temp_block.match?(/Mini-Lesson:/i)
         content = temp_block.gsub(/Mini-Lesson:/i, "").strip
@@ -151,34 +226,31 @@
             concat(content_tag(:div, simple_format(content), class: "text-white font-bold text-xl leading-relaxed [&>p]:m-0"))
           end)
         end
-      else
-        # Enhanced list detection for simple text blocks
-        lines = temp_block.split("\n")
-        if lines.length > 2 && lines.any? { |l| l.include?("|") }
-          # Table detection (require at least 3 lines to be a table)
-          content_tag(:div, class: "overflow-x-auto my-10 rounded-2xl border border-slate-200 shadow-sm") do
-            content_tag(:table, class: "table table-zebra w-full") do
-              header_rendered = false
-              lines.map.with_index do |line, i|
-                cells = line.split("|").map(&:strip)
-                next if cells.all?(&:blank?)
-                
-                if !header_rendered
-                  header_rendered = true
-                  content_tag(:thead, class: "bg-slate-100") do
-                    content_tag(:tr) do
-                      cells.map { |cell| content_tag(:th, cell, class: "text-slate-900 font-black uppercase tracking-widest text-[10px] py-4") }.join.html_safe
-                    end
-                  end
-                else
+      elsif lines.length > 2 && lines.any? { |l| l.include?("|") }
+        # Table detection (require at least 3 lines to be a table)
+        content_tag(:div, class: "overflow-x-auto my-10 rounded-2xl border border-slate-200 shadow-sm") do
+          content_tag(:table, class: "table table-zebra w-full") do
+            header_rendered = false
+            lines.map.with_index do |line, i|
+              cells = line.split("|").map(&:strip)
+              next if cells.all?(&:blank?)
+              
+              if !header_rendered
+                header_rendered = true
+                content_tag(:thead, class: "bg-slate-100") do
                   content_tag(:tr) do
-                    cells.map { |cell| content_tag(:td, cell, class: "text-slate-700 font-medium py-4") }.join.html_safe
+                    cells.map { |cell| content_tag(:th, cell, class: "text-slate-900 font-black uppercase tracking-widest text-[10px] py-4") }.join.html_safe
                   end
                 end
-              end.join.html_safe
-            end
+              else
+                content_tag(:tr) do
+                  cells.map { |cell| content_tag(:td, cell, class: "py-4 text-slate-700") }.join.html_safe
+                end
+              end
+            end.join.html_safe
           end
-        elsif lines.length > 1 && lines[1..].any? { |l| l.strip.match?(/^[*\-•]/) }
+        end
+      elsif lines.length > 1 && lines[1..].any? { |l| l.strip.match?(/^[*\-•]/) }
           content_tag(:div, class: "space-y-4 my-6") do
             lines.each_with_index do |line, i|
               if i == 0
@@ -241,10 +313,9 @@
             simple_format(temp_block)
           end
         end
-      end
 
-      pdf_html + media_html + block_html
-    end.join("\n").html_safe
+        (media_html + block_html).html_safe
+      end.join("\n").html_safe
   end
 
   def render_videos(url_text)
@@ -261,7 +332,7 @@
         video_src = video_src.gsub("youtu.be/", "youtube.com/embed/")
       end
 
-      content_tag(:div, class: "mb-8 aspect-video bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100") do
+      content_tag(:div, class: "mb-8 aspect-video bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-slate-900") do
         content_tag(:iframe, "", 
           src: video_src, 
           class: "w-full h-full",
@@ -288,6 +359,24 @@
       <div class="text-slate-600 leading-relaxed text-xl">
         <%= render_lesson_content(civic_topic.bio, civic_topic) %>
       </div>
+
+      <% if pdf_block_html.present? %>
+        <%= pdf_block_html %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Master Slide Deck -->
+  <% if master_slides_html.present? %>
+    <div class="my-20">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="w-6 h-[1px] bg-[#f9a825]"></span>
+        <span class="text-[#f9a825] text-[10px] font-black uppercase tracking-[0.4em]">Visual Presentation</span>
+      </div>
+      <h2 class="text-4xl font-black text-slate-900 mb-8 border-b-8 border-slate-900 pb-4 inline-block tracking-tighter">
+        Lesson Slide Deck
+      </h2>
+      <%= master_slides_html %>
     </div>
   <% end %>
 
@@ -349,7 +438,7 @@
               <span class="text-[#f9a825] text-[10px] font-black uppercase tracking-[0.4em]">Phase 01</span>
             </div>
             <h3 class="text-4xl font-black text-slate-900 uppercase tracking-tighter leading-tight">
-              <%= civic_topic.legacy_heading.presence || "Taxes" %>
+              <%= civic_topic.legacy_heading.presence || "Phase 01" %>
             </h3>
           </div>
         </div>
@@ -376,7 +465,7 @@
               <span class="text-[#f9a825] text-[10px] font-black uppercase tracking-[0.4em]">Phase 02</span>
             </div>
             <h3 class="text-4xl font-black text-slate-900 uppercase tracking-tighter leading-tight">
-              <%= civic_topic.main_ideas_heading.presence || "Retirement" %>
+              <%= civic_topic.main_ideas_heading.presence || "Phase 02" %>
             </h3>
           </div>
         </div>
@@ -403,7 +492,7 @@
               <span class="text-[#f9a825] text-[10px] font-black uppercase tracking-[0.4em]">Phase 03</span>
             </div>
             <h3 class="text-4xl font-black text-slate-900 uppercase tracking-tighter leading-tight">
-              <%= civic_topic.criticism_heading.presence || "Real-World" %>
+              <%= civic_topic.criticism_heading.presence || "Phase 03" %>
             </h3>
           </div>
         </div>
@@ -432,10 +521,17 @@
         <h2 class="text-5xl font-black text-white mb-12 tracking-tighter">Exit Ticket</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
-          <% civic_topic.suggested_reading.split("\n\n").each do |block| %>
+          <% civic_topic.suggested_reading.to_s.split("\n\n").each do |block| %>
+            <%# Pre-filter: if after removing Image/Video tags the block is empty, skip it %>
+            <% clean_block = block.gsub(/(?:Image|Video):\s*[^\n]+\n?/i, "").strip %>
+            <% next if clean_block.blank? %>
+
+            <% rendered_block = render_lesson_content(block, civic_topic, dark_mode: true) %>
+            <% next if rendered_block.blank? || strip_tags(rendered_block).strip.blank? %>
+            
             <div class="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] hover:bg-white/10 transition-all duration-500 hover:-translate-y-1">
               <div class="text-white leading-relaxed text-xl font-serif italic">
-                <%= render_lesson_content(block, civic_topic, dark_mode: true) %>
+                <%= rendered_block %>
               </div>
             </div>
           <% end %>

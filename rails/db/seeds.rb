@@ -458,15 +458,31 @@ puts "8th Grade U.S. History lesson plans seeded."
   "Chile in the Cold War",
   "The Pinochet File"
 ].each do |name|
-  topic = CivicTopic.find_or_create_by!(name: name)
-  topic.update!(
-    tagline: "Exploring #{name} in 10th Grade World History.",
-    bio: "Placeholder biography for #{name}. Content coming soon.",
-    bio_heading: "Overview",
-    published: true,
-    grade_level: "10th Grade",
-    subject: "World History"
-  )
+  topic = CivicTopic.find_or_create_by!(name: name, grade_level: "10th Grade", subject: "World History")
+  
+  if name == "Chile in the Cold War"
+    topic.update!(
+      tagline: "Exploring Chile's struggle between competing ideologies during the Cold War.",
+      bio: "Image: lesson_plans/chile_cold_war/intro.png\n\nObjectives: Students will analyze the 1973 Chilean coup through multiple historical lenses, identifying how political interests shape different narratives of the same event.\n\nEssential Question: How do power, perspective, and political interests shape the way history is told?\n\nContext: In 1970, Chile elected Salvador Allende, the first Marxist to become president of a Latin American country through open elections. His presidency and the subsequent 1973 military coup led by General Augusto Pinochet became a flashpoint of the Cold War, involving superpowers and competing ideologies.",
+      legacy: "Image: lesson_plans/chile_cold_war/history_map_1.jpeg\n\nImage: lesson_plans/chile_cold_war/history_map_2.jpeg\n\nImage: lesson_plans/chile_cold_war/cold_war_concerns.svg\n\nPotential Starter Questions\n* What was the Cold War?\n* How did the U.S. and USSR compete for influence in Latin America?\n* What is the difference between a democracy and a dictatorship?\n\nImage: lesson_plans/chile_cold_war/allende_1.svg\nImage: lesson_plans/chile_cold_war/allende_2.svg\nImage: lesson_plans/chile_cold_war/allende_3.svg\n\nVideo: https://www.youtube.com/watch?v=sF5kczRhW9E",
+      main_ideas: "Image: lesson_plans/chile_cold_war/why_overthrow.svg\n\nActivity: Memories of Santiago: watch 4:35-end\nVideo: https://www.youtube.com/watch?v=gw5YrRC6VE8\n\nImage: lesson_plans/chile_cold_war/slide_1.svg\nImage: lesson_plans/chile_cold_war/slide_2.svg\nImage: lesson_plans/chile_cold_war/slide_3.svg\n\nImage: lesson_plans/chile_cold_war/slide_4.svg\nImage: lesson_plans/chile_cold_war/slide_5.svg\nImage: lesson_plans/chile_cold_war/slide_6.svg\n\nImage: lesson_plans/chile_cold_war/slide_7.svg\nImage: lesson_plans/chile_cold_war/slide_8.svg\n\nVideo: https://www.youtube.com/watch?v=gOdP3VtXJvE\n\nVideo: https://www.youtube.com/watch?v=y9HjvHZfCUI",
+      criticism: "Image: lesson_plans/chile_cold_war/appeal_to_un.svg\n\nUntold History (The Progressive Perspective):\n* Focuses on the CIA's role in destabilizing the Allende government through economic pressure and support for opposition groups.\n* Highlights the democratic legitimacy of Allende's election and his social reforms aimed at reducing inequality.\n* Emphasizes the brutal human rights abuses of the Pinochet regime, including the Caravans of Death and the Operation Condor.\n* Views the coup as an act of American imperialism intended to protect corporate interests and prevent the spread of socialism.\n\nImage: lesson_plans/chile_cold_war/slide_9.svg\nImage: lesson_plans/chile_cold_war/slide_10.svg\nImage: lesson_plans/chile_cold_war/slide_11.svg\n\nImage: lesson_plans/chile_cold_war/slide_12.svg\nImage: lesson_plans/chile_cold_war/slide_13.svg\nImage: lesson_plans/chile_cold_war/slide_14.svg\n\nImage: lesson_plans/chile_cold_war/slide_15.svg\nImage: lesson_plans/chile_cold_war/slide_16.svg\n\nUnhumans (The Counter-Revolutionary Perspective):\n* Argues that Allende was leading Chile toward a Soviet-aligned Marxist dictatorship and violating the constitution.\n* Highlights the severe economic chaos, hyperinflation, and food shortages caused by Allende's policies.\n* Views the military intervention as a necessary preventative action by the Chilean armed forces to save the country from civil war.\n* Emphasizes the economic 'Miracle of Chile' that followed, transforming the nation into a stable, market-oriented economy.",
+      suggested_reading: "Image: lesson_plans/chile_cold_war/summary.svg\n\nWhat current events have multiple competing narratives explaining them? How can we use the skills we have learned to understand these events?",
+      bio_heading: "Lesson Overview",
+      legacy_heading: "The Cold War",
+      main_ideas_heading: "The Overthrow",
+      criticism_heading: "Two Narratives",
+      published: true,
+      is_lesson_plan: true
+    )
+  else
+    topic.update!(
+      tagline: "Exploring #{name} in 10th Grade World History.",
+      bio: "Placeholder biography for #{name}. Content coming soon.",
+      bio_heading: "Overview",
+      published: true
+    )
+  end
 end
 puts "10th Grade World History lesson plans seeded."
 

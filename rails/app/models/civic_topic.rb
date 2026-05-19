@@ -10,6 +10,6 @@ class CivicTopic < ApplicationRecord
   scope :us_history, -> { where(subject: "U.S. History") }
 
   def is_lesson_plan?
-    is_lesson_plan || [12, 9, 40, 20, 19, 21].include?(id) || subject == "Lesson Plan"
+    is_lesson_plan || [12, 9, 40, 20, 19, 21, 17].include?(id) || subject == "Lesson Plan"
   end
 end

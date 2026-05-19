@@ -1,5 +1,7 @@
 <%= turbo_frame_tag dom_id(post) do %>
-  <div class="relative card bg-white shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col h-full border border-slate-100 overflow-hidden">
+  <div class="relative card bg-white shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col h-full border border-slate-100 overflow-hidden"
+       data-controller="post-permissions"
+       data-post-permissions-owner-id-value="<%= post.user_id %>">
     <%# Main card link overlay %>
     <%= link_to "", post_path(post), class: "absolute inset-0 z-0", data: { turbo_frame: "_top" } %>
     
@@ -43,26 +45,79 @@
     </div>
 
     <%# Management UI %>
-    <% if policy(post).update? %>
-      <div class="absolute top-4 right-4 flex flex-wrap justify-end gap-2 z-20 pointer-events-auto">
+    <% 
+      # Authorization Logic:
+      # 1. In a regular request, check policy(post).update?
+      # 2. In a broadcast (no request context), include the UI but hide it.
+      #    The Stimulus controller will show it ONLY if the user-id meta matches owner-id.
+      
+      is_authorized = false
+      is_broadcast = true
+      
+      if respond_to?(:policy)
+        begin
+          is_authorized = policy(post).update?
+          is_broadcast = false
+        rescue
+          # Likely Devise::MissingWarden (broadcast)
+        end
+      end
+    %>
+    
+    <% if is_authorized || is_broadcast %>
+      <div class="absolute top-4 right-4 flex flex-wrap justify-end gap-2 z-20 pointer-events-auto <%= 'hidden' if is_broadcast %>"
+           data-post-permissions-target="controls">
         <%# Status Toggles %>
-        <% if post.draft? || post.archived? %>
+        <% if post.draft? %>
           <%= button_to post_path(post), 
               params: { post: { status: 'published' } }, 
               method: :patch, 
               class: "btn btn-success btn-xs gap-1 shadow-md border-none", 
-              data: { turbo_stream: true } do %>
+              form: { data: { turbo_stream: true } } do %>
             <i class="fas fa-check"></i>
             Publish
           <% end %>
-        <% elsif post.published? %>
           <%= button_to post_path(post), 
               params: { post: { status: 'archived' } }, 
               method: :patch, 
               class: "btn btn-warning btn-xs gap-1 shadow-md text-white border-none", 
-              data: { turbo_stream: true } do %>
+              form: { data: { turbo_stream: true } } do %>
             <i class="fas fa-archive"></i>
             Archive
+          <% end %>
+        <% elsif post.published? %>
+          <%= button_to post_path(post), 
+              params: { post: { status: 'draft' } }, 
+              method: :patch, 
+              class: "btn btn-ghost btn-xs bg-white/90 hover:bg-slate-200 border border-slate-200 gap-1 shadow-md transition-all", 
+              form: { data: { turbo_stream: true } } do %>
+            <i class="fas fa-file-lines"></i>
+            Draft
+          <% end %>
+          <%= button_to post_path(post), 
+              params: { post: { status: 'archived' } }, 
+              method: :patch, 
+              class: "btn btn-warning btn-xs gap-1 shadow-md text-white border-none", 
+              form: { data: { turbo_stream: true } } do %>
+            <i class="fas fa-archive"></i>
+            Archive
+          <% end %>
+        <% elsif post.archived? %>
+          <%= button_to post_path(post), 
+              params: { post: { status: 'published' } }, 
+              method: :patch, 
+              class: "btn btn-success btn-xs gap-1 shadow-md border-none", 
+              form: { data: { turbo_stream: true } } do %>
+            <i class="fas fa-check"></i>
+            Publish
+          <% end %>
+          <%= button_to post_path(post), 
+              params: { post: { status: 'draft' } }, 
+              method: :patch, 
+              class: "btn btn-ghost btn-xs bg-white/90 hover:bg-slate-200 border border-slate-200 gap-1 shadow-md transition-all", 
+              form: { data: { turbo_stream: true } } do %>
+            <i class="fas fa-file-lines"></i>
+            Draft
           <% end %>
         <% end %>
 
@@ -78,7 +133,7 @@
         <%= button_to post_path(post), 
             method: :delete, 
             class: "btn btn-error btn-xs gap-1 shadow-md text-white border-none", 
-            data: { turbo_confirm: "Are you sure?", turbo_stream: true } do %>
+            form: { data: { turbo_confirm: "Are you sure?", turbo_stream: true } } do %>
           <i class="fas fa-trash"></i>
           Delete
         <% end %>

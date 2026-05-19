@@ -4,7 +4,7 @@ class PostPolicy < ApplicationPolicy
   end
 
   def show?
-    true
+    record.published? || (user.present? && record.user_id == user.id)
   end
 
   def create?

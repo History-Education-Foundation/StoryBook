@@ -3,14 +3,11 @@ class PostsController < ApplicationController
   before_action :set_post, only: [:show, :edit, :update, :destroy]
 
   def index
-    if user_signed_in?
-      @posts = Post.where(user: current_user).or(Post.published).order(created_at: :desc)
-    else
-      @posts = Post.visible_to_guest.order(created_at: :desc)
-    end
+    @posts = policy_scope(Post).order(created_at: :desc)
   end
 
   def show
+    authorize @post
   end
 
   def new

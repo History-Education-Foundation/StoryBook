@@ -48,6 +48,7 @@ RSpec.describe "Posts", type: :request do
 
       it "returns turbo stream response when requested" do
         patch post_path(my_post), params: { post: { title: "Turbo Title" } }, as: :turbo_stream
+        expect(response).to have_http_status(:ok)
         expect(response.media_type).to eq("text/vnd.turbo-stream.html")
         expect(response.body).to include("turbo-stream action=\"replace\"")
       end

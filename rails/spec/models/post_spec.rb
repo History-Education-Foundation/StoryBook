@@ -162,6 +162,13 @@ RSpec.describe Post, type: :model do
       expect(post).not_to be_valid
     end
 
+    it "broadcasts a replacement to the posts stream after update" do
+      post = create(:post)
+      expect {
+        post.update!(title: "New Title")
+      }.to have_broadcasted_to("posts")
+    end
+
     describe "scopes" do
       let!(:draft_post) { create(:post, status: :draft) }
       let!(:published_post) { create(:post, status: :published) }

@@ -30,7 +30,7 @@
           {}, 
           { class: "select select-bordered w-full focus:select-primary transition-all duration-200", data: { action: "change->form-toggle#toggle", form_toggle_target: "select" } } %>
       
-      <div class="mt-2 hidden" data-form_toggle_target="input">
+      <div class="mt-2 hidden" data-form-toggle-target="input">
         <%= form.text_field :new_category_name, class: "input input-bordered w-full input-sm focus:input-primary transition-all duration-200", placeholder: "Enter new category name..." %>
       </div>
     </div>
@@ -44,7 +44,7 @@
           {}, 
           { class: "select select-bordered w-full focus:select-primary transition-all duration-200", data: { action: "change->form-toggle#toggle", form_toggle_target: "select" } } %>
       
-      <div class="mt-2 hidden" data-form_toggle_target="input">
+      <div class="mt-2 hidden" data-form-toggle-target="input">
         <%= form.text_field :new_author_name, class: "input input-bordered w-full input-sm focus:input-primary transition-all duration-200", placeholder: "Enter new author name..." %>
       </div>
     </div>

@@ -41,55 +41,6 @@
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
       <div class="prose prose-xl prose-slate max-w-none">
         
-        <!-- Biography / Overview (Scholar Style) -->
-        <% if @concept.bio.present? %>
-          <% 
-            bio_text = @concept.bio
-            citation = nil
-            if bio_text.include?("Work Cited:")
-              parts = bio_text.split("Work Cited:", 2)
-              bio_text = parts[0]
-              citation = parts[1]
-            end
-          %>
-          <div class="mb-20">
-            <% if @concept.bio_heading.present? %>
-              <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= @concept.bio_heading %></h2>
-            <% end %>
-            <div class="text-slate-600 leading-relaxed text-lg 
-                        [&>p]:mb-6
-                        [&>p:first-of-type]:first-letter:text-8xl 
-                        [&>p:first-of-type]:first-letter:font-bold 
-                        [&>p:first-of-type]:first-letter:text-[#f9a825] 
-                        [&>p:first-of-type]:first-letter:mr-4 
-                        [&>p:first-of-type]:first-letter:float-left
-                        [&>p:first-of-type]:first-letter:leading-[0.7]">
-              <%= simple_format bio_text %>
-            </div>
-
-            <% if citation.present? %>
-              <div class="mt-12 pt-8 border-t border-slate-100">
-                <div class="flex items-start gap-4 p-8 bg-slate-50 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
-                  <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <i class="fas fa-quote-right text-6xl text-slate-900"></i>
-                  </div>
-                  <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <i class="fas fa-bookmark text-[#f9a825]"></i>
-                  </div>
-                  <div>
-                    <h4 class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-3 flex items-center gap-2">
-                      Work Cited
-                    </h4>
-                    <p class="text-slate-500 italic font-serif text-lg leading-relaxed m-0">
-                      <%= citation.strip %>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            <% end %>
-          </div>
-        <% end %>
-
         <!-- Image Captions / Gallery (Scholar Publications Style) -->
         <% if @concept.publications.present? %>
           <div class="mb-20">
@@ -196,88 +147,7 @@
           </div>
         <% end %>
 
-        <!-- Main Ideas / Perspectives (Scholar Style Cards) -->
-        <% if @concept.main_ideas.present? %>
-          <div class="mb-20">
-            <% if @concept.main_ideas_heading.present? %>
-              <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
-                <%= @concept.main_ideas_heading %>
-              </h2>
-            <% end %>
-            
-            <div class="grid grid-cols-1 gap-8">
-              <% @concept.main_ideas.split("\n").reject(&:blank?).each do |idea| %>
-                <% 
-                  icon = "lightbulb"
-                  case idea.downcase
-                  when /justice|equality|discrimination/
-                    icon = "balance-scale"
-                  when /health|medical/
-                    icon = "hand-holding-heart"
-                  when /education|college|school/
-                    icon = "graduation-cap"
-                  when /workers|unions|wage/
-                    icon = "users"
-                  when /environment|climate|sustainable/
-                    icon = "leaf"
-                  when /regulation|corporat|trust/
-                    icon = "gavel"
-                  when /leadership|dictator|centralized/
-                    icon = "user-shield"
-                  when /nationalism|rebirth|unity/
-                    icon = "flag"
-                  when /opposition|suppression|censorship/
-                    icon = "ban"
-                  when /militarism|military|aggressive/
-                    icon = "person-military-pointing"
-                  when /economy|controlled/
-                    icon = "chart-line"
-                  when /propaganda|media/
-                    icon = "broadcast-tower"
-                  when /scapegoating|persecuting|enemies/
-                    icon = "skull-crossbones"
-                  when /religious|doctrine|sacred|faith/
-                    icon = "church"
-                  when /authority|political power|dictatorial/
-                    icon = "crown"
-                  when /separation|church and state|fusion/
-                    icon = "link-slash"
-                  when /resistance|pluralism|diversity/
-                    icon = "users-slash"
-                  when /authoritarianism|repression|repression/
-                    icon = "user-lock"
-                  when /efficiency|scarcity|planning/
-                    icon = "clipboard-list"
-                  when /violence|purges|famine/
-                    icon = "skull"
-                  when /theory|practice|vision/
-                    icon = "flask"
-                  when /achievement|literacy|health|industrialization/
-                    icon = "chart-line"
-                  when /capitalism|exploitation|inequality/
-                    icon = "handcuffs"
-                  end
-                %>
-                <div class="card bg-white border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-3xl overflow-hidden group">
-                  <div class="card-body p-8 flex-row gap-6 items-start">
-                    <div class="w-14 h-14 rounded-2xl bg-[#f9a825]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#f9a825] group-hover:text-white transition-colors duration-300">
-                      <i class="fas fa-<%= icon %> text-[#f9a825] text-xl group-hover:text-white"></i>
-                    </div>
-                    <div class="text-slate-600 m-0">
-                      <% if idea.include?(":") %>
-                        <% parts = idea.split(":", 2) %>
-                        <h4 class="font-bold text-slate-900 text-xl mb-2"><%= parts[0] %></h4>
-                        <p class="text-lg leading-relaxed m-0"><%= parts[1] %></p>
-                      <% else %>
-                        <p class="text-lg leading-relaxed m-0"><%= idea %></p>
-                      <% end %>
-                    </div>
-                  </div>
-                </div>
-              <% end %>
-            </div>
-          </div>
-        <% end %>
+        <!-- Main Ideas section removed -->
 
         <!-- Criticism / Risks (Scholar Style Red Box) -->
         <% if @concept.criticism.present? %>
@@ -420,66 +290,7 @@
           <% end %>
         <% end %>
 
-        <!-- Legacy / Context (Scholar Style Italic Box) -->
-        <% if @concept.legacy.present? %>
-          <% 
-            legacy_text = @concept.legacy
-            conclusion_text = nil
-            if legacy_text.include?("\n\nConclusion")
-              parts = legacy_text.split("\n\nConclusion", 2)
-              legacy_text = parts[0]
-              conclusion_text = parts[1]
-            elsif legacy_text.include?("\nConclusion")
-              parts = legacy_text.split("\nConclusion", 2)
-              legacy_text = parts[0]
-              conclusion_text = parts[1]
-            end
-
-            is_responses = @concept.legacy_heading == 'Responses to Criticisms'
-          %>
-          <div class="mb-20">
-            <% if @concept.legacy_heading.present? %>
-              <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
-                <%= @concept.legacy_heading %>
-              </h2>
-            <% end %>
-
-            <% if is_responses %>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                <% legacy_text.split("\n").reject(&:blank?).each do |item| %>
-                  <div class="p-8 bg-emerald-50 rounded-3xl border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
-                    <% if item.include?(":") %>
-                      <% parts = item.split(":", 2) %>
-                      <h4 class="font-bold text-emerald-900 text-xl mb-3 flex items-center gap-3">
-                        <i class="fas fa-shield-alt text-emerald-500"></i>
-                        <%= parts[0] %>
-                      </h4>
-                      <p class="text-lg text-slate-700 leading-relaxed m-0"><%= parts[1] %></p>
-                    <% else %>
-                      <p class="text-lg text-slate-700 leading-relaxed m-0"><%= item %></p>
-                    <% end %>
-                  </div>
-                <% end %>
-              </div>
-            <% else %>
-              <div class="text-slate-700 leading-relaxed text-xl bg-[#f9a825]/5 p-10 rounded-3xl italic relative border-t-4 border-[#f9a825] [&>p]:mb-4">
-                <div class="absolute -top-4 right-10 w-8 h-8 bg-[#f9a825] rounded-full flex items-center justify-center text-white text-xs shadow-lg">
-                  <i class="fas fa-clock"></i>
-                </div>
-                <%= simple_format legacy_text %>
-              </div>
-            <% end %>
-
-            <% if conclusion_text.present? %>
-              <div class="mt-20">
-                <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block">Conclusion</h2>
-                <div class="text-slate-600 leading-relaxed text-lg">
-                  <%= simple_format conclusion_text.strip %>
-                </div>
-              </div>
-            <% end %>
-          </div>
-        <% end %>
+        <!-- Legacy section removed -->
 
         <!-- Suggested Reading / Inquiry (Scholar Style List) -->
         <% if @concept.suggested_reading.present? %>

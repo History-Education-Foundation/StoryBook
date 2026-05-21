@@ -26,16 +26,17 @@
             citation = parts[1]
           end
         %>
-        <div class="mb-16">
-          <h2 class="text-3xl font-bold text-slate-900 mb-8 border-b-2 border-[#f9a825] pb-4 inline-block"><%= civic_topic.bio_heading.presence || 'Overview' %></h2>
-          <div class="text-slate-600 leading-relaxed text-lg
-                      [&>p]:mb-6
-                      [&>p:first-of-type]:first-letter:text-8xl 
-                      [&>p:first-of-type]:first-letter:font-bold 
+        <div class="mb-20">
+          <h2 class="text-4xl font-black text-slate-900 mb-10 border-b-8 border-[#f9a825] pb-4 inline-block tracking-tighter"><%= civic_topic.bio_heading.presence || 'Overview' %></h2>
+          <div class="text-slate-600 leading-relaxed text-xl font-medium
+                      [&>p]:mb-8
+                      [&>p:first-of-type]:first-letter:text-9xl 
+                      [&>p:first-of-type]:first-letter:font-black 
                       [&>p:first-of-type]:first-letter:text-[#f9a825] 
-                      [&>p:first-of-type]:first-letter:mr-4 
+                      [&>p:first-of-type]:first-letter:mr-6 
                       [&>p:first-of-type]:first-letter:float-left
-                      [&>p:first-of-type]:first-letter:leading-[0.7]">
+                      [&>p:first-of-type]:first-letter:leading-[0.7]
+                      [&>p:first-of-type]:first-letter:tracking-tighter">
             <% 
               # Smart list detection for bio
               processed_bio = bio_text.split("\n").map do |line|
@@ -176,37 +177,37 @@
 
       <!-- Main Ideas / Perspectives -->
       <% if civic_topic.main_ideas.present? %>
-        <div class="mb-20">
-          <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
+        <div class="mb-24">
+          <h2 class="text-4xl font-black text-slate-900 mb-12 border-b-8 border-[#f9a825] pb-4 inline-block tracking-tighter">
             <%= civic_topic.main_ideas_heading.presence || 'Main Ideas' %>
           </h2>
           
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
             <% civic_topic.main_ideas.split("\n").reject(&:blank?).each do |idea| %>
-              <div class="card bg-white border-2 border-slate-100 shadow-sm hover:shadow-2xl hover:border-[#f9a825]/20 transition-all duration-300 rounded-[2rem] overflow-hidden group">
-                <div class="card-body p-8">
-                  <div class="flex items-start gap-6 mb-4">
-                    <div class="w-14 h-14 rounded-2xl bg-[#f9a825]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#f9a825] group-hover:text-white transition-colors duration-300">
+              <div class="group relative bg-white border-2 border-slate-100 shadow-sm hover:shadow-[0_30px_60px_rgba(0,0,0,0.1)] hover:border-[#f9a825]/30 transition-all duration-500 rounded-[3rem] overflow-hidden">
+                <div class="p-10">
+                  <div class="flex items-start gap-8 mb-6">
+                    <div class="w-16 h-16 rounded-2xl bg-[#f9a825]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#f9a825] transition-all duration-500 shadow-sm">
                       <% 
                         icon = 'fa-lightbulb'
                         icon = 'fa-balance-scale' if idea.downcase.include?('court') || idea.downcase.include?('v.') || idea.downcase.include?('judicial')
                         icon = 'fa-landmark' if idea.downcase.include?('congress') || idea.downcase.include?('legislative')
                         icon = 'fa-user-tie' if idea.downcase.include?('president') || idea.downcase.include?('executive')
                       %>
-                      <i class="fas <%= icon %> text-[#f9a825] text-xl group-hover:text-white"></i>
+                      <i class="fas <%= icon %> text-[#f9a825] text-2xl group-hover:text-white transition-colors"></i>
                     </div>
                     <% if idea.include?(":") %>
                       <% parts = idea.split(":", 2) %>
-                      <h4 class="font-bold text-slate-900 text-xl leading-tight pt-2"><%= parts[0] %></h4>
+                      <h4 class="font-black text-slate-900 text-2xl leading-none pt-2 tracking-tighter"><%= parts[0] %></h4>
                     <% end %>
                   </div>
                   
                   <div class="text-slate-600 m-0">
                     <% if idea.include?(":") %>
                       <% parts = idea.split(":", 2) %>
-                      <p class="text-lg leading-relaxed m-0"><%= parts[1] %></p>
+                      <p class="text-xl leading-relaxed m-0 font-medium"><%= parts[1].strip %></p>
                     <% else %>
-                      <p class="text-lg leading-relaxed m-0"><%= idea %></p>
+                      <p class="text-xl leading-relaxed m-0 font-medium"><%= idea.strip %></p>
                     <% end %>
                   </div>
                 </div>
@@ -427,32 +428,32 @@
 
           is_activity = legacy_text.downcase.include?('activity') || legacy_text.downcase.include?('move to')
         %>
-        <div class="mb-20">
-          <h2 class="text-3xl font-bold text-slate-900 mb-10 border-b-2 border-[#f9a825] pb-4 inline-block">
+        <div class="mb-24">
+          <h2 class="text-4xl font-black text-slate-900 mb-12 border-b-8 border-[#f9a825] pb-4 inline-block tracking-tighter">
             <%= civic_topic.legacy_heading.presence || (is_activity ? 'Classroom Activity' : 'Legacy & Context') %>
           </h2>
           
           <% if is_activity %>
-            <div class="bg-slate-900 text-white p-10 md:p-16 rounded-[3rem] shadow-2xl relative overflow-hidden group border-4 border-[#f9a825]/20 hover:border-[#f9a825]/40 transition-all">
-              <div class="absolute top-0 right-0 p-12 opacity-10 group-hover:scale-110 transition-transform">
-                <i class="fas fa-users text-[10rem]"></i>
+            <div class="bg-slate-900 text-white p-12 md:p-20 rounded-[4rem] shadow-[0_40px_80px_rgba(0,0,0,0.3)] relative overflow-hidden group border-b-[12px] border-[#f9a825]">
+              <div class="absolute top-0 right-0 p-12 opacity-10 group-hover:scale-125 transition-transform duration-1000">
+                <i class="fas fa-users text-[15rem]"></i>
               </div>
               <div class="relative z-10">
-                <div class="flex items-center gap-4 mb-8">
-                  <div class="w-12 h-12 rounded-full bg-[#f9a825] flex items-center justify-center text-slate-900 shadow-lg">
-                    <i class="fas fa-running text-xl"></i>
+                <div class="flex items-center gap-6 mb-10">
+                  <div class="w-16 h-16 rounded-3xl bg-[#f9a825] flex items-center justify-center text-slate-900 shadow-[0_15px_30px_rgba(249,168,37,0.4)] group-hover:rotate-12 transition-transform">
+                    <i class="fas fa-running text-2xl"></i>
                   </div>
-                  <span class="text-[#f9a825] font-black uppercase tracking-[0.3em] text-sm">Action Block</span>
+                  <span class="text-[#f9a825] font-black uppercase tracking-[0.4em] text-sm">Action Block</span>
                 </div>
-                <div class="text-2xl md:text-3xl font-bold leading-relaxed mb-0">
+                <div class="text-3xl md:text-5xl font-black leading-tight mb-0 tracking-tighter">
                   <%= simple_format legacy_text %>
                 </div>
               </div>
             </div>
           <% else %>
-            <div class="text-slate-700 leading-relaxed text-xl bg-[#f9a825]/5 p-10 rounded-3xl italic relative border-t-4 border-[#f9a825] [&>p]:mb-4">
-              <div class="absolute -top-4 right-10 w-8 h-8 bg-[#f9a825] rounded-full flex items-center justify-center text-white text-xs shadow-lg">
-                <i class="fas fa-clock"></i>
+            <div class="text-slate-700 leading-relaxed text-2xl font-serif bg-slate-50 p-12 rounded-[3rem] italic relative border-l-[12px] border-[#f9a825] shadow-sm [&>p]:mb-6 last:[&>p]:mb-0">
+              <div class="absolute -top-6 right-12 w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center text-[#f9a825] shadow-xl">
+                <i class="fas fa-history"></i>
               </div>
               <%= simple_format legacy_text %>
             </div>

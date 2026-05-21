@@ -64,8 +64,9 @@
                                            topic.handout_pdf.attached?
 
                       is_social_personality = (topic.name == "Social & Personality")
-                      forced_active = ["Social & Personality", "Social Influence"].include?(topic.name)
-                      is_placeholder = !has_actual_content && !forced_active
+                      forced_active = ["Social & Personality", "Social Influence", "The Pinochet File", "Chile in the Cold War"].include?(topic.name)
+                      forced_coming_soon = ["Industrialization", "Financial Scams"].include?(topic.name)
+                      is_placeholder = (!has_actual_content && !forced_active) || forced_coming_soon
                       
                       target_path = topic.id == 17 ? lesson_plan_path(18) : lesson_plan_path(topic)
                     %>

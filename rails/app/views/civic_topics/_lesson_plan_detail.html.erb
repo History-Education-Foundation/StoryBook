@@ -66,6 +66,17 @@
   def render_lesson_content(text, civic_topic = nil, options = {})
     return "" if text.blank?
     
+    # PRE-PROCESSING: Fix smashed labels and ensure structural labels have double newlines
+    # Fix "Grade: XTime:" -> "Grade: X\n\nTime:"
+    text = text.gsub(/Grade:\s*([^\n]+)(Time:)/i, "Grade: \\1\n\n\\2")
+    text = text.gsub(/Time:\s*([^\n]+)(Standards Alignment)/i, "Time: \\1\n\n\\2")
+    
+    # Ensure major sections have double newlines if they are smashed
+    labels = ["Learning Objectives", "Key Vocabulary", "Hook", "Mini-Lesson", "Activity", "Guided Activity", "Discussion Question", "Discussion Questions", "Reality Check", "Exit Ticket", "Optional Extension"]
+    labels.each do |label|
+      text = text.gsub(/([^\n])(#{label}[:\(])/i, "\\1\n\n\\2")
+    end
+
     # Text color defaults based on dark mode option
     primary_text = options[:dark_mode] ? "text-white" : "text-slate-900"
     secondary_text = options[:dark_mode] ? "text-white/70" : "text-slate-700"
@@ -173,40 +184,73 @@
 
       lines = temp_block.split("\n")
 
-      block_html = if temp_block.match?(/Mini-Lesson:/i)
+      block_html = if temp_block.match?(/Grade:|Time:|Standards Alignment/i)
+        # Style lesson metadata
+        content_tag(:div, class: "grid grid-cols-1 md:grid-cols-3 gap-6 my-12") do
+          temp_block.split("\n").map do |line|
+            next if line.blank?
+            label, val = if line.include?(":")
+              line.split(":", 2)
+            else
+              [nil, line]
+            end
+            
+            if label
+              content_tag(:div, class: "bg-white p-6 rounded-[2.5rem] flex flex-col gap-2 border-2 border-slate-100 shadow-sm hover:border-[#f9a825]/30 transition-all group/meta") do
+                icon = case label.downcase
+                  when /grade/ then "fa-graduation-cap"
+                  when /time/ then "fa-clock"
+                  when /standards/ then "fa-check-circle"
+                  else "fa-info-circle"
+                end
+                concat(content_tag(:div, class: "w-10 h-10 rounded-2xl bg-[#f9a825]/10 flex items-center justify-center text-[#f9a825] group-hover/meta:bg-[#f9a825] group-hover/meta:text-slate-900 transition-colors") { content_tag(:i, "", class: "fas #{icon} text-sm") })
+                concat(content_tag(:span, label.strip, class: "text-slate-400 font-black uppercase tracking-widest text-[9px]"))
+                concat(content_tag(:span, val.strip, class: "text-slate-900 font-black text-lg tracking-tight"))
+              end
+            else
+              content_tag(:div, line, class: "text-slate-500 italic text-sm w-full col-span-full text-center")
+            end
+          end.join.html_safe
+        end
+      elsif temp_block.match?(/Learning Objectives|Key Vocabulary/i)
+        # Style headers
+        content_tag(:div, class: "mt-16 mb-8") do
+          concat(content_tag(:h4, temp_block.strip, class: "text-3xl font-black text-slate-900 uppercase tracking-tighter border-b-[6px] border-[#f9a825] pb-2 inline-block"))
+        end
+      elsif temp_block.match?(/Mini-Lesson:/i)
         content = temp_block.gsub(/Mini-Lesson:/i, "").strip
-        content_tag(:div, class: "bg-[#f9a825]/10 border-l-4 border-[#f9a825] p-6 my-8 rounded-r-2xl shadow-sm") do
-          concat(content_tag(:div, class: "flex items-center gap-3 mb-2") do
-            concat(content_tag(:div, class: "w-8 h-8 rounded-full bg-[#f9a825] flex items-center justify-center text-slate-900 shadow-md") { content_tag(:i, "", class: "fas fa-chalkboard-teacher text-xs") })
-            concat(content_tag(:span, "Mini-Lesson", class: "text-[#f9a825] font-black uppercase tracking-[0.2em] text-xs"))
+        content_tag(:div, class: "bg-gradient-to-r from-[#f9a825]/20 to-transparent border-l-8 border-[#f9a825] p-10 my-12 rounded-r-[2.5rem] shadow-xl group/mini transition-all hover:scale-[1.01]") do
+          concat(content_tag(:div, class: "flex items-center gap-4 mb-6") do
+            concat(content_tag(:div, class: "w-12 h-12 rounded-2xl bg-[#f9a825] flex items-center justify-center text-slate-900 shadow-[0_10px_20px_rgba(249,168,37,0.3)] group-hover/mini:rotate-6 transition-transform") { content_tag(:i, "", class: "fas fa-chalkboard-teacher text-lg") })
+            concat(content_tag(:span, "Teacher Mini-Lesson", class: "text-[#f9a825] font-black uppercase tracking-[0.3em] text-xs"))
           end)
-          concat(content_tag(:div, simple_format(content), class: "text-slate-800 font-bold text-xl [&>p]:m-0"))
+          concat(content_tag(:div, simple_format(content), class: "text-slate-800 font-bold text-2xl leading-tight [&>p]:m-0"))
         end
       elsif temp_block.match?(/Activity:/i)
         content = temp_block.gsub(/Activity:/i, "").strip
-        content_tag(:div, class: "bg-slate-900 border-l-4 border-[#f9a825] p-8 my-10 rounded-r-[2rem] shadow-xl relative overflow-hidden group") do
-          concat(content_tag(:div, class: "absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform") { content_tag(:i, "", class: "fas fa-running text-6xl text-white") })
+        content_tag(:div, class: "bg-slate-900 border-l-8 border-[#f9a825] p-12 my-16 rounded-r-[3rem] shadow-2xl relative overflow-hidden group/act transition-all hover:scale-[1.01]") do
+          concat(content_tag(:div, class: "absolute top-0 right-0 p-12 opacity-10 group-hover/act:scale-125 transition-transform duration-700") { content_tag(:i, "", class: "fas fa-running text-8xl text-white") })
           concat(content_tag(:div, class: "relative z-10") do
-            concat(content_tag(:div, class: "flex items-center gap-3 mb-4") do
-              concat(content_tag(:div, class: "w-10 h-10 rounded-full bg-[#f9a825] flex items-center justify-center text-slate-900 shadow-lg") { content_tag(:i, "", class: "fas fa-users text-sm") })
-              concat(content_tag(:span, "Student Activity", class: "text-[#f9a825] font-black uppercase tracking-[0.3em] text-xs"))
+            concat(content_tag(:div, class: "flex items-center gap-4 mb-8") do
+              concat(content_tag(:div, class: "w-12 h-12 rounded-2xl bg-[#f9a825] flex items-center justify-center text-slate-900 shadow-lg group-hover/act:rotate-6 transition-transform") { content_tag(:i, "", class: "fas fa-users text-lg") })
+              concat(content_tag(:span, "Student Activity Block", class: "text-[#f9a825] font-black uppercase tracking-[0.4em] text-xs"))
             end)
-            concat(content_tag(:div, simple_format(content), class: "text-white font-bold text-2xl leading-relaxed [&>p]:m-0"))
+            concat(content_tag(:div, simple_format(content), class: "text-white font-bold text-3xl leading-relaxed [&>p]:m-0 tracking-tight"))
           end)
         end
       elsif temp_block.match?(/Discussion:/i)
         content = temp_block.gsub(/Discussion:/i, "").strip
-        bg_class = options[:dark_mode] ? "bg-white/5 border-white/10" : "bg-slate-50 border-slate-300"
-        text_color = options[:dark_mode] ? "text-white" : "text-slate-700"
-        header_bg = options[:dark_mode] ? "bg-white/10" : "bg-slate-200"
-        header_text = options[:dark_mode] ? "text-white/60" : "text-slate-500"
+        bg_class = options[:dark_mode] ? "bg-white/5 border-white/10" : "bg-slate-50 border-slate-200"
+        text_color = options[:dark_mode] ? "text-white" : "text-slate-800"
+        header_bg = options[:dark_mode] ? "bg-white/10" : "bg-white"
+        header_text = options[:dark_mode] ? "text-white/60" : "text-slate-400"
         
-        content_tag(:div, class: "#{bg_class} border-l-4 p-6 my-8 rounded-r-2xl shadow-sm") do
-          concat(content_tag(:div, class: "flex items-center gap-3 mb-2") do
-            concat(content_tag(:div, class: "w-8 h-8 rounded-full #{header_bg} flex items-center justify-center #{header_text}") { content_tag(:i, "", class: "fas fa-comments text-xs") })
-            concat(content_tag(:span, "Discussion Question", class: "#{header_text} font-black uppercase tracking-[0.2em] text-xs"))
+        content_tag(:div, class: "#{bg_class} border-l-8 border-slate-300 p-10 my-12 rounded-r-[2.5rem] shadow-sm group/disc transition-all hover:bg-white") do
+          concat(content_tag(:div, class: "flex items-center gap-4 mb-6") do
+            concat(content_tag(:div, class: "w-12 h-12 rounded-2xl #{header_bg} border border-slate-100 flex items-center justify-center #{header_text} shadow-sm group-hover/disc:rotate-6 transition-transform") { content_tag(:i, "", class: "fas fa-comments text-lg") })
+            concat(content_tag(:span, "Discussion Question", class: "#{header_text} font-black uppercase tracking-[0.3em] text-xs"))
           end)
-          concat(content_tag(:div, simple_format(content), class: "#{text_color} font-medium text-lg italic [&>p]:m-0"))
+          concat(content_tag(:div, simple_format(content), class: "#{text_color} font-serif text-2xl italic leading-relaxed [&>p]:m-0"))
         end
       elsif temp_block.match?(/Point:|Goal:|Core Tip:/i)
         # Style important callouts within sections
@@ -476,24 +520,25 @@
 
   <!-- PART 1 -->
   <% if civic_topic.legacy.present? %>
-    <div class="relative group pt-16 pb-16 px-10 -mx-10 rounded-[3rem] hover:bg-slate-50/50 transition-colors duration-500">
+    <div class="relative group pt-24 pb-24 px-12 -mx-12 rounded-[4rem] hover:bg-slate-50/80 transition-all duration-700">
       <!-- Background Number -->
-      <div class="absolute -top-10 -left-10 text-[15rem] font-black text-slate-100 phase-number pointer-events-none select-none opacity-50 group-hover:text-[#f9a825]/10 transition-colors duration-700 leading-none">1</div>
+      <div class="absolute -top-16 -left-16 text-[25rem] font-black text-slate-100/50 phase-number pointer-events-none select-none group-hover:text-[#f9a825]/5 transition-colors duration-700 leading-none z-0">1</div>
       
-      <div class="flex flex-col md:flex-row gap-8 md:gap-16 relative z-10">
-        <div class="md:w-1/4">
-          <div class="sticky top-10">
-            <div class="flex items-center gap-2 mb-4">
-              <span class="w-8 h-[2px] bg-[#f9a825]"></span>
-              <span class="text-[#f9a825] text-[10px] font-black uppercase tracking-[0.4em]">Phase 01</span>
+      <div class="flex flex-col lg:flex-row gap-12 lg:gap-24 relative z-10">
+        <div class="lg:w-1/3">
+          <div class="sticky top-24">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-12 h-1 px-0 bg-[#f9a825]"></div>
+              <span class="text-[#f9a825] text-[12px] font-black uppercase tracking-[0.5em]">Phase 01</span>
             </div>
-            <h3 class="text-4xl font-black text-slate-900 uppercase tracking-tighter leading-tight">
+            <h3 class="text-5xl lg:text-7xl font-black text-slate-900 uppercase tracking-tighter leading-[0.9] mb-8">
               <%= civic_topic.legacy_heading.presence || "Phase 01" %>
             </h3>
+            <div class="w-20 h-2 bg-slate-900 mb-8 rounded-full"></div>
           </div>
         </div>
-        <div class="md:w-3/4 border-l-8 border-[#f9a825] pl-8 md:pl-12 py-2">
-          <div class="prose prose-slate prose-xl max-w-none text-slate-600 leading-relaxed font-medium">
+        <div class="lg:w-2/3 border-l-[12px] border-[#f9a825]/10 pl-8 lg:pl-16 py-4 group-hover:border-[#f9a825] transition-all duration-500">
+          <div class="prose prose-slate prose-2xl max-w-none text-slate-600 leading-relaxed font-medium [&>p]:mb-8 last:[&>p]:mb-0">
             <%= render_lesson_content(civic_topic.legacy, civic_topic) %>
           </div>
         </div>
@@ -503,24 +548,25 @@
 
   <!-- PART 2 -->
   <% if civic_topic.main_ideas.present? %>
-    <div class="relative group pt-16 pb-16 px-10 -mx-10 rounded-[3rem] hover:bg-slate-50/50 transition-colors duration-500">
+    <div class="relative group pt-24 pb-24 px-12 -mx-12 rounded-[4rem] hover:bg-slate-50/80 transition-all duration-700">
       <!-- Background Number -->
-      <div class="absolute -top-10 -left-10 text-[15rem] font-black text-slate-100 phase-number pointer-events-none select-none opacity-50 group-hover:text-[#f9a825]/10 transition-colors duration-700 leading-none">2</div>
+      <div class="absolute -top-16 -left-16 text-[25rem] font-black text-slate-100/50 phase-number pointer-events-none select-none group-hover:text-[#f9a825]/5 transition-colors duration-700 leading-none z-0">2</div>
       
-      <div class="flex flex-col md:flex-row gap-8 md:gap-16 relative z-10">
-        <div class="md:w-1/4">
-          <div class="sticky top-10">
-            <div class="flex items-center gap-2 mb-4">
-              <span class="w-8 h-[2px] bg-[#f9a825]"></span>
-              <span class="text-[#f9a825] text-[10px] font-black uppercase tracking-[0.4em]">Phase 02</span>
+      <div class="flex flex-col lg:flex-row gap-12 lg:gap-24 relative z-10">
+        <div class="lg:w-1/3">
+          <div class="sticky top-24">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-12 h-1 px-0 bg-[#f9a825]"></div>
+              <span class="text-[#f9a825] text-[12px] font-black uppercase tracking-[0.5em]">Phase 02</span>
             </div>
-            <h3 class="text-4xl font-black text-slate-900 uppercase tracking-tighter leading-tight">
+            <h3 class="text-5xl lg:text-7xl font-black text-slate-900 uppercase tracking-tighter leading-[0.9] mb-8">
               <%= civic_topic.main_ideas_heading.presence || "Phase 02" %>
             </h3>
+            <div class="w-20 h-2 bg-slate-900 mb-8 rounded-full"></div>
           </div>
         </div>
-        <div class="md:w-3/4 border-l-8 border-[#f9a825] pl-8 md:pl-12 py-2">
-          <div class="prose prose-slate prose-xl max-w-none text-slate-600 leading-relaxed font-medium">
+        <div class="lg:w-2/3 border-l-[12px] border-[#f9a825]/10 pl-8 lg:pl-16 py-4 group-hover:border-[#f9a825] transition-all duration-500">
+          <div class="prose prose-slate prose-2xl max-w-none text-slate-600 leading-relaxed font-medium [&>p]:mb-8 last:[&>p]:mb-0">
             <%= render_lesson_content(civic_topic.main_ideas, civic_topic) %>
           </div>
         </div>
@@ -530,24 +576,25 @@
 
   <!-- PART 3 -->
   <% if civic_topic.criticism.present? %>
-    <div class="relative group pt-16 pb-16 px-10 -mx-10 rounded-[3rem] hover:bg-slate-50/50 transition-colors duration-500">
+    <div class="relative group pt-24 pb-24 px-12 -mx-12 rounded-[4rem] hover:bg-slate-50/80 transition-all duration-700">
       <!-- Background Number -->
-      <div class="absolute -top-10 -left-10 text-[15rem] font-black text-slate-100 phase-number pointer-events-none select-none opacity-50 group-hover:text-[#f9a825]/10 transition-colors duration-700 leading-none">3</div>
+      <div class="absolute -top-16 -left-16 text-[25rem] font-black text-slate-100/50 phase-number pointer-events-none select-none group-hover:text-[#f9a825]/5 transition-colors duration-700 leading-none z-0">3</div>
       
-      <div class="flex flex-col md:flex-row gap-8 md:gap-16 relative z-10">
-        <div class="md:w-1/4">
-          <div class="sticky top-10">
-            <div class="flex items-center gap-2 mb-4">
-              <span class="w-8 h-[2px] bg-[#f9a825]"></span>
-              <span class="text-[#f9a825] text-[10px] font-black uppercase tracking-[0.4em]">Phase 03</span>
+      <div class="flex flex-col lg:flex-row gap-12 lg:gap-24 relative z-10">
+        <div class="lg:w-1/3">
+          <div class="sticky top-24">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-12 h-1 px-0 bg-[#f9a825]"></div>
+              <span class="text-[#f9a825] text-[12px] font-black uppercase tracking-[0.5em]">Phase 03</span>
             </div>
-            <h3 class="text-4xl font-black text-slate-900 uppercase tracking-tighter leading-tight">
+            <h3 class="text-5xl lg:text-7xl font-black text-slate-900 uppercase tracking-tighter leading-[0.9] mb-8">
               <%= civic_topic.criticism_heading.presence || "Phase 03" %>
             </h3>
+            <div class="w-20 h-2 bg-slate-900 mb-8 rounded-full"></div>
           </div>
         </div>
-        <div class="md:w-3/4 border-l-8 border-[#f9a825] pl-8 md:pl-12 py-2">
-          <div class="prose prose-slate prose-xl max-w-none text-slate-600 leading-relaxed font-medium">
+        <div class="lg:w-2/3 border-l-[12px] border-[#f9a825]/10 pl-8 lg:pl-16 py-4 group-hover:border-[#f9a825] transition-all duration-500">
+          <div class="prose prose-slate prose-2xl max-w-none text-slate-600 leading-relaxed font-medium [&>p]:mb-8 last:[&>p]:mb-0">
             <%= render_lesson_content(civic_topic.criticism, civic_topic) %>
           </div>
         </div>
@@ -557,22 +604,24 @@
 
   <!-- Exit Ticket -->
   <% if civic_topic.suggested_reading.present? %>
-    <div class="mt-24 bg-slate-900 rounded-[3rem] p-10 md:p-16 border-t-8 border-[#f9a825] shadow-2xl relative overflow-hidden group">
-      <div class="absolute top-0 right-0 p-12 opacity-10 group-hover:scale-110 transition-transform">
-        <i class="fas fa-door-open text-[10rem] text-white"></i>
+    <div class="mt-32 bg-slate-900 rounded-[4rem] p-12 md:p-24 border-t-[12px] border-[#f9a825] shadow-[0_50px_100px_rgba(0,0,0,0.4)] relative overflow-hidden group/exit">
+      <div class="absolute top-0 right-0 p-12 opacity-10 group-hover/exit:scale-125 transition-transform duration-1000">
+        <i class="fas fa-door-open text-[15rem] text-white"></i>
       </div>
       <div class="relative z-10">
-        <div class="flex items-center gap-4 mb-8">
-          <div class="w-12 h-12 rounded-full bg-[#f9a825] flex items-center justify-center text-slate-900 shadow-lg">
-            <i class="fas fa-ticket-alt text-xl"></i>
+        <div class="flex items-center gap-6 mb-12">
+          <div class="w-16 h-16 rounded-3xl bg-[#f9a825] flex items-center justify-center text-slate-900 shadow-[0_15px_30px_rgba(249,168,37,0.4)] group-hover/exit:rotate-12 transition-transform">
+            <i class="fas fa-ticket-alt text-2xl"></i>
           </div>
-          <span class="text-[#f9a825] font-black uppercase tracking-[0.3em] text-sm">Session Wrap-up</span>
+          <div>
+            <span class="text-[#f9a825] font-black uppercase tracking-[0.4em] text-xs block mb-1">Lesson Finale</span>
+            <h2 class="text-5xl md:text-7xl font-black text-white tracking-tighter leading-none">
+              <%= civic_topic.id == 17 ? 'Conclusion' : 'Exit Ticket' %>
+            </h2>
+          </div>
         </div>
-        <h2 class="text-5xl font-black text-white mb-12 tracking-tighter">
-          <%= civic_topic.id == 17 ? 'Conclusion' : 'Exit Ticket' %>
-        </h2>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
           <% civic_topic.suggested_reading.to_s.split("\n\n").each do |block| %>
             <%# Pre-filter: if after removing Image/Video tags the block is empty, skip it %>
             <% clean_block = block.gsub(/(?:Image|Video):\s*[^\n]+\n?/i, "").strip %>
@@ -581,9 +630,14 @@
             <% rendered_block = render_lesson_content(block, civic_topic, dark_mode: true) %>
             <% next if rendered_block.blank? || strip_tags(rendered_block).strip.blank? %>
             
-            <div class="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] hover:bg-white/10 transition-all duration-500 hover:-translate-y-1">
-              <div class="text-white leading-relaxed text-2xl font-bold italic">
-                <%= rendered_block %>
+            <div class="bg-white/5 border border-white/10 p-10 rounded-[3rem] hover:bg-white/10 transition-all duration-500 hover:-translate-y-2 group/card">
+              <div class="flex items-start gap-6">
+                <div class="w-10 h-10 rounded-full bg-[#f9a825]/20 flex items-center justify-center flex-shrink-0 group-hover/card:bg-[#f9a825] group-hover/card:text-slate-900 transition-colors">
+                  <i class="fas fa-question text-sm"></i>
+                </div>
+                <div class="text-white leading-relaxed text-2xl md:text-3xl font-bold italic tracking-tight">
+                  <%= rendered_block %>
+                </div>
               </div>
             </div>
           <% end %>

@@ -41,7 +41,10 @@
         <div class="mb-24 last:mb-0">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <% topics.each do |topic| %>
-              <% is_ready = topic.published? && topic.bio.present? %>
+              <% 
+                active_topics = ["Andrew Yang", "James Lindsay", "American Civics Renewal Act", "Lobbying"]
+                is_ready = topic.published? && topic.bio.present? && active_topics.include?(topic.name)
+              %>
               
               <div class="group relative bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden">
                 <% if is_ready %>
